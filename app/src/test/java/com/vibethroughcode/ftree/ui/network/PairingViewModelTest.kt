@@ -2,11 +2,15 @@ package com.vibethroughcode.ftree.ui.network
 
 import com.vibethroughcode.ftree.data.Person
 import com.vibethroughcode.ftree.kutumb.Bip340Scheme
+import com.vibethroughcode.ftree.kutumb.RecoveryIssuer
+import com.vibethroughcode.ftree.kutumb.RecoveryRefusal
+import com.vibethroughcode.ftree.kutumb.trust.PairingMethod
+import com.vibethroughcode.ftree.kutumb.trust.TrustedContact
+import com.vibethroughcode.ftree.kutumb.sync.NoSyncPublisher
 import com.vibethroughcode.ftree.kutumb.InMemoryKutumbRepository
 import com.vibethroughcode.ftree.kutumb.LocalIdentity
 import com.vibethroughcode.ftree.kutumb.PairingFlow
 import com.vibethroughcode.ftree.kutumb.PairingState
-import com.vibethroughcode.ftree.kutumb.trust.PairingMethod
 import com.vibethroughcode.ftree.nearby.wire.QrLink
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -37,6 +41,8 @@ class PairingViewModelTest {
         var confirmed: Boolean? = null
         override fun start() { started++ }
         override fun joinByLink(link: QrLink) = Unit
+        var typed: Pair<String, Int>? = null
+        override fun joinByAddress(address: String, port: Int) { typed = address to port }
         override fun confirmCode(matched: Boolean) { confirmed = matched }
         override fun cancel() { cancelled++ }
     }
@@ -121,5 +127,54 @@ class PairingViewModelTest {
         val vm = viewModel(devika)
         vm.confirmCode(false)
         assertEquals(false, flow.confirmed)
+    }
+
+    @Test
+    fun aTypedPrivateAddressStartsPairingAndAnythingElseDoesNot() = runTest {
+        val vm = viewModel(devika)
+        assertEquals(true, vm.typedAddress(" 192.168.1.20:43121 "))
+        assertEquals("192.168.1.20" to 43121, flow.typed)
+
+        flow.typed = null
+        // A public address, a missing port and a port out of range are refused before anything connects.
+        assertEquals(false, vm.typedAddress("8.8.8.8:43121"))
+        assertEquals(false, vm.typedAddress("192.168.1.20"))
+        assertEquals(false, vm.typedAddress("192.168.1.20:70000"))
+        assertEquals(null, flow.typed)
+    }
+
+    @Test
+    fun choosingSomeoneAlreadyTrustedVouchesForTheNewPhoneInsteadOfAddingAContact() = runTest {
+        val vm = viewModelWithRecovery(devika)
+        kutumb.saveContact(TrustedContact("devika", Bip340Scheme.generateKeyPair().publicKey, pairedAt = 1, pairingMethod = PairingMethod.DIRECT))
+        val job = vm.state.launchIn(backgroundScope)
+        flow.mutable.value = PairingState.Verified("Pixel", peerKey)
+
+        vm.setRecovering(true)
+        assertEquals(listOf("devika"), vm.state.first { it.recovering }.trusted.map { it.id })
+        vm.vouchNewPhone("devika")
+
+        assertEquals(peerKey, kutumb.observeContacts().first().single { it.personId == "devika" }.pubKeyCurrent)
+        assertEquals(1, kutumb.observeRotations().first().size)
+        assertEquals(true, vm.state.first { it.saved }.saved)
+        job.cancel()
+    }
+
+    @Test
+    fun aRefusedVouchStaysOnTheScreenAndSaysWhy() = runTest {
+        val vm = viewModelWithRecovery(devika)
+        val job = vm.state.launchIn(backgroundScope)
+        flow.mutable.value = PairingState.Verified("Pixel", peerKey)
+
+        vm.vouchNewPhone("devika") // Devika is not trusted yet, so there is nobody to move.
+        assertEquals(RecoveryRefusal.UNKNOWN_PERSON, vm.state.first { it.refusal != null }.refusal)
+        assertEquals(false, vm.state.value.saved)
+        job.cancel()
+    }
+
+    private suspend fun viewModelWithRecovery(vararg people: Person): PairingViewModel {
+        kutumb.setIdentity(LocalIdentity("me", Bip340Scheme.generateKeyPair()))
+        val issuer = RecoveryIssuer(kutumb, Bip340Scheme, NoSyncPublisher, clock = { 99 })
+        return PairingViewModel(flow, MutableStateFlow(listOf(me) + people), kutumb, clock = { 99 }, recovery = issuer)
     }
 }

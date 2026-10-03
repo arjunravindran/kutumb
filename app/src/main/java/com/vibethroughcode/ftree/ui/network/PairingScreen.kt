@@ -21,10 +21,21 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.sp
+import com.vibethroughcode.ftree.ui.theme.FTreeText
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -35,6 +46,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.vibethroughcode.ftree.R
 import com.vibethroughcode.ftree.kutumb.PairingProblem
+import com.vibethroughcode.ftree.kutumb.RecoveryRefusal
 import com.vibethroughcode.ftree.kutumb.PairingState
 import com.vibethroughcode.ftree.ui.FTreeViewModels
 import com.vibethroughcode.ftree.ui.common.PersonAvatar
@@ -43,6 +55,12 @@ import com.vibethroughcode.ftree.ui.nearby.QrPanel
 import com.vibethroughcode.ftree.ui.nearby.ScanAction
 
 const val PairingBackTag = "pairing-back"
+const val PairingTypeAddressTag = "pairing-type-address"
+const val PairingOwnAddressTag = "pairing-own-address"
+const val PairingAddressFieldTag = "pairing-address-field"
+const val PairingAddressGoTag = "pairing-address-go"
+const val PairingRecoverToggleTag = "pairing-recover-toggle"
+const val PairingRecoverErrorTag = "pairing-recover-error"
 const val PairingWaitingTag = "pairing-waiting"
 const val PairingCodeTag = "pairing-code"
 const val PairingMatchTag = "pairing-match"
@@ -137,6 +155,54 @@ private fun Waiting(state: PairingState.Waiting, viewModel: PairingViewModel) {
         )
         state.link?.let { QrPanel(it) }
         ScanAction(onScanned = viewModel::scanned)
+        TypeAddress(shown = state.link?.let { "${it.address}:${it.port}" }, onSubmit = viewModel::typedAddress)
+    }
+}
+
+/**
+ * The way in when the camera will not scan: this phone's own address to read out, and a field for
+ * the other phone's. Typing an address skips nothing: the six digits are compared either way.
+ */
+@Composable
+private fun TypeAddress(shown: String?, onSubmit: (String) -> Boolean) {
+    var open by rememberSaveable { mutableStateOf(false) }
+    var text by rememberSaveable { mutableStateOf("") }
+    var invalid by rememberSaveable { mutableStateOf(false) }
+
+    if (!open) {
+        TextButton(onClick = { open = true }, modifier = Modifier.testTag(PairingTypeAddressTag)) {
+            Text(stringResource(R.string.pairing_type_address))
+        }
+        return
+    }
+
+    fun submit() { invalid = !onSubmit(text) }
+
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+        if (shown != null) {
+            Text(
+                stringResource(R.string.pairing_your_address),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Text(shown, style = FTreeText.record.copy(fontSize = 18.sp), modifier = Modifier.testTag(PairingOwnAddressTag))
+        }
+        OutlinedTextField(
+            value = text,
+            onValueChange = { text = it; invalid = false },
+            label = { Text(stringResource(R.string.pairing_their_address)) },
+            placeholder = { Text("192.168.1.20:43121", style = FTreeText.record) },
+            singleLine = true,
+            isError = invalid,
+            supportingText = if (invalid) { { Text(stringResource(R.string.nearby_address_invalid)) } } else null,
+            textStyle = FTreeText.record.copy(fontSize = 16.sp),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri, imeAction = ImeAction.Go),
+            keyboardActions = KeyboardActions(onGo = { submit() }),
+            modifier = Modifier.fillMaxWidth().testTag(PairingAddressFieldTag),
+        )
+        Button(onClick = { submit() }, enabled = text.isNotBlank(), modifier = Modifier.testTag(PairingAddressGoTag)) {
+            Text(stringResource(R.string.pairing_address_go))
+        }
     }
 }
 
@@ -206,26 +272,47 @@ private fun Failed(problem: PairingProblem, viewModel: PairingViewModel) {
 
 @Composable
 private fun Who(state: PairingUiState, verified: PairingState.Verified, viewModel: PairingViewModel) {
+    val recovering = state.recovering
     Column(Modifier.fillMaxSize().testTag(PairingWhoTag)) {
         Text(
-            text = stringResource(R.string.pairing_who_title, verified.peerName),
+            text = stringResource(if (recovering) R.string.pairing_recover_title else R.string.pairing_who_title, verified.peerName),
             style = MaterialTheme.typography.titleLarge,
             modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 16.dp),
         )
         Text(
-            text = stringResource(R.string.pairing_who_body),
+            text = stringResource(if (recovering) R.string.pairing_recover_body else R.string.pairing_who_body),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 6.dp, bottom = 12.dp),
+            modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 6.dp, bottom = 4.dp),
         )
+        state.refusal?.let { why ->
+            Text(
+                text = stringResource(
+                    when (why) {
+                        RecoveryRefusal.KEY_IN_USE -> R.string.pairing_recover_key_in_use
+                        RecoveryRefusal.SAME_KEY -> R.string.pairing_recover_same_key
+                        else -> R.string.pairing_recover_failed
+                    },
+                ),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp).testTag(PairingRecoverErrorTag),
+            )
+        }
+        TextButton(
+            onClick = { viewModel.setRecovering(!recovering) },
+            modifier = Modifier.padding(horizontal = 12.dp).testTag(PairingRecoverToggleTag),
+        ) {
+            Text(stringResource(if (recovering) R.string.pairing_recover_back else R.string.pairing_recover_toggle))
+        }
         PersonPicker(
-            people = state.candidates,
+            people = if (recovering) state.trusted else state.candidates,
             query = state.query,
             onQueryChange = viewModel::onQueryChange,
-            onPick = viewModel::choosePerson,
+            onPick = if (recovering) viewModel::vouchNewPhone else viewModel::choosePerson,
             onCancel = { viewModel.onQueryChange("") },
             hint = stringResource(R.string.network_who_hint),
-            noneFound = stringResource(R.string.pairing_who_none),
+            noneFound = stringResource(if (recovering) R.string.pairing_recover_none else R.string.pairing_who_none),
             searchTag = "pairing-who-search",
             listTag = "pairing-who-list",
             cancelTag = "pairing-who-clear",

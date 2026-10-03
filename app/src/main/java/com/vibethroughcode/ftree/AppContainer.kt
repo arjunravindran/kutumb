@@ -22,6 +22,9 @@ import com.vibethroughcode.ftree.kutumb.PairingFlow
 import com.vibethroughcode.ftree.kutumb.pairing.NearbyPairingFlow
 import com.vibethroughcode.ftree.kutumb.PhoneKey
 import com.vibethroughcode.ftree.kutumb.PlaceSource
+import com.vibethroughcode.ftree.kutumb.RecoveryIssuer
+import com.vibethroughcode.ftree.kutumb.sync.CompositeSyncHandler
+import com.vibethroughcode.ftree.kutumb.sync.RotationSyncHandler
 import com.vibethroughcode.ftree.kutumb.db.AndroidKeyVault
 import com.vibethroughcode.ftree.kutumb.db.PrefsPhoneKeyStore
 import com.vibethroughcode.ftree.kutumb.db.RoomKutumbRepository
@@ -117,13 +120,16 @@ class AppContainer(
                     connector = WebSocketRelay.connector(),
                     scope = syncScope,
                     clock = System::currentTimeMillis,
-                    handler = GameSyncHandler(kutumbRepository),
+                    handler = CompositeSyncHandler(GameSyncHandler(kutumbRepository), RotationSyncHandler(kutumbRepository, signatureScheme)),
                 )
             },
             scope = syncScope,
             clock = System::currentTimeMillis,
         ).also { it.start() }
     }
+
+    /** Vouches for a relative's new phone after meeting it in person. */
+    val recoveryIssuer: RecoveryIssuer by lazy { RecoveryIssuer(kutumbRepository, signatureScheme, syncPublisher, System::currentTimeMillis) }
 
     /** What the facts screens use to send their changes; does nothing while sync is off. */
     val syncPublisher: SyncPublisher by lazy {

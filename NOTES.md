@@ -66,7 +66,7 @@ Also found while testing: `Bip340Scheme.verify` must catch `Secp256k1Exception` 
 
 ### Test status after 3a/3b
 
-Full `connectedDebugAndroidTest`: 203 tests, 3 failures at the time of the run. One was mine (the tab label, fixed). The other two, `BookFlowTest.theStorybookReallyFeaturesOnePerson` and `theChartOpensTheBookAndSharesAPdfNamedForTheFamily`, fail identically on the untouched baseline (checked with my changes stashed), so they predate this work. I have not investigated them (the first looks for a downloaded "Diwali" template).
+Full `connectedDebugAndroidTest`: 203 tests, 3 failures at the time of the run. One was mine (the tab label, fixed). The other two, `BookFlowTest.theStorybookReallyFeaturesOnePerson` and `theChartOpensTheBookAndSharesAPdfNamedForTheFamily`, fail identically on the untouched baseline (checked with my changes stashed), so they predate this work. **Both are fixed now** (see "Recovery, typed-address pairing and the book tests" below): the book's default template became the chart (#315), and Diwali stopped shipping on the device (#314).
 
 ### 3c Relationship path ("main" mockup)
 
@@ -146,7 +146,7 @@ Deviations from the mockup/SPEC:
 
 - A phone that was scanned shows no digits (nothing was compared), just "<name> scanned this phone. Pair with them?". `PairingState.ConfirmCode.code` is therefore nullable.
 - Still the 3b deviation: derived digits, not a pre-agreed PIN; still same-LAN UDP/TCP, not Wi-Fi Direct.
-- `docs/nearby-protocol.md` is not updated for `TYPE_IDENTITY`. The protocol change should get the discussion CLAUDE.md asks for before merge.
+- `docs/nearby-protocol.md` describes `TYPE_IDENTITY` and the pairing conversation (commit 34a2b08). It is a wire-protocol addition, which CLAUDE.md says should be discussed before merge into upstream; nothing on the desktop or web side speaks it yet.
 
 Tested (JVM, written but not run by me while this note was written):
 
@@ -187,7 +187,7 @@ Still to do: wire `SyncEngine` + `WebSocketRelay.connector()` into `AppContainer
 
 ### Step 6, continued: facts, answers and resolutions now sync
 
-- **Wire format** (`kutumb-core` `game/GameSync.kt`, JVM-tested, 10 tests): `ANSWER` carries the fact and the answer; `RESOLUTION` carries the fact, the winning answer, points and time. The fact is embedded in both so a message can arrive before the receiving phone has ever seen the fact, and the winning answer rides along so a resolution cannot arrive before the answer it picks. Decoding is strict (null on anything malformed; text <= 2000 chars, ids <= 200, points 1..100). There is no separate `FACT` message: facts travel inside the other two. `ROTATION` and `TREE_EDIT` are not handled (accepted and dropped), as agreed.
+- **Wire format** (`kutumb-core` `game/GameSync.kt`, JVM-tested, 10 tests): `ANSWER` carries the fact and the answer; `RESOLUTION` carries the fact, the winning answer, points and time. The fact is embedded in both so a message can arrive before the receiving phone has ever seen the fact, and the winning answer rides along so a resolution cannot arrive before the answer it picks. Decoding is strict (null on anything malformed; text <= 2000 chars, ids <= 200, points 1..100). There is no separate `FACT` message: facts travel inside the other two. `TREE_EDIT` is not handled (accepted and dropped), as agreed. `ROTATION` is handled now; see "Recovery" below.
 - **Who may say what** (`GameSyncRules`): an answer is accepted only if its `answererId` is the person whose key signed it; a fact this phone has never seen is created only if it is about the local person or the sender; a resolution is accepted only from the fact's owner, never for a fact about the local person (those are resolved on this phone only), once per fact; the self-report flag must be consistent. Redeliveries are ignored by id, so a restart (which empties the engine's seen-set) is safe.
 - **App wiring:** `GameSyncHandler` is the engine's handler (6 tests with the in-memory repository). `FactsViewModel.submit` sends a guess to the person it is about (a self-answer goes to no one); `ResolveViewModel.confirm` sends the resolution to everyone who answered. Both go through `SyncPublisher`, which does nothing while sync is off.
 - **Decision to review:** a change made while sync is off or has no relays is **not** queued for later; `SyncService.publish` returns false and nothing is stored, so it is never sent after sync is switched on. Queuing regardless would hold family answers on disk waiting for a switch the person may never flip. Say if you want it queued instead.
@@ -227,3 +227,26 @@ Still to do: wire `SyncEngine` + `WebSocketRelay.connector()` into `AppContainer
 - **Verified on the emulator** (`CircleFlowTest`, 2 tests): the circle opens on the best-connected person with FRIEND / COLLEAGUE groups and a "via Ben" introduction, tapping moves the view, and adding a connection with a label shows the new person under it.
 - **In a Circle:** the Facts tab is hidden (the game asks about family: whose mother, born where). Network stays: pairing and "who am I" are per tree. Birthdays/People tab work as is. Export/import writes `CONNECTED` edges as ordinary relationships.
 - **Not done:** a drawn graph (the list view is the only one), a "who am I" for circles, deleting a label across a circle, bulk adding.
+
+## Recovery, typed-address pairing and the book tests
+
+### Recovery (spec steps 2-4): a relative vouches for a new phone
+
+Before this, `kutumb-core` had the rules (`RotationRules`, `RotationPropagation`) and the app stored rotations, but nothing issued or applied one.
+
+- **The relative's side** (`kutumb/RecoveryIssuer.kt`, `RecoveryTest`): after a normal in-person pairing, the "Who is it?" screen has a second choice, "They are someone I already trust, on a new phone". Choosing a trusted relative there does not add a contact; it signs `IdentityRotationEvent.attest(...)` with this phone's key, moves that contact to the new key (old key into `pubKeyHistory`, so revoked), marks them `DIRECT` (they were just met in person), saves the event, and publishes a `ROTATION` envelope to every other contact (not to the person: nobody else can reach the new key until they accept this). Refused, with a reason shown on screen, when this phone has no identity, the person is not trusted here, it is the phone's own owner, the key is already theirs, or the key already belongs to someone else or to this phone. The change on this phone stands even with sync off; only telling the others needs it.
+- **Everyone else** (`kutumb/sync/RotationSyncHandler.kt`): a `ROTATION` from a trusted contact is run through `RotationRules.apply`; if it is valid (signature, a voucher this phone trusts, the old key still current) the contact moves to the new key and the event is saved. The sender need not be the voucher; the voucher's signature inside is what counts. Redeliveries, stale events and untrusted vouchers change nothing. `CompositeSyncHandler` offers every message to both handlers; each ignores types it does not know.
+- **Wire form:** `kutumb-core` `recovery/RotationSync.kt` (6 fields: person, old, new, by, sig, at), strict decoding, 2 JVM tests.
+- **Not done:** the new phone gets no contact list back. It pairs with one relative and trusts only them; everyone else it learns by pairing again or when they pair with it. An event that arrives before the one it depends on (a chain X to Y to Z) is rejected rather than held, because the rotations table holds applied events only. Both are small follow-ups, not designed here.
+
+### Typed-address pairing
+
+Pairing screen > "Type an address instead" shows this phone's own `address:port` to read out and a field for the other phone's. `NearbyRepository.pairByAddress` takes a private address only (as a scanned code is held to), has no token and no fingerprint, so the six digits are always compared. `pairByLink` and `pairByAddress` share `startPairing`. `PairingFlow.joinByAddress` has a no-op default so the other implementers (tests, `UnavailablePairingFlow`) are unaffected. `PairingViewModelTest` and `NetworkPairingTest`.
+
+### The book tests
+
+`BookFlowTest` had two failures that predated this work. Neither was an app bug. The default template is now the family chart (#315), so the shared PDF is `... Chart.pdf` (test updated). And Diwali is a download too (#314), so no storybook ships on the device; the "Whose story" flow has nothing to run against and is removed with a comment, the way upstream removed the Heirloom one (the decision is held by `BookOptionsTest`, the PDF by `BookPdfTest`). `BookFlowTest`: 6 of 6.
+
+### Full instrumented suite, 2026-10-03
+
+240 tests: 237 passed. The two `BookFlowTest` failures above are fixed since. `NetworkTreeLinkTest.aTrustedPersonsSheetLeadsToTheirRelationshipScreen` timed out once in the long run and passes alone (2 of 2) on the same code, so it is order- or load-dependent; not investigated further.

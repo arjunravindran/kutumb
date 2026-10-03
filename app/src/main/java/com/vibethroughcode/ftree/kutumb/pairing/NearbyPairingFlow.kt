@@ -55,6 +55,8 @@ class NearbyPairingFlow(
 
     override fun joinByLink(link: QrLink) = nearby.pairByLink(link)
 
+    override fun joinByAddress(address: String, port: Int) = nearby.pairByAddress(address, port)
+
     override fun confirmCode(matched: Boolean) = nearby.answerPairing(matched)
 
     override fun cancel() {

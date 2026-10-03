@@ -104,7 +104,7 @@ object FTreeViewModels {
         }
         initializer {
             val app = this[APPLICATION_KEY] as FTreeApplication
-            PairingViewModel(app.container.pairingFlow, repository().observeAllPeople(), app.container.kutumbRepository)
+            PairingViewModel(app.container.pairingFlow, repository().observeAllPeople(), app.container.kutumbRepository, recovery = app.container.recoveryIssuer)
         }
         initializer {
             val handle: SavedStateHandle = createSavedStateHandle()

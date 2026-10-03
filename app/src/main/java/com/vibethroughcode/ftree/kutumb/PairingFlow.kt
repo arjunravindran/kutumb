@@ -65,6 +65,9 @@ interface PairingFlow {
     /** The other phone's QR was scanned: connect to it. */
     fun joinByLink(link: QrLink)
 
+    /** An address the reader typed from the other phone's screen. The six digits are always compared. */
+    fun joinByAddress(address: String, port: Int) = Unit
+
     /** The reader's answer to "does their screen show the same code?". */
     fun confirmCode(matched: Boolean)
 

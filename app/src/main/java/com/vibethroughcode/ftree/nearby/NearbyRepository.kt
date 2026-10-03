@@ -376,17 +376,37 @@ class NearbyRepository(
     }
 
     /** Pairs with the device whose code was scanned. */
-    fun pairByLink(link: QrLink) {
+    fun pairByLink(link: QrLink) = startPairing(
+        address = link.address,
+        port = link.port,
+        name = link.displayName ?: link.address,
+        token = link.token ?: Handshake.NO_TOKEN,
+        expectedFingerprint = link.keyFingerprint,
+    )
+
+    /**
+     * Pairs with an address somebody typed, for a network that drops discovery or a camera that
+     * will not scan. With no scanned code there is no token and no fingerprint, so the six digits
+     * are the only check and are always compared. Only a private address is taken, as for a scan.
+     */
+    fun pairByAddress(address: String, port: Int) {
+        if (pairingIdentity == null) return
+        if (!QrLink.isPrivateAddress(address) || port !in 1..65535) {
+            _pair.value = NearbyPairState.Failed(NearbyProblem.NETWORK)
+            return
+        }
+        startPairing(address, port, name = "$address:$port", token = Handshake.NO_TOKEN, expectedFingerprint = null)
+    }
+
+    private fun startPairing(address: String, port: Int, name: String, token: ByteArray, expectedFingerprint: ByteArray?) {
         val identity = pairingIdentity ?: return
         if (!preferences.enabled.value) {
             _pair.value = NearbyPairState.Off
             return
         }
         if (!engaged.compareAndSet(false, true)) return
-        val name = link.displayName ?: link.address
         pairingAsSender = true
         _pair.value = NearbyPairState.Connecting(name)
-        val token = link.token ?: Handshake.NO_TOKEN
 
         scope.launch(Dispatchers.IO) {
             val transfer = NearbySendTransfer(
@@ -394,7 +414,7 @@ class NearbyRepository(
                 outgoing = null,
                 pairedByQr = !token.contentEquals(Handshake.NO_TOKEN),
                 pairingToken = token,
-                expectedFingerprint = link.keyFingerprint,
+                expectedFingerprint = expectedFingerprint,
                 listener = object : NearbyTransferListener {
                     override fun onCode(sas: String) {
                         _pair.value = NearbyPairState.ConfirmCode(sas, name)
@@ -414,7 +434,7 @@ class NearbyRepository(
             sending = transfer
             try {
                 val channel = try {
-                    transport.connect(link.address, link.port, NearbyProtocol.CONNECT_TIMEOUT_MS)
+                    transport.connect(address, port, NearbyProtocol.CONNECT_TIMEOUT_MS)
                 } catch (_: Exception) {
                     _pair.value = NearbyPairState.Failed(NearbyProblem.NETWORK)
                     return@launch

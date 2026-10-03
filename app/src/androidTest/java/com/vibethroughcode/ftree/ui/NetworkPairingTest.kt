@@ -9,6 +9,8 @@ import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.performTextReplacement
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.vibethroughcode.ftree.FTreeApplication
@@ -20,11 +22,16 @@ import com.vibethroughcode.ftree.kutumb.PairingFlow
 import com.vibethroughcode.ftree.kutumb.PairingProblem
 import com.vibethroughcode.ftree.kutumb.PairingState
 import com.vibethroughcode.ftree.kutumb.trust.PairingMethod
+import com.vibethroughcode.ftree.kutumb.trust.TrustedContact
 import com.vibethroughcode.ftree.nearby.wire.QrLink
 import com.vibethroughcode.ftree.ui.network.NetworkListTag
 import com.vibethroughcode.ftree.ui.network.NetworkPairTag
 import com.vibethroughcode.ftree.ui.network.PairingCodeTag
+import com.vibethroughcode.ftree.ui.network.PairingAddressFieldTag
+import com.vibethroughcode.ftree.ui.network.PairingAddressGoTag
 import com.vibethroughcode.ftree.ui.network.PairingFailedTag
+import com.vibethroughcode.ftree.ui.network.PairingRecoverToggleTag
+import com.vibethroughcode.ftree.ui.network.PairingTypeAddressTag
 import com.vibethroughcode.ftree.ui.network.PairingMatchTag
 import com.vibethroughcode.ftree.ui.network.PairingWaitingTag
 import com.vibethroughcode.ftree.ui.network.PairingWhoTag
@@ -50,6 +57,8 @@ class NetworkPairingTest {
         var confirmed: Boolean? = null
         override fun start() { mutable.value = PairingState.Waiting(link = null, deviceName = "Quiet Heron") }
         override fun joinByLink(link: QrLink) = Unit
+        var typed: Pair<String, Int>? = null
+        override fun joinByAddress(address: String, port: Int) { typed = address to port }
         override fun confirmCode(matched: Boolean) { confirmed = matched }
         override fun cancel() { mutable.value = PairingState.Idle }
     }
@@ -119,5 +128,49 @@ class NetworkPairingTest {
         rule.waitUntil(5_000) { rule.onAllNodesWithTag(PairingFailedTag).fetchSemanticsNodes().isNotEmpty() }
         rule.onAllNodesWithText("Try again").assertCountEquals(0)
         assertNull(runBlocking { kutumb.observeContacts().first().firstOrNull() })
+    }
+
+    @Test
+    fun anAddressTypedFromTheOtherPhoneStartsPairingAndABadOneIsRefused() {
+        rule.waitUntil(5_000) { rule.onAllNodesWithTag(PairingWaitingTag).fetchSemanticsNodes().isNotEmpty() }
+        rule.onNodeWithTag(PairingTypeAddressTag).performClick()
+
+        // A public address is refused on the screen, before anything connects.
+        rule.onNodeWithTag(PairingAddressFieldTag).performTextInput("8.8.8.8:43121")
+        rule.onNodeWithTag(PairingAddressGoTag).performClick()
+        rule.onNodeWithText("That doesn't look like a local address", substring = true).assertIsDisplayed()
+        assertNull(flow.typed)
+
+        rule.onNodeWithTag(PairingAddressFieldTag).performTextInput("") // keep focus
+        rule.onNodeWithTag(PairingAddressFieldTag).performTextReplacement("192.168.1.20:43121")
+        rule.onNodeWithTag(PairingAddressGoTag).performClick()
+        assertEquals("192.168.1.20" to 43121, flow.typed)
+    }
+
+    @Test
+    fun aRelativeOnANewPhoneIsVouchedForInsteadOfAddedAgain() {
+        val oldKey = Bip340Scheme.generateKeyPair().publicKey
+        runBlocking {
+            kutumb.saveContact(TrustedContact(devika.id, oldKey, pairedAt = 1, pairingMethod = PairingMethod.DIRECT))
+        }
+        rule.waitUntil(5_000) { rule.onAllNodesWithTag(PairingWaitingTag).fetchSemanticsNodes().isNotEmpty() }
+
+        val newKey = Bip340Scheme.generateKeyPair().publicKey
+        flow.mutable.value = PairingState.Verified("Pixel 9", newKey)
+        rule.waitUntil(5_000) { rule.onAllNodesWithTag(PairingWhoTag).fetchSemanticsNodes().isNotEmpty() }
+        // Devika is already trusted, so she is not among the people it could be...
+        assertEquals(0, rule.onAllNodesWithText("Devika Nair").fetchSemanticsNodes().size)
+        // ...until the reader says it is somebody they already trust on a new phone.
+        rule.onNodeWithTag(PairingRecoverToggleTag).performClick()
+        rule.waitUntil(5_000) { rule.onAllNodesWithText("Devika Nair").fetchSemanticsNodes().isNotEmpty() }
+        rule.onNodeWithText("Devika Nair").performClick()
+
+        rule.waitUntil(5_000) { rule.onAllNodesWithTag(NetworkListTag).fetchSemanticsNodes().isNotEmpty() }
+        val devikaNow = runBlocking { kutumb.observeContacts().first().single { it.personId == devika.id } }
+        assertEquals(newKey, devikaNow.pubKeyCurrent)
+        assertEquals(listOf(oldKey), devikaNow.pubKeyHistory)
+        val rotation = runBlocking { kutumb.observeRotations().first().single() }
+        assertEquals(devika.id, rotation.personId)
+        assertEquals(newKey, rotation.newPubKey)
     }
 }
