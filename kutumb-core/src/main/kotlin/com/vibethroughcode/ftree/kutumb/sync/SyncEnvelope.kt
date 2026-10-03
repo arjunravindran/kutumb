@@ -7,6 +7,7 @@ enum class SyncType(val wire: String) {
     RESOLUTION("resolution"),
     ROTATION("rotation"),
     TREE_EDIT("tree-edit"),
+    MESSAGE("message"),
     ;
 
     companion object {

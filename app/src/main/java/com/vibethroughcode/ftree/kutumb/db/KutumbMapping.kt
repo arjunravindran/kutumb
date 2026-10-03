@@ -8,6 +8,8 @@ import com.vibethroughcode.ftree.kutumb.game.RedemptionStatus
 import com.vibethroughcode.ftree.kutumb.game.RewardRedemption
 import com.vibethroughcode.ftree.kutumb.game.RewardType
 import com.vibethroughcode.ftree.kutumb.geo.LocationLabel
+import com.vibethroughcode.ftree.kutumb.messaging.DeliveryStatus
+import com.vibethroughcode.ftree.kutumb.messaging.Message
 import com.vibethroughcode.ftree.kutumb.geo.LocationSource
 import com.vibethroughcode.ftree.kutumb.geo.PersonLocation
 import com.vibethroughcode.ftree.kutumb.sync.OutboxEntry
@@ -48,6 +50,12 @@ internal fun PersonLocationEntity.toCore(): PersonLocation? = parsed {
         personId, LocationLabel.entries.first { it.name == label }, lat, lon,
         LocationSource.entries.first { it.name == source }, updatedAt, sharingEnabled,
     )
+}
+
+internal fun Message.toRow() = MessageEntity(id, threadPersonId, senderId, body, sentAt, deliveryStatus.name, isRead)
+
+internal fun MessageEntity.toCore(): Message? = parsed {
+    Message(id, threadPersonId, senderId, body, sentAt, DeliveryStatus.entries.first { it.name == deliveryStatus }, isRead)
 }
 
 internal fun Fact.toRow() = FactEntity(id, personId, category, prompt)

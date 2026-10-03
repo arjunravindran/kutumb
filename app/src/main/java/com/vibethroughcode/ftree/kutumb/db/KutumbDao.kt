@@ -88,6 +88,18 @@ interface KutumbDao {
     @Query("DELETE FROM sync_outbox WHERE eventId = :eventId")
     suspend fun deleteOutbox(eventId: String)
 
+    @Query("SELECT * FROM messages ORDER BY sentAt, id")
+    fun observeMessages(): Flow<List<MessageEntity>>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun putMessage(message: MessageEntity)
+
+    @Query("UPDATE messages SET isRead = 1 WHERE threadPersonId = :personId AND isRead = 0")
+    suspend fun markThreadRead(personId: String)
+
+    @Query("DELETE FROM messages")
+    suspend fun clearMessages()
+
     @Query("DELETE FROM local_identity")
     suspend fun clearLocalIdentity()
 

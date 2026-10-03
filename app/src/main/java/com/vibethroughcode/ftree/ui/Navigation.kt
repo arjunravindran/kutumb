@@ -55,6 +55,10 @@ data object FactsRoute
 @Serializable
 data class PathRoute(val personId: String)
 
+/** A conversation with one relative met in person. */
+@Serializable
+data class ThreadRoute(val personId: String)
+
 /** Pairing with a relative in person. */
 @Serializable
 data object PairRoute

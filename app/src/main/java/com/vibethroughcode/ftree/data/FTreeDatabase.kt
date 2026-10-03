@@ -13,6 +13,7 @@ import com.vibethroughcode.ftree.kutumb.db.IdentityRotationEntity
 import com.vibethroughcode.ftree.kutumb.db.KutumbDao
 import com.vibethroughcode.ftree.kutumb.db.LedgerEntity
 import com.vibethroughcode.ftree.kutumb.db.LocalIdentityEntity
+import com.vibethroughcode.ftree.kutumb.db.MessageEntity
 import com.vibethroughcode.ftree.kutumb.db.OutboxEntity
 import com.vibethroughcode.ftree.kutumb.db.PersonLocationEntity
 import com.vibethroughcode.ftree.kutumb.db.RedemptionEntity
@@ -23,9 +24,9 @@ import com.vibethroughcode.ftree.kutumb.db.TrustedContactEntity
         Person::class, Relationship::class, PersonOrigin::class,
         LocalIdentityEntity::class, TrustedContactEntity::class, IdentityRotationEntity::class,
         PersonLocationEntity::class, FactEntity::class, FactAnswerEntity::class, FactResolutionEntity::class,
-        LedgerEntity::class, OutboxEntity::class, RedemptionEntity::class,
+        LedgerEntity::class, OutboxEntity::class, RedemptionEntity::class, MessageEntity::class,
     ],
-    version = 2,
+    version = 3,
     exportSchema = true,
 )
 @TypeConverters(Converters::class)
@@ -53,7 +54,7 @@ abstract class FTreeDatabase : RoomDatabase() {
         /** [name] is the file; each tree has its own (see `TreeCatalog`), and the default is the original. */
         fun build(context: Context, name: String = NAME): FTreeDatabase =
             Room.databaseBuilder(context.applicationContext, FTreeDatabase::class.java, name)
-                .addMigrations(MIGRATION_1_2)
+                .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
                 .addCallback(enforceForeignKeys)
                 .build()
     }

@@ -21,6 +21,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Chat
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.outlined.Lock
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -35,7 +37,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -56,6 +60,7 @@ const val NetworkListTag = "network-list"
 const val NetworkWhoTag = "network-who"
 fun networkRowTag(personId: String) = "network-row-$personId"
 fun networkMessageTag(personId: String) = "network-message-$personId"
+fun networkPreviewTag(personId: String) = "network-preview-$personId"
 fun owedRowTag(redemptionId: String) = "owed-row-$redemptionId"
 fun owedSettleTag(redemptionId: String) = "owed-settle-$redemptionId"
 
@@ -258,6 +263,17 @@ private fun ContactCard(
                 if (term != null) {
                     Text(term, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
+                row.lastMessage?.let { last ->
+                    Text(
+                        text = last.body,
+                        style = MaterialTheme.typography.bodySmall,
+                        fontWeight = if (row.unread > 0) FontWeight.SemiBold else FontWeight.Normal,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.padding(top = 4.dp).testTag(networkPreviewTag(row.contact.personId)),
+                    )
+                }
                 Row(Modifier.padding(top = 6.dp), verticalAlignment = Alignment.CenterVertically) {
                     // Filled for met-in-person, hollow for vouched: shape as well as colour, so the
                     // difference survives a colour-blind reader.
@@ -275,13 +291,13 @@ private fun ContactCard(
                     )
                 }
             }
-            MessageControl(row.contact.personId, name, enabled = row.contact.messagingEnabled, onMessage = onMessage)
+            MessageControl(row.contact.personId, name, enabled = row.contact.messagingEnabled, unread = row.unread, onMessage = onMessage)
         }
     }
 }
 
 @Composable
-private fun MessageControl(personId: String, name: String, enabled: Boolean, onMessage: (() -> Unit)?) {
+private fun MessageControl(personId: String, name: String, enabled: Boolean, unread: Int, onMessage: (() -> Unit)?) {
     if (!enabled) {
         // Locked: only an in-person pairing unlocks messaging, never a vouch.
         Icon(
@@ -296,7 +312,9 @@ private fun MessageControl(personId: String, name: String, enabled: Boolean, onM
             enabled = onMessage != null,
             modifier = Modifier.testTag(networkMessageTag(personId)),
         ) {
-            Icon(Icons.AutoMirrored.Outlined.Chat, contentDescription = stringResource(R.string.network_message, name))
+            BadgedBox(badge = { if (unread > 0) Badge { Text(unread.toString()) } }) {
+                Icon(Icons.AutoMirrored.Outlined.Chat, contentDescription = stringResource(R.string.network_message, name))
+            }
         }
     }
 }

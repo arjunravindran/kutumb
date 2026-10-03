@@ -6,14 +6,15 @@ import kotlinx.coroutines.flow.first
 /**
  * How a screen's local change reaches the family: queue [envelope] for these people, if sync is
  * running. A failure to queue never undoes the local change; the caller has already saved it.
+ * Returns whether anything was queued, for the callers (messages) that show the difference.
  */
 interface SyncPublisher {
-    suspend fun publish(envelope: SyncEnvelope, personIds: Collection<String>)
+    suspend fun publish(envelope: SyncEnvelope, personIds: Collection<String>): Boolean
 }
 
 /** Does nothing. The default for tests and for screens built without sync. */
 object NoSyncPublisher : SyncPublisher {
-    override suspend fun publish(envelope: SyncEnvelope, personIds: Collection<String>) = Unit
+    override suspend fun publish(envelope: SyncEnvelope, personIds: Collection<String>) = false
 }
 
 /**
@@ -25,11 +26,11 @@ class ServiceSyncPublisher(
     private val enabled: () -> Boolean,
     private val service: () -> SyncService,
 ) : SyncPublisher {
-    override suspend fun publish(envelope: SyncEnvelope, personIds: Collection<String>) {
-        if (!enabled()) return
+    override suspend fun publish(envelope: SyncEnvelope, personIds: Collection<String>): Boolean {
+        if (!enabled()) return false
         val wanted = personIds.toSet()
         val keys = repository.observeContacts().first().filter { it.personId in wanted }.map { it.pubKeyCurrent }
-        if (keys.isEmpty()) return
-        runCatching { service().publish(envelope, keys) }
+        if (keys.isEmpty()) return false
+        return runCatching { service().publish(envelope, keys) }.getOrDefault(false)
     }
 }

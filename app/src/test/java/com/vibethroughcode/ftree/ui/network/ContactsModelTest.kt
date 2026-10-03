@@ -6,6 +6,8 @@ import com.vibethroughcode.ftree.graph.FamilySnapshot
 import com.vibethroughcode.ftree.graph.KinshipTerm
 import com.vibethroughcode.ftree.kutumb.Bip340Scheme
 import com.vibethroughcode.ftree.kutumb.game.RedemptionStatus
+import com.vibethroughcode.ftree.kutumb.messaging.DeliveryStatus
+import com.vibethroughcode.ftree.kutumb.messaging.Message
 import com.vibethroughcode.ftree.kutumb.game.RewardRedemption
 import com.vibethroughcode.ftree.kutumb.game.RewardType
 import com.vibethroughcode.ftree.kutumb.trust.PairingMethod
@@ -105,5 +107,26 @@ class ContactsModelTest {
         val row = ContactsModel.owed("me", listOf(owes("x", "me", "deleted")), snapshot).single()
         assertNull(row.other)
         assertTrue(row.youOwe)
+    }
+
+    private fun said(id: String, thread: String, from: String, at: Long, read: Boolean = true) =
+        Message(id, thread, from, "text $id", at, if (from == thread) DeliveryStatus.RECEIVED else DeliveryStatus.QUEUED, read)
+
+    @Test
+    fun aRowCarriesTheNewestMessageAndHowManyOfTheirsAreUnread() {
+        val messages = listOf(
+            said("a", "kiran", "kiran", 1, read = false),
+            said("b", "kiran", "me", 2),
+            said("c", "kiran", "kiran", 3, read = false),
+            said("d", "mum", "mum", 9, read = true),
+        )
+        val rows = ContactsModel.rows("me", listOf(direct("kiran"), direct("mum"), direct("nan")), snapshot, messages).associateBy { it.contact.personId }
+        assertEquals("c", rows.getValue("kiran").lastMessage?.id)
+        assertEquals(2, rows.getValue("kiran").unread)
+        assertEquals("d", rows.getValue("mum").lastMessage?.id)
+        assertEquals(0, rows.getValue("mum").unread)
+        // Nobody has written to Nani, and a message to a stranger belongs to no row.
+        assertNull(rows.getValue("nan").lastMessage)
+        assertEquals(0, rows.getValue("nan").unread)
     }
 }

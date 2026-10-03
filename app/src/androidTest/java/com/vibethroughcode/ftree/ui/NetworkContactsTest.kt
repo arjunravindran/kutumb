@@ -1,7 +1,7 @@
 package com.vibethroughcode.ftree.ui
 
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
@@ -96,8 +96,8 @@ class NetworkContactsTest {
         rule.onNodeWithText("Paired in person").assertIsDisplayed()
         rule.onNodeWithText("Vouched by Devika Nair").assertIsDisplayed()
 
-        // Messaging is not built yet, so even the unlocked control is drawn unavailable.
-        rule.onNodeWithTag(networkMessageTag(devika.id)).assertIsNotEnabled()
+        // Someone met in person can be messaged; the vouched one gets a lock instead.
+        rule.onNodeWithTag(networkMessageTag(devika.id)).assertIsEnabled()
         // A plain icon merges into its row for a screen reader; look for it unmerged.
         rule.onNodeWithTag(networkMessageTag(asha.id), useUnmergedTree = true).assertIsDisplayed()
     }

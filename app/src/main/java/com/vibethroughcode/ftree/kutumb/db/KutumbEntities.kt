@@ -114,3 +114,14 @@ data class RedemptionEntity(
     val status: String,
     val redeemedAt: Long?,
 )
+
+@Entity(tableName = "messages", indices = [Index(value = ["threadPersonId"])])
+data class MessageEntity(
+    @PrimaryKey val id: String,
+    val threadPersonId: String,
+    val senderId: String,
+    val body: String,
+    val sentAt: Long,
+    val deliveryStatus: String,
+    val isRead: Boolean,
+)

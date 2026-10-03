@@ -24,6 +24,7 @@ import com.vibethroughcode.ftree.kutumb.PhoneKey
 import com.vibethroughcode.ftree.kutumb.PlaceSource
 import com.vibethroughcode.ftree.kutumb.RecoveryIssuer
 import com.vibethroughcode.ftree.kutumb.sync.CompositeSyncHandler
+import com.vibethroughcode.ftree.kutumb.sync.MessageSyncHandler
 import com.vibethroughcode.ftree.kutumb.sync.RotationSyncHandler
 import com.vibethroughcode.ftree.kutumb.db.AndroidKeyVault
 import com.vibethroughcode.ftree.kutumb.db.PrefsPhoneKeyStore
@@ -120,7 +121,11 @@ class AppContainer(
                     connector = WebSocketRelay.connector(),
                     scope = syncScope,
                     clock = System::currentTimeMillis,
-                    handler = CompositeSyncHandler(GameSyncHandler(kutumbRepository), RotationSyncHandler(kutumbRepository, signatureScheme)),
+                    handler = CompositeSyncHandler(
+                        GameSyncHandler(kutumbRepository),
+                        RotationSyncHandler(kutumbRepository, signatureScheme),
+                        MessageSyncHandler(kutumbRepository, System::currentTimeMillis),
+                    ),
                 )
             },
             scope = syncScope,

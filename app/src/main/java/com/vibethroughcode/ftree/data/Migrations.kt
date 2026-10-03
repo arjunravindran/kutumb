@@ -30,3 +30,15 @@ val MIGRATION_1_2 = object : Migration(1, 2) {
         db.execSQL("CREATE INDEX IF NOT EXISTS `index_reward_redemptions_fromPersonId_toPersonId` ON `reward_redemptions` (`fromPersonId`, `toPersonId`)")
     }
 }
+
+/**
+ * Version 3 adds the messages between people who have met in person. Like version 2 it only
+ * creates: nothing in the tree or the family network is touched, so an update in place keeps
+ * everything. The statements are the ones Room generated into `schemas/.../3.json`.
+ */
+val MIGRATION_2_3 = object : Migration(2, 3) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("CREATE TABLE IF NOT EXISTS `messages` (`id` TEXT NOT NULL, `threadPersonId` TEXT NOT NULL, `senderId` TEXT NOT NULL, `body` TEXT NOT NULL, `sentAt` INTEGER NOT NULL, `deliveryStatus` TEXT NOT NULL, `isRead` INTEGER NOT NULL, PRIMARY KEY(`id`))")
+        db.execSQL("CREATE INDEX IF NOT EXISTS `index_messages_threadPersonId` ON `messages` (`threadPersonId`)")
+    }
+}

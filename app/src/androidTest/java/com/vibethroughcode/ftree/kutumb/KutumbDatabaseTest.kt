@@ -8,6 +8,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.vibethroughcode.ftree.data.FTreeDatabase
 import com.vibethroughcode.ftree.data.MIGRATION_1_2
+import com.vibethroughcode.ftree.data.MIGRATION_2_3
 import com.vibethroughcode.ftree.data.Person
 import com.vibethroughcode.ftree.kutumb.db.AndroidKeyVault
 import com.vibethroughcode.ftree.kutumb.db.KeyVault
@@ -204,5 +205,43 @@ class KutumbDatabaseTest {
         }
         migrated.query("SELECT COUNT(*) FROM trusted_contacts").use { it.moveToFirst(); assertEquals(0, it.getInt(0)) }
         migrated.close()
+    }
+
+    @Test
+    fun updatingFromVersionTwoKeepsTheNetworkAndAddsMessages() {
+        val name = "migration-test-2-3"
+        migrations.createDatabase(name, 2).apply {
+            execSQL("INSERT INTO people (id, name, gender, deceased, createdAt, updatedAt) VALUES ('p', 'Asha', 'UNSPECIFIED', 0, 1, 1)")
+            execSQL("INSERT INTO trusted_contacts (personId, pubKeyCurrent, pubKeyHistory, pairedAt, pairingMethod) VALUES ('p', '" + "a".repeat(64) + "', '', 1, 'DIRECT')")
+            close()
+        }
+        val migrated = migrations.runMigrationsAndValidate(name, 3, true, MIGRATION_2_3)
+        migrated.query("SELECT pairingMethod FROM trusted_contacts WHERE personId = 'p'").use {
+            assertTrue(it.moveToFirst())
+            assertEquals("DIRECT", it.getString(0))
+        }
+        migrated.execSQL("INSERT INTO messages (id, threadPersonId, senderId, body, sentAt, deliveryStatus, isRead) VALUES ('m', 'p', 'p', 'hi', 1, 'RECEIVED', 0)")
+        migrated.query("SELECT COUNT(*) FROM messages").use { it.moveToFirst(); assertEquals(1, it.getInt(0)) }
+        migrated.close()
+    }
+
+    @Test
+    fun messagesSurviveInTheRoomRepositoryAndAreClearedWithTheRest() = runBlocking {
+        val m = com.vibethroughcode.ftree.kutumb.messaging.Message(
+            "kiran/1", "kiran", "kiran", "hello", 5, com.vibethroughcode.ftree.kutumb.messaging.DeliveryStatus.RECEIVED, isRead = false,
+        )
+        repo.saveMessage(m)
+        repo.saveMessage(m.copy(id = "me-1", senderId = "me", deliveryStatus = com.vibethroughcode.ftree.kutumb.messaging.DeliveryStatus.QUEUED, isRead = true, sentAt = 6))
+        assertEquals(listOf("kiran/1", "me-1"), repo.observeMessages().first().map { it.id })
+
+        repo.markThreadRead("kiran")
+        assertTrue(repo.observeMessages().first().all { it.isRead })
+
+        // Saving an id again replaces it: that is how a status changes.
+        repo.saveMessage(m.copy(body = "edited", isRead = true))
+        assertEquals("edited", repo.observeMessages().first().single { it.id == "kiran/1" }.body)
+
+        repo.clearAll()
+        assertTrue(repo.observeMessages().first().isEmpty())
     }
 }

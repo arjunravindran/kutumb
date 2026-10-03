@@ -37,11 +37,11 @@ class ContactsViewModel(
 ) : ViewModel() {
 
     val state: StateFlow<ContactsUiState> =
-        combine(kutumb.observeIdentity(), kutumb.observeContacts(), family.observeWholeGraph(), kutumb.observeRedemptions()) { identity, contacts, snapshot, redemptions ->
+        combine(kutumb.observeIdentity(), kutumb.observeContacts(), family.observeWholeGraph(), kutumb.observeRedemptions(), kutumb.observeMessages()) { identity, contacts, snapshot, redemptions, messages ->
             ContactsUiState(
                 loaded = true,
                 me = identity?.let { snapshot.people[it.personId] },
-                rows = identity?.let { ContactsModel.rows(it.personId, contacts, snapshot) }.orEmpty(),
+                rows = identity?.let { ContactsModel.rows(it.personId, contacts, snapshot, messages) }.orEmpty(),
                 everyone = snapshot.people.values.toList(),
                 owed = identity?.let { ContactsModel.owed(it.personId, redemptions, snapshot) }.orEmpty(),
             )

@@ -6,6 +6,7 @@ import com.vibethroughcode.ftree.kutumb.game.FactResolution
 import com.vibethroughcode.ftree.kutumb.game.LedgerEntry
 import com.vibethroughcode.ftree.kutumb.game.RewardRedemption
 import com.vibethroughcode.ftree.kutumb.geo.LocationLabel
+import com.vibethroughcode.ftree.kutumb.messaging.Message
 import com.vibethroughcode.ftree.kutumb.geo.PersonLocation
 import com.vibethroughcode.ftree.kutumb.sync.OutboxEntry
 import com.vibethroughcode.ftree.kutumb.trust.IdentityRotationEvent
@@ -14,6 +15,7 @@ import com.vibethroughcode.ftree.kutumb.trust.TrustedContact
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 
 /** Who this device is: the person in the tree it speaks for, and the long-term key it speaks with. */
@@ -66,6 +68,15 @@ interface KutumbRepository {
     fun observeRedemptions(): Flow<List<RewardRedemption>>
     suspend fun saveRedemption(redemption: RewardRedemption)
 
+    /** Every message in every conversation, oldest first. A conversation is the messages sharing a threadPersonId. */
+    fun observeMessages(): Flow<List<Message>>
+
+    /** One row per id: saving a message again replaces it, which is how a status changes. */
+    suspend fun saveMessage(message: Message)
+
+    /** The reader has seen everything in the conversation with [personId]. */
+    suspend fun markThreadRead(personId: String)
+
     /** Forgets everything, the identity included. For tests and the debug seeder's `clear`. */
     suspend fun clearAll()
 }
@@ -76,6 +87,7 @@ class InMemoryKutumbRepository : KutumbRepository {
     private val rotations = MutableStateFlow<List<IdentityRotationEvent>>(emptyList())
     private val outbox = MutableStateFlow<List<OutboxEntry>>(emptyList())
     private val locations = MutableStateFlow<List<PersonLocation>>(emptyList())
+    private val messages = MutableStateFlow<List<Message>>(emptyList())
     private val facts = MutableStateFlow<List<Fact>>(emptyList())
     private val answers = MutableStateFlow<List<FactAnswer>>(emptyList())
     private val resolutions = MutableStateFlow<List<FactResolution>>(emptyList())
@@ -97,6 +109,11 @@ class InMemoryKutumbRepository : KutumbRepository {
     override suspend fun deleteOutboxEntry(eventId: String) = outbox.update { all -> all.filter { it.eventId != eventId } }
 
     override fun observeLocations(): Flow<List<PersonLocation>> = locations.asStateFlow()
+    override fun observeMessages(): Flow<List<Message>> = messages.map { all -> all.sortedWith(compareBy({ it.sentAt }, { it.id })) }
+    override suspend fun saveMessage(message: Message) = messages.update { all -> all.filter { it.id != message.id } + message }
+    override suspend fun markThreadRead(personId: String) =
+        messages.update { all -> all.map { if (it.threadPersonId == personId) it.copy(isRead = true) else it } }
+
     override suspend fun saveLocation(location: PersonLocation) =
         locations.update { all -> all.filter { it.personId != location.personId || it.label != location.label } + location }
     override suspend fun deleteLocation(personId: String, label: LocationLabel) =
@@ -118,7 +135,7 @@ class InMemoryKutumbRepository : KutumbRepository {
 
     override suspend fun clearAll() {
         identity.value = null
-        contacts.value = emptyList(); rotations.value = emptyList(); outbox.value = emptyList(); locations.value = emptyList(); facts.value = emptyList(); answers.value = emptyList()
+        contacts.value = emptyList(); rotations.value = emptyList(); outbox.value = emptyList(); locations.value = emptyList(); messages.value = emptyList(); facts.value = emptyList(); answers.value = emptyList()
         resolutions.value = emptyList(); ledger.value = emptyList(); redemptions.value = emptyList()
     }
 

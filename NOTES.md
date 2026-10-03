@@ -251,3 +251,17 @@ Pairing screen > "Type an address instead" shows this phone's own `address:port`
 ### Full instrumented suite, 2026-10-03
 
 240 tests: 237 passed. The two `BookFlowTest` failures above are fixed since. `NetworkTreeLinkTest.aTrustedPersonsSheetLeadsToTheirRelationshipScreen` timed out once in the long run and passes alone (2 of 2) on the same code, so it is order- or load-dependent; not investigated further.
+
+## Messaging
+
+Direct messages between two people who have met in person, as the spec's "Optional messaging" section asks. The Network tab's message button, drawn unavailable until now, opens a conversation.
+
+- **Who can write:** only a contact paired `DIRECT`. A vouched contact gets the lock, as before, and a message from one is dropped on arrival. A key rotation keeps the right (the pairing method survives it), so a relative who gets a new phone does not have to be met again to be messaged.
+- **Wire:** a new sync type `MESSAGE` ("message") carrying `{id, body, at}`, over the same NIP-17 gift-wrapped, NIP-44 encrypted path as the other sync messages, to the relays the person named. Who sent it is the gift wrap's author, not a field. Not interoperable with other Nostr chat apps (the rumor kind is the app's 30078, not NIP-17's 14): this is the app's own "family sync", not a general DM channel. An older build that does not know the type drops it as unsupported.
+- **Rules** (`kutumb-core` `messaging/Messaging.kt`, 8 JVM tests): body 1-2000 chars, ids <= 200, a message cannot claim to be more than five minutes ahead of this phone's clock, a redelivery is dropped by id, and the stored id is `<sender>/<wire id>` so two people cannot overwrite each other by reusing one.
+- **Storage:** one table, `messages`, **database version 3** (`MIGRATION_2_3`, a create-only migration, covered by `KutumbDatabaseTest`; `schemas/.../3.json` is committed). The spec's separate `MessageThread` is not a table: a conversation is the other person, so it is `threadPersonId` on each message.
+- **Sending:** a message is saved before anything tries to send it. `SyncPublisher.publish` now returns whether it queued anything; `QUEUED` means the outbox has it and will keep trying, `NOT_SENT` means sync was off or had no relay, with "Send again" on the message. No delivery receipt: nothing here says the other person has read it.
+- **Reading:** opening a conversation marks theirs read; the Network list shows the newest message and an unread count on the button.
+- **Tests:** `MessagingFlowTest` (8, JVM: sending, resending, the rules at the handler, read marking), `ContactsModelTest`, `KutumbDatabaseTest` (migration and Room round trip), `MessagingTest` (3, device: write with sync off, receive while open, vouched is locked).
+- **`adjustResize`:** the conversation screen is the first with a text field pinned to the bottom, and with no soft-input mode set the system panned the whole window (the top bar and the list went off the top). `MainActivity` now declares `adjustResize`, which is what `imePadding()` expects; it also applies to every other screen with a text field.
+- **Not done:** notifications for a new message (the app asks for `POST_NOTIFICATIONS` only for birthday reminders and nothing new was added), delivery receipts, deleting a message or a conversation, anything but text, and syncing a person's messages to a second phone. A message sent while sync is off is not queued for later; "Send again" is the way.

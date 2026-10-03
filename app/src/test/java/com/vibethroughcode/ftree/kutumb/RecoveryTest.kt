@@ -24,7 +24,7 @@ class RecoveryTest {
 
     private class RecordingPublisher : SyncPublisher {
         val sent = mutableListOf<Pair<SyncEnvelope, Set<String>>>()
-        override suspend fun publish(envelope: SyncEnvelope, personIds: Collection<String>) { sent += envelope to personIds.toSet() }
+        override suspend fun publish(envelope: SyncEnvelope, personIds: Collection<String>): Boolean { sent += envelope to personIds.toSet(); return true }
     }
 
     private fun key() = scheme.generateKeyPair()

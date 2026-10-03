@@ -62,6 +62,7 @@ import com.vibethroughcode.ftree.ui.nearby.NearbyScreen
 import com.vibethroughcode.ftree.ui.facts.FactsScreen
 import com.vibethroughcode.ftree.ui.facts.ResolveScreen
 import com.vibethroughcode.ftree.ui.network.ContactsScreen
+import com.vibethroughcode.ftree.ui.network.MessageThreadScreen
 import com.vibethroughcode.ftree.ui.network.PairingScreen
 import com.vibethroughcode.ftree.ui.network.PathScreen
 import com.vibethroughcode.ftree.ui.nearby.QrPanel
@@ -342,7 +343,12 @@ fun FTreeApp(
                         ContactsScreen(
                             onPair = { navController.navigate(PairRoute) },
                             onOpenContact = { navController.navigate(PathRoute(it)) },
+                            onMessage = { navController.navigate(ThreadRoute(it)) },
                         )
+                    }
+
+                    composable<ThreadRoute> {
+                        MessageThreadScreen(onBack = { navController.popBackStack() })
                     }
 
                     composable<FactsRoute> {

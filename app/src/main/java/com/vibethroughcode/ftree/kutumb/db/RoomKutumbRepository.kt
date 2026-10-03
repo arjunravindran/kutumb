@@ -10,6 +10,7 @@ import com.vibethroughcode.ftree.kutumb.game.FactResolution
 import com.vibethroughcode.ftree.kutumb.game.LedgerEntry
 import com.vibethroughcode.ftree.kutumb.game.RewardRedemption
 import com.vibethroughcode.ftree.kutumb.geo.LocationLabel
+import com.vibethroughcode.ftree.kutumb.messaging.Message
 import com.vibethroughcode.ftree.kutumb.geo.PersonLocation
 import com.vibethroughcode.ftree.kutumb.sync.OutboxEntry
 import com.vibethroughcode.ftree.kutumb.trust.IdentityRotationEvent
@@ -78,6 +79,10 @@ class RoomKutumbRepository(
     override fun observeRedemptions(): Flow<List<RewardRedemption>> = dao.observeRedemptions().map { rows -> rows.mapNotNull { it.toCore() } }
     override suspend fun saveRedemption(redemption: RewardRedemption) = dao.putRedemption(redemption.toRow())
 
+    override fun observeMessages(): Flow<List<Message>> = dao.observeMessages().map { rows -> rows.mapNotNull { it.toCore() } }
+    override suspend fun saveMessage(message: Message) = dao.putMessage(message.toRow())
+    override suspend fun markThreadRead(personId: String) = dao.markThreadRead(personId)
+
     override suspend fun clearAll() {
         // Only this feature's tables: the family tree itself is not ours to wipe.
         database.withTransaction {
@@ -91,6 +96,7 @@ class RoomKutumbRepository(
             dao.clearPointsLedger()
             dao.clearSyncOutbox()
             dao.clearRewardRedemptions()
+            dao.clearMessages()
         }
     }
 }

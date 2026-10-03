@@ -15,6 +15,7 @@ import com.vibethroughcode.ftree.data.PhotoStore
 import com.vibethroughcode.ftree.ui.facts.FactsViewModel
 import com.vibethroughcode.ftree.ui.facts.ResolveViewModel
 import com.vibethroughcode.ftree.ui.network.ContactsViewModel
+import com.vibethroughcode.ftree.ui.network.MessageThreadViewModel
 import com.vibethroughcode.ftree.ui.network.PairingViewModel
 import com.vibethroughcode.ftree.ui.network.PathViewModel
 import com.vibethroughcode.ftree.ui.people.PeopleViewModel
@@ -101,6 +102,14 @@ object FTreeViewModels {
         initializer {
             val app = this[APPLICATION_KEY] as FTreeApplication
             PathViewModel(repository(), app.container.kutumbRepository, createSavedStateHandle().toRoute<PathRoute>().personId)
+        }
+        initializer {
+            val app = this[APPLICATION_KEY] as FTreeApplication
+            MessageThreadViewModel(
+                repository().observePerson(createSavedStateHandle().toRoute<ThreadRoute>().personId),
+                app.container.kutumbRepository, app.container.syncPublisher,
+                createSavedStateHandle().toRoute<ThreadRoute>().personId,
+            )
         }
         initializer {
             val app = this[APPLICATION_KEY] as FTreeApplication

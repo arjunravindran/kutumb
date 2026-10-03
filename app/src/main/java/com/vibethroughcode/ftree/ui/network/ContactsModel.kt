@@ -5,6 +5,8 @@ import com.vibethroughcode.ftree.graph.FamilySnapshot
 import com.vibethroughcode.ftree.graph.Kinship
 import com.vibethroughcode.ftree.graph.Relation
 import com.vibethroughcode.ftree.kutumb.game.RedemptionStatus
+import com.vibethroughcode.ftree.kutumb.messaging.Message
+import com.vibethroughcode.ftree.kutumb.messaging.Messaging
 import com.vibethroughcode.ftree.kutumb.game.RewardRedemption
 import com.vibethroughcode.ftree.kutumb.trust.PairingMethod
 import com.vibethroughcode.ftree.kutumb.trust.TrustedContact
@@ -22,6 +24,10 @@ data class ContactRow(
     val relation: Relation.Found?,
     /** Who vouched, for a [PairingMethod.VOUCHED] contact. */
     val voucher: Person?,
+    /** The newest message in the conversation with them, if any. */
+    val lastMessage: Message? = null,
+    /** How many of theirs the reader has not seen. */
+    val unread: Int = 0,
 )
 
 /** A reward that has been earned and not yet handed over, from the reader's side. */
@@ -52,14 +58,18 @@ object ContactsModel {
      * Everyone the reader trusts, those met in person first, then by name. A person without a name
      * sorts last, as they do in every other list in the app.
      */
-    fun rows(meId: String, contacts: List<TrustedContact>, snapshot: FamilySnapshot): List<ContactRow> =
-        contacts.filter { it.personId != meId }
+    fun rows(meId: String, contacts: List<TrustedContact>, snapshot: FamilySnapshot, messages: List<Message> = emptyList()): List<ContactRow> {
+        val byThread = messages.groupBy { it.threadPersonId }
+        return contacts.filter { it.personId != meId }
             .map { contact ->
+                val summary = byThread[contact.personId]?.let(Messaging::summary)
                 ContactRow(
                     contact = contact,
                     person = snapshot.people[contact.personId],
                     relation = Kinship.relate(snapshot, meId, contact.personId) as? Relation.Found,
                     voucher = contact.vouchedByPersonId?.let(snapshot.people::get),
+                    lastMessage = summary?.first,
+                    unread = summary?.second ?: 0,
                 )
             }
             .sortedWith(
@@ -67,4 +77,5 @@ object ContactsModel {
                     .thenBy { it.person?.name.isNullOrBlank() }
                     .thenBy(String.CASE_INSENSITIVE_ORDER) { it.person?.name.orEmpty() }
             )
+    }
 }

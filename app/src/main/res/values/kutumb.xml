@@ -46,6 +46,13 @@
     <string name="circle_view_graph">Graph</string>
     <string name="circle_graph_description">Graph of %1$s and %2$d other people. The list view has the same people as text.</string>
     <string name="circle_graph_hidden">%1$d more not drawn. The list has everyone.</string>
+    <string name="thread_input_hint">Message</string>
+    <string name="thread_send">Send</string>
+    <string name="thread_empty">No messages with %1$s yet. Say hello.</string>
+    <string name="thread_locked">You can message someone once you have met in person.</string>
+    <string name="thread_queued">%1$s · queued</string>
+    <string name="thread_not_sent">%1$s · not sent. Family sync is off, or has no relay.</string>
+    <string name="thread_resend">Send again</string>
     <string name="network_hint">Vouched contacts unlock messaging once you meet them in person.</string>
     <string name="network_removed_person">Someone removed from the tree</string>
     <string name="network_empty_title">No one paired yet</string>
