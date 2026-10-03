@@ -21,6 +21,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -131,6 +132,7 @@ private fun PlacePickerDialog(
     onDismiss: () -> Unit,
 ) {
     var query by rememberSaveable { mutableStateOf("") }
+    val locale = LocalConfiguration.current.locales[0]
     val results by produceState(emptyList<Place>(), query) { value = if (query.isBlank()) emptyList() else search(query) }
 
     AlertDialog(
@@ -159,7 +161,7 @@ private fun PlacePickerDialog(
                     ) {
                         Text(place.name, style = MaterialTheme.typography.bodyLarge)
                         Text(
-                            Locale("", place.country).getDisplayCountry(Locale.getDefault()).ifBlank { place.country },
+                            Locale("", place.country).getDisplayCountry(locale).ifBlank { place.country },
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
