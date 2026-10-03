@@ -4,6 +4,8 @@ import com.vibethroughcode.ftree.data.Person
 import com.vibethroughcode.ftree.graph.FamilySnapshot
 import com.vibethroughcode.ftree.graph.Kinship
 import com.vibethroughcode.ftree.graph.Relation
+import com.vibethroughcode.ftree.kutumb.game.RedemptionStatus
+import com.vibethroughcode.ftree.kutumb.game.RewardRedemption
 import com.vibethroughcode.ftree.kutumb.trust.PairingMethod
 import com.vibethroughcode.ftree.kutumb.trust.TrustedContact
 
@@ -22,7 +24,30 @@ data class ContactRow(
     val voucher: Person?,
 )
 
+/** A reward that has been earned and not yet handed over, from the reader's side. */
+data class OwedRow(
+    val redemption: RewardRedemption,
+    /** The other person; null when the tree no longer has them. */
+    val other: Person?,
+    /** True when the reader is the one who owes it. */
+    val youOwe: Boolean,
+)
+
 object ContactsModel {
+    /** What is still owed to or by the reader, what they owe first, then by the other person's name. */
+    fun owed(meId: String, redemptions: List<RewardRedemption>, snapshot: FamilySnapshot): List<OwedRow> =
+        redemptions.filter { it.status == RedemptionStatus.OWED && (it.fromPersonId == meId || it.toPersonId == meId) }
+            .map { r ->
+                val youOwe = r.fromPersonId == meId
+                OwedRow(r, snapshot.people[if (youOwe) r.toPersonId else r.fromPersonId], youOwe)
+            }
+            .sortedWith(
+                compareByDescending<OwedRow> { it.youOwe }
+                    .thenBy { it.other?.name.isNullOrBlank() }
+                    .thenBy(String.CASE_INSENSITIVE_ORDER) { it.other?.name.orEmpty() }
+                    .thenBy { it.redemption.id }
+            )
+
     /**
      * Everyone the reader trusts, those met in person first, then by name. A person without a name
      * sorts last, as they do in every other list in the app.

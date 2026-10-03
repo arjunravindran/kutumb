@@ -9,6 +9,14 @@
     <string name="network_status_vouched_unknown">Vouched by a relative</string>
     <string name="network_message">Message %1$s</string>
     <string name="network_message_locked">Meet in person to unlock messaging</string>
+    <string name="owed_title">Owed</string>
+    <string name="owed_you_owe">You owe %1$s a %2$s</string>
+    <string name="owed_owes_you">%1$s owes you a %2$s</string>
+    <string name="owed_settle">Mark as settled</string>
+    <string name="reward_beer">beer</string>
+    <string name="reward_coffee">coffee</string>
+    <string name="reward_ice_cream">ice cream</string>
+    <string name="reward_custom">treat</string>
     <string name="network_hint">Vouched contacts unlock messaging once you meet them in person.</string>
     <string name="network_removed_person">Someone removed from the tree</string>
     <string name="network_empty_title">No one paired yet</string>

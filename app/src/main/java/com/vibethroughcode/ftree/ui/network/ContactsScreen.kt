@@ -28,6 +28,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -41,6 +42,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.vibethroughcode.ftree.R
 import com.vibethroughcode.ftree.data.Gender
 import com.vibethroughcode.ftree.data.Person
+import com.vibethroughcode.ftree.kutumb.game.RewardType
 import com.vibethroughcode.ftree.kutumb.trust.PairingMethod
 import com.vibethroughcode.ftree.ui.FTreeViewModels
 import com.vibethroughcode.ftree.ui.common.EmptyState
@@ -54,6 +56,8 @@ const val NetworkListTag = "network-list"
 const val NetworkWhoTag = "network-who"
 fun networkRowTag(personId: String) = "network-row-$personId"
 fun networkMessageTag(personId: String) = "network-message-$personId"
+fun owedRowTag(redemptionId: String) = "owed-row-$redemptionId"
+fun owedSettleTag(redemptionId: String) = "owed-settle-$redemptionId"
 
 /**
  * The family network: everyone this phone trusts, and whether they were met or vouched for.
@@ -107,6 +111,18 @@ fun ContactsScreen(
                 contentPadding = PaddingValues(horizontal = 20.dp, vertical = 14.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
+                if (state.owed.isNotEmpty()) {
+                    item(key = "owed-title") {
+                        Text(
+                            text = stringResource(R.string.owed_title),
+                            style = MaterialTheme.typography.titleMedium,
+                            modifier = Modifier.padding(top = 2.dp),
+                        )
+                    }
+                    items(state.owed, key = { "owed-" + it.redemption.id }) { owed ->
+                        OwedCard(owed, onSettle = { viewModel.settle(owed.redemption.id) })
+                    }
+                }
                 items(state.rows, key = { it.contact.personId }) { row ->
                     ContactCard(
                         row = row,
@@ -124,6 +140,39 @@ fun ContactsScreen(
                         modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 10.dp),
                     )
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun OwedCard(owed: OwedRow, onSettle: () -> Unit) {
+    val other = owed.other?.displayName() ?: stringResource(R.string.network_removed_person)
+    val reward = stringResource(
+        when (owed.redemption.rewardType) {
+            RewardType.BEER -> R.string.reward_beer
+            RewardType.COFFEE -> R.string.reward_coffee
+            RewardType.ICE_CREAM -> R.string.reward_ice_cream
+            RewardType.CUSTOM -> R.string.reward_custom
+        },
+    )
+    Surface(
+        shape = RoundedCornerShape(14.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+        modifier = Modifier.fillMaxWidth().testTag(owedRowTag(owed.redemption.id)),
+    ) {
+        Row(
+            modifier = Modifier.padding(start = 16.dp, top = 6.dp, bottom = 6.dp, end = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = stringResource(if (owed.youOwe) R.string.owed_you_owe else R.string.owed_owes_you, other, reward),
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.weight(1f),
+            )
+            TextButton(onClick = onSettle, modifier = Modifier.testTag(owedSettleTag(owed.redemption.id))) {
+                Text(stringResource(R.string.owed_settle))
             }
         }
     }

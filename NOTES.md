@@ -102,7 +102,7 @@ The existing chart already has the mockup's three views (Chart / Compact / Every
 - **Auto-surfacing:** per the spec ("surfaces automatically the next time they open the app"), `FTreeApp` opens the card once at launch if one is waiting. No timeout, never auto-resolved. A banner on the Facts tab also links to it.
 - **Assumptions with no spec number:** reward threshold is **5 points** and reward type **coffee** for every pair (`ResolveViewModel.DEFAULT_THRESHOLD/DEFAULT_REWARD`). The spec says both are configurable per relationship, but no mockup has that screen. The mockup's "40 / 100 pts" and "+10" were illustrative and are not used.
 - Picking your own answer awards you points but no reward (nothing owed to yourself), and the screen says so.
-- No screen yet lists owed rewards or lets either side mark one redeemed; the data and core rules (`RewardRedemption.settle`) exist. A follow-up.
+- **Owed rewards** now show at the top of the Network tab ("You owe Kiran a coffee" / "Kiran owes you a beer", what you owe first) with "Mark as settled"; either side may settle (`ContactsModel.owed`, 3 JVM tests; `NetworkContactsTest`). Settling is local: it is not synced to the other phone, so each side marks their own copy. The threshold (5 points) and reward (coffee) are still the placeholders above, with no screen to change them.
 
 ## Step 4 — Room
 

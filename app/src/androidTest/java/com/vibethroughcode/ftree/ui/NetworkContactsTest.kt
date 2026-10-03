@@ -14,12 +14,17 @@ import com.vibethroughcode.ftree.MainActivity
 import com.vibethroughcode.ftree.data.Person
 import com.vibethroughcode.ftree.kutumb.LocalIdentity
 import com.vibethroughcode.ftree.kutumb.Bip340Scheme
+import com.vibethroughcode.ftree.kutumb.game.RedemptionStatus
+import com.vibethroughcode.ftree.kutumb.game.RewardRedemption
+import com.vibethroughcode.ftree.kutumb.game.RewardType
 import com.vibethroughcode.ftree.kutumb.trust.PairingMethod
 import com.vibethroughcode.ftree.kutumb.trust.TrustedContact
 import com.vibethroughcode.ftree.ui.network.NetworkListTag
 import com.vibethroughcode.ftree.ui.network.NetworkWhoTag
 import com.vibethroughcode.ftree.ui.network.networkMessageTag
 import com.vibethroughcode.ftree.ui.network.networkRowTag
+import com.vibethroughcode.ftree.ui.network.owedRowTag
+import com.vibethroughcode.ftree.ui.network.owedSettleTag
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
@@ -95,5 +100,30 @@ class NetworkContactsTest {
         rule.onNodeWithTag(networkMessageTag(devika.id)).assertIsNotEnabled()
         // A plain icon merges into its row for a screen reader; look for it unmerged.
         rule.onNodeWithTag(networkMessageTag(asha.id), useUnmergedTree = true).assertIsDisplayed()
+    }
+
+    @Test
+    fun aRewardOwedShowsWhoOwesWhatAndCanBeMarkedSettled() {
+        runBlocking {
+            kutumb.setIdentity(LocalIdentity(me.id, Bip340Scheme.generateKeyPair()))
+            kutumb.saveContact(contact(devika, PairingMethod.DIRECT))
+            kutumb.saveRedemption(RewardRedemption("r1", me.id, devika.id, RewardType.COFFEE, 5))
+            kutumb.saveRedemption(RewardRedemption("r2", asha.id, me.id, RewardType.BEER, 5))
+            // Settled already, or between other people: neither is the reader's business.
+            kutumb.saveRedemption(RewardRedemption("r3", me.id, asha.id, RewardType.CUSTOM, 5, RedemptionStatus.REDEEMED, redeemedAt = 3))
+            kutumb.saveRedemption(RewardRedemption("r4", devika.id, asha.id, RewardType.CUSTOM, 5))
+        }
+        rule.waitUntil(5_000) { rule.onAllNodesWithTag(owedRowTag("r1")).fetchSemanticsNodes().isNotEmpty() }
+
+        rule.onNodeWithText("You owe Devika Nair a coffee").assertIsDisplayed()
+        rule.onNodeWithText("Asha Menon owes you a beer").assertIsDisplayed()
+        rule.onNodeWithTag(owedRowTag("r3")).assertDoesNotExist()
+        rule.onNodeWithTag(owedRowTag("r4")).assertDoesNotExist()
+
+        rule.onNodeWithTag(owedSettleTag("r1")).performClick()
+        rule.waitUntil(5_000) { rule.onAllNodesWithTag(owedRowTag("r1")).fetchSemanticsNodes().isEmpty() }
+        rule.onNodeWithTag(owedRowTag("r2")).assertIsDisplayed()
+        val stored = runBlocking { kutumb.observeRedemptions().first().first { it.id == "r1" } }
+        assertEquals(RedemptionStatus.REDEEMED, stored.status)
     }
 }

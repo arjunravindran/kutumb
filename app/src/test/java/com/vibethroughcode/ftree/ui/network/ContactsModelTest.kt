@@ -5,6 +5,9 @@ import com.vibethroughcode.ftree.data.Person
 import com.vibethroughcode.ftree.graph.FamilySnapshot
 import com.vibethroughcode.ftree.graph.KinshipTerm
 import com.vibethroughcode.ftree.kutumb.Bip340Scheme
+import com.vibethroughcode.ftree.kutumb.game.RedemptionStatus
+import com.vibethroughcode.ftree.kutumb.game.RewardRedemption
+import com.vibethroughcode.ftree.kutumb.game.RewardType
 import com.vibethroughcode.ftree.kutumb.trust.PairingMethod
 import com.vibethroughcode.ftree.kutumb.trust.TrustedContact
 import org.junit.Assert.assertEquals
@@ -67,5 +70,40 @@ class ContactsModelTest {
         val rows = ContactsModel.rows("me", listOf(direct("ghost"), direct("kiran")), snapshot)
         assertEquals(listOf("kiran", "ghost"), rows.map { it.contact.personId })
         assertNotNull(rows.last().person)
+    }
+
+    private fun owes(id: String, from: String, to: String, done: Boolean = false) = RewardRedemption(
+        id, from, to, RewardType.COFFEE, 5,
+        status = if (done) RedemptionStatus.REDEEMED else RedemptionStatus.OWED,
+        redeemedAt = if (done) 9L else null,
+    )
+
+    @Test
+    fun owedListsOnlyWhatIsOutstandingAndInvolvesTheReader() {
+        val rows = ContactsModel.owed(
+            "me",
+            listOf(owes("a", "me", "kiran"), owes("b", "kiran", "me", done = true), owes("c", "kiran", "mum")),
+            snapshot,
+        )
+        assertEquals(listOf("a"), rows.map { it.redemption.id })
+    }
+
+    @Test
+    fun whatTheReaderOwesComesFirstThenByTheOtherPersonsName() {
+        val rows = ContactsModel.owed(
+            "me",
+            listOf(owes("1", "mum", "me"), owes("2", "me", "mum"), owes("3", "kiran", "me"), owes("4", "me", "asha")),
+            snapshot,
+        )
+        assertEquals(listOf("4", "2", "3", "1"), rows.map { it.redemption.id })
+        assertEquals(listOf(true, true, false, false), rows.map { it.youOwe })
+        assertEquals("Asha", rows.first().other?.name)
+    }
+
+    @Test
+    fun anOwedRewardToSomeoneWhoLeftTheTreeIsStillListed() {
+        val row = ContactsModel.owed("me", listOf(owes("x", "me", "deleted")), snapshot).single()
+        assertNull(row.other)
+        assertTrue(row.youOwe)
     }
 }

@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -24,21 +25,25 @@ data class ContactsUiState(
     val rows: List<ContactRow> = emptyList(),
     /** Everyone in the tree, for choosing [me]. */
     val everyone: List<Person> = emptyList(),
+    /** Rewards earned and not yet handed over, to or from the reader. */
+    val owed: List<OwedRow> = emptyList(),
 )
 
 class ContactsViewModel(
     family: FamilyRepository,
     private val kutumb: KutumbRepository,
     private val phoneKey: PhoneKey,
+    private val clock: () -> Long = System::currentTimeMillis,
 ) : ViewModel() {
 
     val state: StateFlow<ContactsUiState> =
-        combine(kutumb.observeIdentity(), kutumb.observeContacts(), family.observeWholeGraph()) { identity, contacts, snapshot ->
+        combine(kutumb.observeIdentity(), kutumb.observeContacts(), family.observeWholeGraph(), kutumb.observeRedemptions()) { identity, contacts, snapshot, redemptions ->
             ContactsUiState(
                 loaded = true,
                 me = identity?.let { snapshot.people[it.personId] },
                 rows = identity?.let { ContactsModel.rows(it.personId, contacts, snapshot) }.orEmpty(),
                 everyone = snapshot.people.values.toList(),
+                owed = identity?.let { ContactsModel.owed(it.personId, redemptions, snapshot) }.orEmpty(),
             )
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ContactsUiState())
 
@@ -48,6 +53,15 @@ class ContactsViewModel(
     fun onQueryChange(value: String) { _query.value = value }
 
     fun candidates(everyone: List<Person>, query: String): List<Person> = matchingPeople(everyone, query)
+
+    /** Marks a reward as handed over. Either side may; settling it twice changes nothing. */
+    fun settle(redemptionId: String) {
+        val me = state.value.me?.id ?: return
+        viewModelScope.launch {
+            val redemption = kutumb.observeRedemptions().first().firstOrNull { it.id == redemptionId } ?: return@launch
+            kutumb.saveRedemption(redemption.settle(me, clock()))
+        }
+    }
 
     /**
      * "This is me." Uses the phone's one long-term key, minted here the first time and shared by
