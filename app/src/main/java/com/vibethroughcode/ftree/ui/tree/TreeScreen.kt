@@ -327,7 +327,7 @@ fun TreeScreen(
             Column {
                 if (!short || treeIsEmpty) {
                     CenterAlignedTopAppBar(
-                        title = { Text(stringResource(R.string.tree_title)) },
+                        title = { TreeTitle(stringResource(R.string.tree_title)) },
                         actions = {
                             if (!treeIsEmpty) {
                                 ChartActions(

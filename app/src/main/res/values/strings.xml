@@ -522,6 +522,7 @@
     <string name="circle_connections_none">No connections yet. Tap + to add one.</string>
     <string name="settings_section_trees">Your trees</string>
     <string name="trees_explainer">Keep separate trees for separate parts of your life. Each has its own people, photographs and connections, and nothing is shared between them.</string>
+    <string name="trees_switch">Switch tree</string>
     <string name="trees_open_now">Open now</string>
     <string name="trees_kind_family">Family tree</string>
     <string name="trees_kind_circle">Circle</string>

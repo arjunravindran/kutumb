@@ -216,7 +216,7 @@ Still to do: wire `SyncEngine` + `WebSocketRelay.connector()` into `AppContainer
 ### Not done (phase 3)
 
 1. ~~Network per tree~~ **Done.** One phone key (`kutumb/PhoneKey.kt`, sealed in `kutumb-phone-key` prefs) is used by every tree's "who am I"; a key an existing tree already holds is adopted if the phone has none (a tree that disagrees keeps its own, so contacts keep trusting it). Who-am-I, contacts, facts and points stay in each tree's database. **Sync runs for every tree while the switch is on:** the other trees keep an `AppContainer` in `FTreeApplication.background` (own database, engine and relay connections), and leaving a tree hands its container to the background instead of tearing it down. `SyncPreferences` is now one instance for the app. Costs: one set of relay connections per tree with an identity (at most 5 relays each); a sender who is a contact in two trees reaches both engines, since the envelope carries no tree id. Reminders still follow only the open tree.
-2. A tree switcher on the main screen (today only in Settings), and a first-run prompt.
+2. ~~A tree switcher on the main screen~~ **Done:** with two or more trees the Tree and Circle screens' title is the tree's name with a menu of the others (`ui/tree/TreeTitle.kt`, `TreeSwitcherTest`). Not done: a first-run prompt.
 
 ### Circles (phase 2)
 

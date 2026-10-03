@@ -36,6 +36,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.vibethroughcode.ftree.FTreeApplication
 import com.vibethroughcode.ftree.R
+import com.vibethroughcode.ftree.ui.tree.TreeTitle
 import com.vibethroughcode.ftree.graph.Circle
 import com.vibethroughcode.ftree.ui.FTreeViewModels
 import com.vibethroughcode.ftree.ui.common.PersonRow
@@ -78,7 +79,7 @@ fun CircleScreen(
         modifier = modifier,
         topBar = {
             TopAppBar(
-                title = { Text(treeName) },
+                title = { TreeTitle(treeName) },
                 actions = {
                     IconButton(onClick = onAddPerson, modifier = Modifier.testTag(CircleAddPersonTag)) {
                         Icon(Icons.Default.PersonAddAlt, contentDescription = stringResource(R.string.circle_add_person))
