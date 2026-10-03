@@ -185,6 +185,15 @@
                 <action android:name="android.intent.action.TIMEZONE_CHANGED" />
             </intent-filter>
         </receiver>
+        <!--
+            The periodic family-sync run (kutumb/sync/SyncJob.kt). Scheduled only while sync is on and a
+            relay is named, so with the switch off nothing here ever runs. Not exported: only the system
+            may start it, and BIND_JOB_SERVICE is what proves a start came from the system.
+        -->
+        <service
+            android:name=".kutumb.sync.SyncJobService"
+            android:exported="false"
+            android:permission="android.permission.BIND_JOB_SERVICE" />
     </application>
 
 </manifest>

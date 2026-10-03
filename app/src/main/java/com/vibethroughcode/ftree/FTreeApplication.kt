@@ -13,7 +13,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import com.vibethroughcode.ftree.kutumb.PhoneKey
 import com.vibethroughcode.ftree.kutumb.sync.SyncPreferences
+import com.vibethroughcode.ftree.kutumb.sync.SyncJobs
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.io.File
@@ -52,6 +56,12 @@ class FTreeApplication : Application() {
         appScope.launch {
             syncPreferences.enabled.collect { on -> if (on) syncOtherTrees() else releaseOtherTrees() }
         }
+        // The periodic job exists exactly while sync is on and a relay is named.
+        appScope.launch {
+            combine(syncPreferences.enabled, syncPreferences.relays, SyncJobs::shouldRun)
+                .distinctUntilChanged()
+                .collect { run -> if (run) SyncJobs.schedule(this@FTreeApplication) else SyncJobs.cancel(this@FTreeApplication) }
+        }
     }
 
     private fun open(tree: TreeInfo) {
@@ -76,7 +86,21 @@ class FTreeApplication : Application() {
         }
     }
 
-    private val appScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    internal val appScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
+    /**
+     * One run of the periodic background job ([SyncJobs]): makes sure sync is up for every tree, gives
+     * it [window] to collect what waited at the relays and to send what waited here, and returns.
+     * A no-op with the switch off. The connections are not closed afterwards: they belong to the
+     * process, which the system ends when it likes, and are used at once if the app is opened.
+     */
+    suspend fun backgroundSyncPass(window: Long = BACKGROUND_PASS_MS) {
+        if (!syncPreferences.enabled.value) return
+        container.syncService.poke()
+        syncOtherTrees()
+        synchronized(background) { background.values.toList() }.forEach { it.syncService.poke() }
+        delay(window)
+    }
 
     /** Starts a service for every tree but the open one; each stays idle until its tree has an identity. */
     private fun syncOtherTrees() {
@@ -127,6 +151,7 @@ class FTreeApplication : Application() {
 
     private companion object {
         const val CLOSE_DELAY_MS = 3_000L
+        const val BACKGROUND_PASS_MS = 30_000L
     }
 
     /** Deletes what a removed tree left behind: its database, photographs and identity file. */
