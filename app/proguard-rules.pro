@@ -17,6 +17,19 @@
 -keep class com.vibethroughcode.ftree.data.KinshipLanguage { *; }
 -keep class com.vibethroughcode.ftree.reminders.ReminderLead { *; }
 
+# The same rule for what the family network and the trees store by name: the contact's pairing method,
+# a place's label and source, a message's delivery status, a reward and its status (the Room tables),
+# and a tree's kind (the catalogue, read back at every launch - a kind that failed to read would put
+# a person back on their first tree without a word). A release build was exercised across a restart
+# and read them all back; these lines keep it that way when R8's choices change.
+-keep class com.vibethroughcode.ftree.kutumb.trust.PairingMethod { *; }
+-keep class com.vibethroughcode.ftree.kutumb.geo.LocationLabel { *; }
+-keep class com.vibethroughcode.ftree.kutumb.geo.LocationSource { *; }
+-keep class com.vibethroughcode.ftree.kutumb.messaging.DeliveryStatus { *; }
+-keep class com.vibethroughcode.ftree.kutumb.game.RewardType { *; }
+-keep class com.vibethroughcode.ftree.kutumb.game.RedemptionStatus { *; }
+-keep class com.vibethroughcode.ftree.data.TreeKind { *; }
+
 -keepclassmembers enum * {
     public static **[] values();
     public static ** valueOf(java.lang.String);
