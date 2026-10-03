@@ -18,6 +18,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -38,6 +41,7 @@ import com.vibethroughcode.ftree.FTreeApplication
 import com.vibethroughcode.ftree.R
 import com.vibethroughcode.ftree.ui.tree.TreeTitle
 import com.vibethroughcode.ftree.graph.Circle
+import com.vibethroughcode.ftree.graph.CircleGraphLayout
 import com.vibethroughcode.ftree.ui.FTreeViewModels
 import com.vibethroughcode.ftree.ui.common.PersonRow
 import com.vibethroughcode.ftree.ui.common.SectionRule
@@ -68,12 +72,14 @@ fun CircleScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val treeName = (LocalContext.current.applicationContext as FTreeApplication).container.tree.name
     var chosen by rememberSaveable { mutableStateOf(focusId) }
+    var showGraph by rememberSaveable { mutableStateOf(false) }
 
     val egoId = chosen?.takeIf { id -> state.people.any { it.id == id } } ?: Circle.startingPoint(state.people, state.edges)
     val ego = state.people.firstOrNull { it.id == egoId }
     val connections = remember(egoId, state) { egoId?.let { Circle.connectionsOf(it, state.people, state.edges) }.orEmpty() }
     val groups = remember(connections) { Circle.grouped(connections) }
     val through = remember(egoId, state) { egoId?.let { Circle.throughOthers(it, state.people, state.edges) }.orEmpty() }
+    val graph = remember(egoId, state) { egoId?.let { CircleGraphLayout.layout(it, state.people, state.edges) } }
 
     Scaffold(
         modifier = modifier,
@@ -123,6 +129,42 @@ fun CircleScreen(
                 }
             }
 
+            if (connections.isNotEmpty()) {
+                item(key = "view-toggle") {
+                    SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth().padding(horizontal = 20.dp)) {
+                        SegmentedButton(
+                            selected = !showGraph,
+                            onClick = { showGraph = false },
+                            shape = SegmentedButtonDefaults.itemShape(0, 2),
+                            modifier = Modifier.testTag(CircleViewListTag),
+                        ) { Text(stringResource(R.string.circle_view_list)) }
+                        SegmentedButton(
+                            selected = showGraph,
+                            onClick = { showGraph = true },
+                            shape = SegmentedButtonDefaults.itemShape(1, 2),
+                            modifier = Modifier.testTag(CircleViewGraphTag),
+                        ) { Text(stringResource(R.string.circle_view_graph)) }
+                    }
+                }
+            }
+
+            if (showGraph && graph != null && connections.isNotEmpty()) {
+                item(key = "graph") {
+                    Column(Modifier.padding(horizontal = 12.dp, vertical = 12.dp)) {
+                        CircleGraphView(graph, onPick = { chosen = it })
+                        CircleGraphLegend(graph, Modifier.padding(horizontal = 8.dp, vertical = 8.dp))
+                        if (graph.hidden > 0) {
+                            Text(
+                                stringResource(R.string.circle_graph_hidden, graph.hidden),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(horizontal = 8.dp),
+                            )
+                        }
+                    }
+                }
+            }
+
             if (connections.isEmpty()) {
                 item {
                     Text(
@@ -134,7 +176,8 @@ fun CircleScreen(
                 }
             }
 
-            groups.forEach { group ->
+            val listing = !(showGraph && graph != null && connections.isNotEmpty())
+            if (listing) groups.forEach { group ->
                 item(key = "group-${group.label?.lowercase()}") {
                     SectionRule(
                         label = group.label ?: stringResource(R.string.circle_unlabelled),
@@ -146,7 +189,7 @@ fun CircleScreen(
                 }
             }
 
-            if (through.isNotEmpty()) {
+            if (listing && through.isNotEmpty()) {
                 item(key = "through") {
                     SectionRule(
                         label = stringResource(R.string.circle_through),

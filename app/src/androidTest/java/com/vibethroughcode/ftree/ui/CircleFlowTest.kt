@@ -2,7 +2,10 @@ package com.vibethroughcode.ftree.ui
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.click
+import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
@@ -27,7 +30,12 @@ import com.vibethroughcode.ftree.data.TreeKind
 import com.vibethroughcode.ftree.ui.circle.AddConnectionLabelTag
 import com.vibethroughcode.ftree.ui.circle.AddConnectionNameTag
 import com.vibethroughcode.ftree.ui.circle.AddConnectionSaveTag
+import com.vibethroughcode.ftree.graph.CircleGraphLayout
 import com.vibethroughcode.ftree.ui.circle.CircleAddConnectionTag
+import com.vibethroughcode.ftree.ui.circle.CircleGraphTag
+import com.vibethroughcode.ftree.ui.circle.CircleViewGraphTag
+import com.vibethroughcode.ftree.ui.circle.CircleViewListTag
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Before
@@ -108,5 +116,38 @@ class CircleFlowTest {
         // The facts game asks about family, which a circle does not have; pairing still applies.
         compose.onNodeWithTag(NavNetworkTag).assertIsDisplayed()
         compose.onAllNodesWithTag(NavFactsTag).assertCountEquals(0)
+    }
+
+    @Test fun theGraphDrawsTheSameCircleAndTappingAPersonMovesToThem() {
+        scenario = ActivityScenario.launch(MainActivity::class.java)
+        compose.waitUntil(5_000) { compose.onAllNodesWithText("COLLEAGUE").fetchSemanticsNodes().isNotEmpty() }
+
+        compose.onNodeWithTag(CircleViewGraphTag).performClick()
+        compose.waitUntil(5_000) { compose.onAllNodesWithTag(CircleGraphTag).fetchSemanticsNodes().isNotEmpty() }
+        // The list's headings are gone; the picture and its legend stand in for them.
+        compose.onAllNodesWithText("THROUGH PEOPLE THEY KNOW").assertCountEquals(0)
+        compose.onNodeWithText("COLLEAGUE · 1").assertIsDisplayed()
+        compose.onNodeWithText("Friend · 1").assertIsDisplayed()
+
+        // Dara is reached through Ben, so she is on the outer ring. Tap where the layout puts her.
+        val (people, edges) = runBlocking {
+            app.container.familyRepository.observeAllPeople().first() to app.container.familyRepository.observeAllEdges().first()
+        }
+        val graph = CircleGraphLayout.layout("Asha", people, edges)!!
+        val dara = graph.node("Dara")!!
+        compose.onNodeWithTag(CircleGraphTag).performTouchInput {
+            val scale = minOf(width, height) / (2 * graph.extent)
+            click(Offset(width / 2f + dara.x * scale, height / 2f + dara.y * scale))
+        }
+
+        // The header is the middle person's name, so seeing Dara's there is the move.
+        compose.waitUntil(5_000) { compose.onAllNodesWithText("Dara").fetchSemanticsNodes().isNotEmpty() }
+        compose.onNodeWithText("Dara").assertIsDisplayed()
+        compose.onNodeWithTag(CircleGraphTag).assertIsDisplayed()
+
+        // And back to the list, which is where the graph's own summary points.
+        compose.onNodeWithTag(CircleViewListTag).performClick()
+        compose.waitUntil(5_000) { compose.onAllNodesWithTag(CircleGraphTag).fetchSemanticsNodes().isEmpty() }
+        compose.onNodeWithText("FRIEND").assertIsDisplayed()
     }
 }

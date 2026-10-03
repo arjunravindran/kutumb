@@ -42,6 +42,10 @@
     <string name="pairing_recover_key_in_use">That phone already belongs to someone you trust.</string>
     <string name="pairing_recover_same_key">That is already their phone.</string>
     <string name="pairing_recover_failed">That did not work. Choose who you are on the Network tab first.</string>
+    <string name="circle_view_list">List</string>
+    <string name="circle_view_graph">Graph</string>
+    <string name="circle_graph_description">Graph of %1$s and %2$d other people. The list view has the same people as text.</string>
+    <string name="circle_graph_hidden">%1$d more not drawn. The list has everyone.</string>
     <string name="network_hint">Vouched contacts unlock messaging once you meet them in person.</string>
     <string name="network_removed_person">Someone removed from the tree</string>
     <string name="network_empty_title">No one paired yet</string>
