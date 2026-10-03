@@ -52,7 +52,7 @@ object FTreeViewModels {
         initializer { WholeTreeViewModel(repository()) }
         initializer {
             val app = this[APPLICATION_KEY] as FTreeApplication
-            ContactsViewModel(repository(), app.container.kutumbRepository, app.container.signatureScheme)
+            ContactsViewModel(repository(), app.container.kutumbRepository, app.container.phoneKey)
         }
         initializer {
             val app = this[APPLICATION_KEY] as FTreeApplication

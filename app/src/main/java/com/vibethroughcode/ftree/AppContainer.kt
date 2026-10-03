@@ -20,7 +20,9 @@ import com.vibethroughcode.ftree.kutumb.Bip340Scheme
 import com.vibethroughcode.ftree.kutumb.KutumbRepository
 import com.vibethroughcode.ftree.kutumb.PairingFlow
 import com.vibethroughcode.ftree.kutumb.pairing.NearbyPairingFlow
+import com.vibethroughcode.ftree.kutumb.PhoneKey
 import com.vibethroughcode.ftree.kutumb.db.AndroidKeyVault
+import com.vibethroughcode.ftree.kutumb.db.PrefsPhoneKeyStore
 import com.vibethroughcode.ftree.kutumb.db.RoomKutumbRepository
 import com.vibethroughcode.ftree.kutumb.sync.GameSyncHandler
 import com.vibethroughcode.ftree.kutumb.sync.ServiceSyncPublisher
@@ -146,6 +148,9 @@ class AppContainer(context: Context, val tree: TreeInfo = TreeCatalog.ORIGINAL) 
 
     /** The signature algorithm behind every attestation; swapped as a whole, not per call site. */
     val signatureScheme: SignatureScheme by lazy { Bip340Scheme }
+
+    /** The phone's one long-term key, the same whichever tree is open (its file is not per tree). */
+    val phoneKey: PhoneKey by lazy { PhoneKey(PrefsPhoneKeyStore(context, AndroidKeyVault()), signatureScheme) }
 
     val updatePreferences: UpdatePreferences by lazy { UpdatePreferences(context) }
     val chartPreferences: ChartPreferences by lazy { ChartPreferences(context) }

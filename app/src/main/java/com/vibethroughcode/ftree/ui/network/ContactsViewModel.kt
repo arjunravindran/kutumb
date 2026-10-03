@@ -6,7 +6,7 @@ import com.vibethroughcode.ftree.data.FamilyRepository
 import com.vibethroughcode.ftree.data.Person
 import com.vibethroughcode.ftree.kutumb.KutumbRepository
 import com.vibethroughcode.ftree.kutumb.LocalIdentity
-import com.vibethroughcode.ftree.kutumb.trust.SignatureScheme
+import com.vibethroughcode.ftree.kutumb.PhoneKey
 import com.vibethroughcode.ftree.ui.common.matchingPeople
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,7 +29,7 @@ data class ContactsUiState(
 class ContactsViewModel(
     family: FamilyRepository,
     private val kutumb: KutumbRepository,
-    private val scheme: SignatureScheme,
+    private val phoneKey: PhoneKey,
 ) : ViewModel() {
 
     val state: StateFlow<ContactsUiState> =
@@ -49,10 +49,13 @@ class ContactsViewModel(
 
     fun candidates(everyone: List<Person>, query: String): List<Person> = matchingPeople(everyone, query)
 
-    /** "This is me." Mints the long-term key here, on the device, and it never leaves. */
+    /**
+     * "This is me." Uses the phone's one long-term key, minted here the first time and shared by
+     * every tree; it never leaves the device.
+     */
     fun chooseMe(personId: String) {
         viewModelScope.launch {
-            val keyPair = withContext(Dispatchers.Default) { scheme.generateKeyPair() }
+            val keyPair = withContext(Dispatchers.Default) { phoneKey.keyPair() }
             kutumb.setIdentity(LocalIdentity(personId, keyPair))
             _query.value = ""
         }

@@ -8,6 +8,11 @@ import android.os.Looper
 import com.vibethroughcode.ftree.data.CatalogStore
 import com.vibethroughcode.ftree.data.TreeCatalog
 import com.vibethroughcode.ftree.data.TreeInfo
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import java.io.File
 
 class FTreeApplication : Application() {
@@ -37,7 +42,21 @@ class FTreeApplication : Application() {
         if (container.reminderPreferences.enabled.value) container.reminders.ensure()
         // Sync is opt-in: with the switch off this reads one preference and opens nothing.
         if (container.syncPreferences.enabled.value) container.syncService
+        adoptTreeKey(container)
     }
+
+    /**
+     * A tree that already holds a key (made before the phone had one of its own) lends it to the
+     * phone if the phone has none, so the key a relative paired with stays the phone's key. Trees
+     * that disagree keep their own; see [PhoneKey.adopt].
+     */
+    private fun adoptTreeKey(opened: AppContainer) {
+        appScope.launch {
+            opened.kutumbRepository.observeIdentity().first()?.let { opened.phoneKey.adopt(it.keyPair) }
+        }
+    }
+
+    private val appScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     /**
      * Opens another tree: remembers the choice, shuts the current wiring down and builds the new
