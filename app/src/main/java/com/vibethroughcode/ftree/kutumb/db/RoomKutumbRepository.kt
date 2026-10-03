@@ -9,6 +9,7 @@ import com.vibethroughcode.ftree.kutumb.game.FactAnswer
 import com.vibethroughcode.ftree.kutumb.game.FactResolution
 import com.vibethroughcode.ftree.kutumb.game.LedgerEntry
 import com.vibethroughcode.ftree.kutumb.game.RewardRedemption
+import com.vibethroughcode.ftree.kutumb.geo.LocationLabel
 import com.vibethroughcode.ftree.kutumb.geo.PersonLocation
 import com.vibethroughcode.ftree.kutumb.sync.OutboxEntry
 import com.vibethroughcode.ftree.kutumb.trust.IdentityRotationEvent
@@ -52,6 +53,7 @@ class RoomKutumbRepository(
 
     override fun observeLocations(): Flow<List<PersonLocation>> = dao.observeLocations().map { rows -> rows.mapNotNull { it.toCore() } }
     override suspend fun saveLocation(location: PersonLocation) = dao.putLocation(location.toRow())
+    override suspend fun deleteLocation(personId: String, label: LocationLabel) = dao.deleteLocation(personId, label.name)
 
     override fun observeFacts(): Flow<List<Fact>> = dao.observeFacts().map { rows -> rows.mapNotNull { it.toCore() } }
     override suspend fun saveFact(fact: Fact) = dao.putFact(fact.toRow())

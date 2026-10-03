@@ -108,7 +108,8 @@ object FTreeViewModels {
         }
         initializer {
             val handle: SavedStateHandle = createSavedStateHandle()
-            PersonDetailViewModel(repository(), handle.toRoute<PersonRoute>().personId)
+            val app = this[APPLICATION_KEY] as FTreeApplication
+            PersonDetailViewModel(repository(), app.container.kutumbRepository, app.container.places, handle.toRoute<PersonRoute>().personId)
         }
         initializer {
             val handle: SavedStateHandle = createSavedStateHandle()

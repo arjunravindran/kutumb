@@ -44,6 +44,9 @@ interface KutumbDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun putLocation(location: PersonLocationEntity)
 
+    @Query("DELETE FROM person_locations WHERE personId = :personId AND label = :label")
+    suspend fun deleteLocation(personId: String, label: String)
+
     @Query("SELECT * FROM facts")
     fun observeFacts(): Flow<List<FactEntity>>
 

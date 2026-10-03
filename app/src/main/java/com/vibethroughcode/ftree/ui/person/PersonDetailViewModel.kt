@@ -10,9 +10,16 @@ import com.vibethroughcode.ftree.data.RelativeKind
 import com.vibethroughcode.ftree.data.SpouseKind
 import com.vibethroughcode.ftree.graph.Circle
 import com.vibethroughcode.ftree.graph.Connection
+import com.vibethroughcode.ftree.kutumb.KutumbRepository
+import com.vibethroughcode.ftree.kutumb.PlaceSource
+import com.vibethroughcode.ftree.kutumb.geo.LocationLabel
+import com.vibethroughcode.ftree.kutumb.geo.LocationSource
+import com.vibethroughcode.ftree.kutumb.geo.PersonLocation
+import com.vibethroughcode.ftree.kutumb.geo.Place
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -28,10 +35,58 @@ data class PersonDetailUiState(
     fun of(kind: RelativeKind): List<Person> = relatives[kind].orEmpty()
 }
 
+/** The places recorded for one person. [sharing] is whether they feed distance and "born close". */
+data class PersonPlaces(
+    val born: PersonLocation? = null,
+    val lives: PersonLocation? = null,
+    val sharing: Boolean = true,
+) {
+    val any: Boolean get() = born != null || lives != null
+    fun of(label: LocationLabel): PersonLocation? = if (label == LocationLabel.BIRTHPLACE) born else lives
+}
+
 class PersonDetailViewModel(
     private val repository: FamilyRepository,
+    private val kutumb: KutumbRepository,
+    private val placeSource: PlaceSource,
     val personId: String,
+    private val clock: () -> Long = System::currentTimeMillis,
 ) : ViewModel() {
+
+    val places: StateFlow<PersonPlaces> = kutumb.observeLocations().map { all ->
+        val mine = all.filter { it.personId == personId }
+        PersonPlaces(
+            born = mine.firstOrNull { it.label == LocationLabel.BIRTHPLACE },
+            lives = mine.firstOrNull { it.label == LocationLabel.CURRENT },
+            sharing = mine.all { it.sharingEnabled },
+        )
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), PersonPlaces())
+
+    suspend fun searchPlaces(query: String): List<Place> = placeSource.index().search(query)
+
+    /** "Chennai, IN" for a saved position, or its coordinates when no listed town is near. */
+    suspend fun placeName(location: PersonLocation): String =
+        placeSource.index().nearest(location.lat, location.lon)?.let { "${it.name}, ${it.country}" }
+            ?: "%.2f, %.2f".format(java.util.Locale.ROOT, location.lat, location.lon)
+
+    fun choosePlace(label: LocationLabel, place: Place) {
+        viewModelScope.launch {
+            kutumb.saveLocation(
+                PersonLocation(personId, label, place.lat, place.lon, LocationSource.GEOCODED, clock(), places.value.sharing),
+            )
+        }
+    }
+
+    fun clearPlace(label: LocationLabel) {
+        viewModelScope.launch { kutumb.deleteLocation(personId, label) }
+    }
+
+    /** Applies to every place of this person: the switch is per person, never per place. */
+    fun setPlacesSharing(on: Boolean) {
+        viewModelScope.launch {
+            kutumb.observeLocations().first().filter { it.personId == personId }.forEach { kutumb.saveLocation(it.copy(sharingEnabled = on)) }
+        }
+    }
 
     private val relatives = combine(
         repository.observeParents(personId),

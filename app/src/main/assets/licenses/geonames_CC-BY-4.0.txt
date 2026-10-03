@@ -1,0 +1,11 @@
+GeoNames place data
+
+The list of towns and cities in places/places.tsv (names, countries, positions and populations,
+for places of 15,000 people or more) is derived from the GeoNames gazetteer, cities15000 extract.
+
+  Source:  https://www.geonames.org/
+  Licence: Creative Commons Attribution 4.0 International
+           https://creativecommons.org/licenses/by/4.0/
+
+Changes made: reduced to six fields per place, coordinates rounded to two decimals, sorted by name.
+The data is provided as is, with no warranty.

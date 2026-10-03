@@ -21,6 +21,7 @@ import com.vibethroughcode.ftree.kutumb.KutumbRepository
 import com.vibethroughcode.ftree.kutumb.PairingFlow
 import com.vibethroughcode.ftree.kutumb.pairing.NearbyPairingFlow
 import com.vibethroughcode.ftree.kutumb.PhoneKey
+import com.vibethroughcode.ftree.kutumb.PlaceSource
 import com.vibethroughcode.ftree.kutumb.db.AndroidKeyVault
 import com.vibethroughcode.ftree.kutumb.db.PrefsPhoneKeyStore
 import com.vibethroughcode.ftree.kutumb.db.RoomKutumbRepository
@@ -153,6 +154,11 @@ class AppContainer(
 
     /** The signature algorithm behind every attestation; swapped as a whole, not per call site. */
     val signatureScheme: SignatureScheme by lazy { Bip340Scheme }
+
+    /** Towns and cities for choosing where somebody was born or lives; bundled, so nothing is looked up online. */
+    val places: PlaceSource by lazy {
+        PlaceSource { context.assets.open("places/places.tsv").bufferedReader().use { it.readText() } }
+    }
 
     /** The phone's one long-term key, the same whichever tree is open (its file is not per tree). */
     val phoneKey: PhoneKey by lazy { PhoneKey(PrefsPhoneKeyStore(context, AndroidKeyVault()), signatureScheme) }

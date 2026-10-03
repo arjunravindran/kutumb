@@ -236,6 +236,18 @@ fun PersonDetailScreen(
                     }
                 }
 
+                Column {
+                    val places by viewModel.places.collectAsStateWithLifecycle()
+                    PlacesSection(
+                        places = places,
+                        nameOf = viewModel::placeName,
+                        search = viewModel::searchPlaces,
+                        onChoose = viewModel::choosePlace,
+                        onClear = viewModel::clearPlace,
+                        onSharing = viewModel::setPlacesSharing,
+                    )
+                }
+
                 if (!person.notes.isNullOrBlank()) {
                     Column {
                         SectionRule(

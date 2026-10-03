@@ -5,6 +5,7 @@ import com.vibethroughcode.ftree.kutumb.game.FactAnswer
 import com.vibethroughcode.ftree.kutumb.game.FactResolution
 import com.vibethroughcode.ftree.kutumb.game.LedgerEntry
 import com.vibethroughcode.ftree.kutumb.game.RewardRedemption
+import com.vibethroughcode.ftree.kutumb.geo.LocationLabel
 import com.vibethroughcode.ftree.kutumb.geo.PersonLocation
 import com.vibethroughcode.ftree.kutumb.sync.OutboxEntry
 import com.vibethroughcode.ftree.kutumb.trust.IdentityRotationEvent
@@ -45,6 +46,9 @@ interface KutumbRepository {
 
     /** One row per person per label: saving replaces the one that was there. */
     suspend fun saveLocation(location: PersonLocation)
+
+    /** Forgets one of a person's places; nothing happens if they have none for [label]. */
+    suspend fun deleteLocation(personId: String, label: LocationLabel)
 
     fun observeFacts(): Flow<List<Fact>>
     suspend fun saveFact(fact: Fact)
@@ -95,6 +99,8 @@ class InMemoryKutumbRepository : KutumbRepository {
     override fun observeLocations(): Flow<List<PersonLocation>> = locations.asStateFlow()
     override suspend fun saveLocation(location: PersonLocation) =
         locations.update { all -> all.filter { it.personId != location.personId || it.label != location.label } + location }
+    override suspend fun deleteLocation(personId: String, label: LocationLabel) =
+        locations.update { all -> all.filter { it.personId != personId || it.label != label } }
 
     override fun observeFacts(): Flow<List<Fact>> = facts.asStateFlow()
     override suspend fun saveFact(fact: Fact) = facts.update { all -> all.filter { it.id != fact.id } + fact }
