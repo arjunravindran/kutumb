@@ -111,7 +111,7 @@ class BookFlowTest {
         rule.onNodeWithTag(BookShareTag).assertIsEnabled().performClick()
         rule.waitUntil(30_000) { (monitor?.hits ?: 0) > 0 }
         val shared = File(app.cacheDir, "shared").listFiles().orEmpty()
-        assertTrue("shared ${shared.map { it.name }}", shared.any { it.name == "The Sharma Family Book.pdf" && it.length() > 10_000 })
+        assertTrue("shared ${shared.map { it.name }}", shared.any { it.name == "The Sharma Family Chart.pdf" && it.length() > 1_000 })
     }
 
     @Test
@@ -209,39 +209,13 @@ class BookFlowTest {
      * is actually made. Restore this test if a format-1 template ever ships again.
      */
 
-    /**
-     * #260: the other half of that, on the template that actually ships the storybook.
-     *
-     * Until #259 swapped it in, no shipped template answered `featuresOnePerson`, so the only thing
-     * this flow could be held to was the hint. Diwali is format 2 now, so the hint must be *gone*
-     * there and the picker must really choose somebody - which is the difference between "Whose
-     * story" being a live control and being an explained no-op.
-     *
-     * Diwali is selected by name rather than relied on as the default: it is the featured template
-     * only inside its own season (2026-10-18 to 11-15, `catalog.json`), and this test has to pass
-     * on either side of that date.
+    /*
+     * #260 held the storybook's "Whose story" picker to a real choice on a device, on Diwali, selected
+     * by name. Diwali became a download as well (#314), so no template that features one person ships
+     * on the device any more and this flow has nothing to run against, the same as the Heirloom hint
+     * above. What it checked is not untested: the decision is `featuresOnePerson`, which `BookOptionsTest`
+     * holds to "a format-2 template features one person", and the storybook itself is drawn from the
+     * androidTest assets by `BookPdfTest`. Restore this flow if a format-2 template ever ships in the
+     * app again.
      */
-    @Test
-    fun theStorybookReallyFeaturesOnePerson() {
-        rule.waitUntil(10_000) { rule.onAllNodesWithTag(TreeBookTag).fetchSemanticsNodes().isNotEmpty() }
-        rule.onNodeWithTag(TreeBookTag).performClick()
-        waitForBook()
-
-        rule.onNodeWithText("Diwali").performClick()
-        waitForBook()
-        rule.waitUntil(5_000) {
-            rule.onAllNodesWithText("Heirloom doesn't feature one person yet.").fetchSemanticsNodes().isEmpty()
-        }
-
-        rule.onNodeWithTag(BookFeaturedRowTag).performScrollTo().performClick()
-        rule.waitUntil(5_000) { rule.onAllNodesWithTag(BookFeaturedSearchTag).fetchSemanticsNodes().isNotEmpty() }
-        rule.onNodeWithTag(BookFeaturedSearchTag).performTextInput("Aarav")
-        val row = hasText("Aarav Sharma") and hasAnyAncestor(hasTestTag(BookFeaturedListTag))
-        rule.waitUntil(5_000) { rule.onAllNodes(row).fetchSemanticsNodes().isNotEmpty() }
-        rule.onNode(row).performClick()
-
-        val chosen = hasTestTag(BookFeaturedRowTag) and hasText("Aarav Sharma")
-        rule.waitUntil(5_000) { rule.onAllNodes(chosen).fetchSemanticsNodes().isNotEmpty() }
-        rule.onNodeWithTag(BookFeaturedResetTag).assertExists()
-    }
 }
