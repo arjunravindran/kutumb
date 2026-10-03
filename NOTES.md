@@ -215,7 +215,7 @@ Still to do: wire `SyncEngine` + `WebSocketRelay.connector()` into `AppContainer
 
 ### Not done (phase 3)
 
-1. **Network per tree:** one phone key shared by all trees (today each tree's `local_identity` would mint its own key), with who-am-I, contacts, facts and points per tree; sync for every tree at once rather than the open one; .ftree export/import is per tree already.
+1. ~~Network per tree~~ **Done.** One phone key (`kutumb/PhoneKey.kt`, sealed in `kutumb-phone-key` prefs) is used by every tree's "who am I"; a key an existing tree already holds is adopted if the phone has none (a tree that disagrees keeps its own, so contacts keep trusting it). Who-am-I, contacts, facts and points stay in each tree's database. **Sync runs for every tree while the switch is on:** the other trees keep an `AppContainer` in `FTreeApplication.background` (own database, engine and relay connections), and leaving a tree hands its container to the background instead of tearing it down. `SyncPreferences` is now one instance for the app. Costs: one set of relay connections per tree with an identity (at most 5 relays each); a sender who is a contact in two trees reaches both engines, since the envelope carries no tree id. Reminders still follow only the open tree.
 2. A tree switcher on the main screen (today only in Settings), and a first-run prompt.
 
 ### Circles (phase 2)
@@ -225,5 +225,5 @@ Still to do: wire `SyncEngine` + `WebSocketRelay.connector()` into `AppContainer
 - **Pure logic** `graph/Circle.kt` (7 JVM tests): connections of a person, grouped by label, people reached *through* others (with who leads there), the best-connected starting point, labels already in use.
 - **A Circle's tree tab** (`ui/circle/CircleScreen`): the circle seen from one person, grouped by label, then "Through people they know" (introductions). Tapping anyone moves the view to them. This replaces the ancestors-above chart; there is no canvas, a list is enough at circle sizes. Adding: `AddConnectionScreen` (label with suggestions, new person or existing). Person detail shows Connections (add, change label, long-press to remove) instead of Parents/Spouses/Children/Siblings, and hides "How are we related" and "Share this branch".
 - **Verified on the emulator** (`CircleFlowTest`, 2 tests): the circle opens on the best-connected person with FRIEND / COLLEAGUE groups and a "via Ben" introduction, tapping moves the view, and adding a connection with a label shows the new person under it.
-- **Still shown in a Circle, deliberately for now:** the Network and Facts tabs (the game and pairing are per tree, phase 3) and Settings. Birthdays/People tab work as is. Export/import writes `CONNECTED` edges as ordinary relationships.
+- **In a Circle:** the Facts tab is hidden (the game asks about family: whose mother, born where). Network stays: pairing and "who am I" are per tree. Birthdays/People tab work as is. Export/import writes `CONNECTED` edges as ordinary relationships.
 - **Not done:** a drawn graph (the list view is the only one), a "who am I" for circles, deleting a label across a circle, bulk adding.

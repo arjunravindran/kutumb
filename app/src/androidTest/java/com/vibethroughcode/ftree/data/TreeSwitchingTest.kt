@@ -24,7 +24,10 @@ class TreeSwitchingTest {
         assertTrue(app.switchTo(TreeCatalog.ORIGINAL.id))
     }
 
+    private val syncWasOn = app.syncPreferences.enabled.value
+
     @After fun cleanUp() {
+        app.syncPreferences.setEnabled(syncWasOn)
         app.switchTo(TreeCatalog.ORIGINAL.id)
         created?.let { t ->
             (app.catalog.remove(t.id) as? CatalogResult.Ok)?.let { app.deleteFilesOf(it.tree) }
@@ -63,6 +66,51 @@ class TreeSwitchingTest {
 
         assertFalse(app.getDatabasePath(tree.databaseName).exists())
         assertFalse(File(app.filesDir, tree.photoDirectory).exists())
+    }
+
+    private fun waitFor(what: String, condition: () -> Boolean) {
+        val until = System.currentTimeMillis() + 5_000
+        while (!condition()) {
+            check(System.currentTimeMillis() < until) { "timed out waiting for $what" }
+            Thread.sleep(50)
+        }
+    }
+
+    @Test fun withSyncOnTheOtherTreesKeepRunningAndSwitchingKeepsThemOpen() = runBlocking {
+        val circle = (app.catalog.create("Sync ${System.nanoTime()}", TreeKind.CIRCLE) as CatalogResult.Ok).tree.also { created = it }
+        val original = TreeCatalog.ORIGINAL.id
+
+        app.syncPreferences.setEnabled(true)
+        waitFor("the other tree to start syncing") { circle.id in app.syncingInBackground }
+        assertFalse(original in app.syncingInBackground) // the open tree is not a background one
+
+        // Leaving the original keeps it running, and its database stays usable well after the usual close delay.
+        val left = app.container
+        assertTrue(app.switchTo(circle.id))
+        assertTrue(original in app.syncingInBackground)
+        assertFalse(circle.id in app.syncingInBackground)
+        Thread.sleep(3_500)
+        left.familyRepository.observeAllPeople().first()
+
+        // Coming back reuses the running wiring instead of building a second one.
+        assertTrue(app.switchTo(original))
+        assertTrue(app.container === left)
+
+        // Switching sync off lets go of the unseen trees.
+        app.syncPreferences.setEnabled(false)
+        waitFor("the background trees to be released") { app.syncingInBackground.isEmpty() }
+    }
+
+    @Test fun aTreeSyncingInTheBackgroundCanStillBeDeleted() {
+        val tree = (app.catalog.create("Gone ${System.nanoTime()}", TreeKind.CIRCLE) as CatalogResult.Ok).tree
+        app.syncPreferences.setEnabled(true)
+        waitFor("the tree to start syncing") { tree.id in app.syncingInBackground }
+
+        assertTrue(app.catalog.remove(tree.id) is CatalogResult.Ok)
+        app.deleteFilesOf(tree)
+
+        assertFalse(tree.id in app.syncingInBackground)
+        assertFalse(app.getDatabasePath(tree.databaseName).exists())
     }
 
     @Test fun theOpenTreeCannotBeDeleted() {

@@ -66,7 +66,15 @@ import kotlinx.coroutines.cancel
  * built on them. Opening a different tree builds a new container and drops this one ([close]);
  * preferences, the updater and the relay list are the same for every tree.
  */
-class AppContainer(context: Context, val tree: TreeInfo = TreeCatalog.ORIGINAL) {
+class AppContainer(
+    context: Context,
+    val tree: TreeInfo = TreeCatalog.ORIGINAL,
+    /**
+     * One instance for the whole app, handed to every container: the switch and the relay list are
+     * the phone's, and each container's service must see a change made through another's screen.
+     */
+    val syncPreferences: SyncPreferences = SyncPreferences(context),
+) {
     private val databaseLazy = lazy { FTreeDatabase.build(context, tree.databaseName) }
 
     /** Public so instrumented tests can call `clearAllTables()` between runs. */
@@ -90,9 +98,6 @@ class AppContainer(context: Context, val tree: TreeInfo = TreeCatalog.ORIGINAL) 
 
     /** The family network's records, in the app's database. The private key is sealed by the Keystore first. */
     val kutumbRepository: KutumbRepository by lazy { RoomKutumbRepository(database, AndroidKeyVault()) }
-
-    /** Off, with no relays, until a person turns sync on in Settings and names some. */
-    val syncPreferences: SyncPreferences by lazy { SyncPreferences(context) }
 
     /**
      * Keeps the relay connections up while sync is on. Constructing it starts it, so callers touch
@@ -246,6 +251,14 @@ class AppContainer(context: Context, val tree: TreeInfo = TreeCatalog.ORIGINAL) 
     /** Stops what this container started on its own: relay connections, pairing, the nearby sockets. */
     fun stopServices() {
         syncScope.cancel()
+        stopForeground()
+    }
+
+    /**
+     * Stops what only makes sense while the tree is on screen (pairing, the nearby sockets) and
+     * leaves sync running. For a tree left behind while sync is on: it keeps syncing unseen.
+     */
+    fun stopForeground() {
         pairingScope.cancel()
         if (nearbyLazy.isInitialized()) nearbyLazy.value.stop()
     }

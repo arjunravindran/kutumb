@@ -239,6 +239,8 @@ fun FTreeApp(
     val backStackEntry by navController.currentBackStackEntryAsState()
     val destination = backStackEntry?.destination
     val onTopLevel = destinations.any { destination?.hasRoute(it.type) == true }
+    // The facts game asks about family (whose mother, born where), which a circle of friends has none of.
+    val shownDestinations = if (isCircle) destinations.filter { it.type != FactsRoute::class } else destinations
 
     /*
      * The three places move to the side when the window is short.
@@ -256,7 +258,7 @@ fun FTreeApp(
             bottomBar = {
                 if (onTopLevel && !useRail) {
                     NavigationBar {
-                        destinations.forEach { item ->
+                        shownDestinations.forEach { item ->
                             val selected = destination?.hasRoute(item.type) == true
                             NavigationBarItem(
                                 selected = selected,
@@ -275,7 +277,7 @@ fun FTreeApp(
                     // Held to the standard rail width. Left to size itself it takes a quarter of a
                 // landscape phone, which is the opposite of the point of moving off the bottom edge.
                 NavigationRail(modifier = Modifier.fillMaxHeight().width(112.dp)) {
-                        destinations.forEach { item ->
+                        shownDestinations.forEach { item ->
                             val selected = destination?.hasRoute(item.type) == true
                             NavigationRailItem(
                                 selected = selected,

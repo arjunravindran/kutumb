@@ -2,6 +2,8 @@ package com.vibethroughcode.ftree.ui
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onRoot
@@ -97,5 +99,14 @@ class CircleFlowTest {
         compose.waitUntil(5_000) { compose.onAllNodesWithText("Esha").fetchSemanticsNodes().isNotEmpty() }
         compose.onNodeWithText("NEIGHBOUR").assertIsDisplayed()
         compose.onNodeWithText("Esha").assertIsDisplayed()
+    }
+
+    @Test fun aCircleHasNoFactsTabButKeepsNetwork() {
+        scenario = ActivityScenario.launch(MainActivity::class.java)
+        compose.waitUntil(5_000) { compose.onAllNodesWithText("COLLEAGUE").fetchSemanticsNodes().isNotEmpty() }
+
+        // The facts game asks about family, which a circle does not have; pairing still applies.
+        compose.onNodeWithTag(NavNetworkTag).assertIsDisplayed()
+        compose.onAllNodesWithTag(NavFactsTag).assertCountEquals(0)
     }
 }
