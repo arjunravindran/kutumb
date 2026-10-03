@@ -1,6 +1,7 @@
 package com.vibethroughcode.ftree.kutumb.sync
 
 import com.vibethroughcode.ftree.kutumb.KutumbRepository
+import com.vibethroughcode.ftree.kutumb.messaging.Message
 import com.vibethroughcode.ftree.kutumb.messaging.Messaging
 import com.vibethroughcode.ftree.kutumb.trust.TrustedContact
 import kotlinx.coroutines.flow.first
@@ -13,6 +14,8 @@ import kotlinx.coroutines.flow.first
 class MessageSyncHandler(
     private val repository: KutumbRepository,
     private val clock: () -> Long,
+    /** Told of each message as it is kept (not of the ones refused or already held), e.g. to post a note. */
+    private val onReceived: suspend (Message) -> Unit = {},
 ) : SyncHandler {
     override suspend fun onEnvelope(envelope: SyncEnvelope, sender: TrustedContact, rumor: UnsignedEvent) {
         if (envelope.type != SyncType.MESSAGE) return
@@ -20,5 +23,6 @@ class MessageSyncHandler(
         val held = repository.observeMessages().first().mapTo(HashSet()) { it.id }
         val message = Messaging.acceptInbound(sender, wire, clock(), held) ?: return
         repository.saveMessage(message)
+        onReceived(message)
     }
 }

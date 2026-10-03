@@ -264,7 +264,7 @@ Direct messages between two people who have met in person, as the spec's "Option
 - **Reading:** opening a conversation marks theirs read; the Network list shows the newest message and an unread count on the button.
 - **Tests:** `MessagingFlowTest` (8, JVM: sending, resending, the rules at the handler, read marking), `ContactsModelTest`, `KutumbDatabaseTest` (migration and Room round trip), `MessagingTest` (3, device: write with sync off, receive while open, vouched is locked).
 - **`adjustResize`:** the conversation screen is the first with a text field pinned to the bottom, and with no soft-input mode set the system panned the whole window (the top bar and the list went off the top). `MainActivity` now declares `adjustResize`, which is what `imePadding()` expects; it also applies to every other screen with a text field.
-- **Not done:** notifications for a new message (the app asks for `POST_NOTIFICATIONS` only for birthday reminders and nothing new was added), delivery receipts, deleting a message or a conversation, anything but text, and syncing a person's messages to a second phone. A message sent while sync is off is not queued for later; "Send again" is the way.
+- **Not done:** delivery receipts, deleting a message or a conversation, anything but text, and syncing a person's messages to a second phone. A message sent while sync is off is not queued for later; "Send again" is the way.
 
 ## Background sync
 
@@ -274,4 +274,15 @@ Sync used to run only while the app's process was alive. It now also wakes up on
 - **Only when wanted:** the job exists exactly while the sync switch is on and a relay is named (`SyncJobs.shouldRun`, the one rule), scheduled and cancelled by a collector in `FTreeApplication`. With the switch off nothing is scheduled and nothing wakes. Settings says so in plain words, and the Permissions text now names sync next to reminders as a use of the boot permission.
 - **Checked on the emulator:** with sync on and a relay that never resolves (`wss://relay.invalid`) the system lists the job (periodic, persisted, needs a network); after the process was killed, `cmd jobscheduler run -f` started a fresh process and the pass ran with no crash, and the job was still scheduled. Force-stopping an app cancels its jobs (Android's rule), so a force-stopped app schedules again on its next launch. `SyncJobsTest` (2) and `SyncJobTest` (4).
 - **Not checked:** an actual relay (none reachable from here), Doze and app-standby timing, battery cost over days. The 15-minute floor is the platform's; a message can wait that long to arrive while the app is closed.
-- **Not done:** notifications when a message arrives. Needs a switch and the notification permission asked at the moment it is turned on, as the birthday reminders do; the job makes it worth building now.
+- **Notifications for messages:** see "Message notifications" below.
+
+## Message notifications
+
+A note on the phone when someone you have met in person writes to you. Off until switched on (Settings > "Notify me of new messages"), and Android is asked to allow notifications at that moment and no other, the same way the birthday reminders do it: the switch moves only once Android says yes, and a refusal for good offers the system page.
+
+- **What it says:** the sender and the text. On a locked phone only "New message" (`VISIBILITY_PRIVATE` with a public version), because what someone wrote to you is nobody else's business and a lock screen is read by whoever picks the phone up. One note per conversation, replaced as more arrive.
+- **When it does not post** (`MessageNotificationRules.shouldPost`, 4 JVM tests): the switch is off, Android will not show it, the message is one the reader wrote, or that conversation is on screen (`OpenThread`, set while the thread screen is resumed). Opening a conversation takes its note down.
+- **Tapping it** opens the conversation, in the tree it belongs to: the note carries the tree id, `MainActivity` switches to that tree before anything is drawn on a fresh start, or starts the main screen again on it when another tree is open. `MessageNoteTapTest` covers the same-tree and the other-tree case.
+- **A bug found on the way:** following a tap that *started* the app (a note, and the birthday-reminder note too) ran before the navigation graph was set and threw "You must call setGraph()". Both now wait for the first destination (`awaitGraph`). Cold-start taps on a reminder note had this problem before.
+- **Where the code is:** `kutumb/messaging/MessageNotifications.kt` (rules, preferences, notifier), `MessageSyncHandler`'s `onReceived` hook, `ui/settings/MessageNotificationSettings.kt`. `MessageNotificationTest` (5) and `MessageNoteTapTest` (3) on the device.
+- **Not checked:** the permission dialog itself (the tests grant it through `UiAutomation`), and a note arriving from the background job on a real phone.

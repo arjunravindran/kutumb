@@ -23,6 +23,8 @@ import com.vibethroughcode.ftree.kutumb.pairing.NearbyPairingFlow
 import com.vibethroughcode.ftree.kutumb.PhoneKey
 import com.vibethroughcode.ftree.kutumb.PlaceSource
 import com.vibethroughcode.ftree.kutumb.RecoveryIssuer
+import com.vibethroughcode.ftree.kutumb.messaging.MessageNotificationPreferences
+import com.vibethroughcode.ftree.kutumb.messaging.MessageNotifier
 import com.vibethroughcode.ftree.kutumb.sync.CompositeSyncHandler
 import com.vibethroughcode.ftree.kutumb.sync.MessageSyncHandler
 import com.vibethroughcode.ftree.kutumb.sync.RotationSyncHandler
@@ -56,6 +58,7 @@ import com.vibethroughcode.ftree.update.UpdatePreferences
 import com.vibethroughcode.ftree.update.UpdateRepository
 import java.io.File
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
@@ -124,13 +127,23 @@ class AppContainer(
                     handler = CompositeSyncHandler(
                         GameSyncHandler(kutumbRepository),
                         RotationSyncHandler(kutumbRepository, signatureScheme),
-                        MessageSyncHandler(kutumbRepository, System::currentTimeMillis),
+                        MessageSyncHandler(kutumbRepository, System::currentTimeMillis) { messageNotifier.onReceived(it) },
                     ),
                 )
             },
             scope = syncScope,
             clock = System::currentTimeMillis,
         ).also { it.start() }
+    }
+
+    /** Whether a new message earns a note on the phone. Off until switched on in Settings. */
+    val messageNotificationPreferences: MessageNotificationPreferences by lazy { MessageNotificationPreferences(context) }
+
+    val messageNotifier: MessageNotifier by lazy {
+        MessageNotifier(
+            context.applicationContext, tree.id, messageNotificationPreferences,
+            nameOf = { personId -> familyRepository.observePerson(personId).first()?.name },
+        )
     }
 
     /** Vouches for a relative's new phone after meeting it in person. */

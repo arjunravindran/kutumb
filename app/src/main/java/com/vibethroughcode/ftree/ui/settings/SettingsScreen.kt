@@ -428,6 +428,8 @@ fun SettingsScreen(
                 }
             }
 
+            MessageNotificationSettings()
+
             Column {
                 SectionRule(stringResource(R.string.settings_section_about))
 

@@ -41,11 +41,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.vibethroughcode.ftree.FTreeApplication
 import com.vibethroughcode.ftree.R
 import com.vibethroughcode.ftree.kutumb.messaging.DeliveryStatus
 import com.vibethroughcode.ftree.kutumb.messaging.Message
+import com.vibethroughcode.ftree.kutumb.messaging.OpenThread
 import com.vibethroughcode.ftree.kutumb.messaging.Messaging
 import com.vibethroughcode.ftree.ui.FTreeViewModels
 import com.vibethroughcode.ftree.ui.common.displayName
@@ -70,6 +73,14 @@ fun MessageThreadScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     var draft by rememberSaveable { mutableStateOf("") }
+
+    // While this screen is in front, its own messages need no note, and one already posted is stale.
+    val notifier = (LocalContext.current.applicationContext as FTreeApplication).container.messageNotifier
+    LifecycleResumeEffect(viewModel.personId) {
+        OpenThread.personId = viewModel.personId
+        notifier.cancel(viewModel.personId)
+        onPauseOrDispose { if (OpenThread.personId == viewModel.personId) OpenThread.personId = null }
+    }
 
     // Anything that arrives while the conversation is open is read the moment it is shown.
     LaunchedEffect(state.unread) { if (state.unread > 0) viewModel.markRead() }

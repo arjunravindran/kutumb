@@ -98,7 +98,11 @@ private val nothingOpened: StateFlow<Uri?> = MutableStateFlow<Uri?>(null).asStat
 /** A tapped birthday note: the one person it named, or null when it named several. */
 data class ReminderTap(val personId: String?)
 
+/** A note about a new message was tapped: the conversation with [personId], in the tree [treeId]. */
+data class ThreadTap(val treeId: String?, val personId: String)
+
 private val noReminder: StateFlow<ReminderTap?> = MutableStateFlow<ReminderTap?>(null).asStateFlow()
+private val noThread: StateFlow<ThreadTap?> = MutableStateFlow<ThreadTap?>(null).asStateFlow()
 
 const val NavTreeTag = "nav-tree"
 const val NavPeopleTag = "nav-people"
@@ -144,6 +148,8 @@ fun FTreeApp(
     opened: StateFlow<Uri?> = nothingOpened,
     onOpened: () -> Unit = {},
     reminder: StateFlow<ReminderTap?> = noReminder,
+    thread: StateFlow<ThreadTap?> = noThread,
+    onThreadFollowed: () -> Unit = {},
     onReminderFollowed: () -> Unit = {},
 ) {
     val navController = rememberNavController()
@@ -215,9 +221,20 @@ fun FTreeApp(
     val tappedReminder by reminder.collectAsStateWithLifecycle()
     LaunchedEffect(tappedReminder) {
         val tap = tappedReminder ?: return@LaunchedEffect
+        awaitGraph(navController)
         navController.switchTo(PeopleRoute)
         tap.personId?.let { navController.navigate(PersonRoute(it)) }
         onReminderFollowed()
+    }
+
+    // A note about a message opens that conversation, under the Network tab it is reached from.
+    val tappedThread by thread.collectAsStateWithLifecycle()
+    LaunchedEffect(tappedThread) {
+        val tap = tappedThread ?: return@LaunchedEffect
+        awaitGraph(navController)
+        navController.switchTo(NetworkRoute)
+        navController.navigate(ThreadRoute(tap.personId))
+        onThreadFollowed()
     }
 
     // People's bell asks Settings to bring the reminders into view once it opens.
@@ -520,6 +537,15 @@ fun FTreeApp(
  * Saving and restoring state means the chart keeps its pan and zoom, and the people list its scroll
  * position, when you step away to settings and back.
  */
+/**
+ * A tap that started the app arrives before the navigation host has set its graph, because the screen
+ * is composed a moment after effects first run. There is a destination once it has; asking sooner
+ * throws.
+ */
+private suspend fun awaitGraph(navController: NavHostController) {
+    navController.currentBackStackEntryFlow.first()
+}
+
 private fun NavHostController.switchTo(route: Any) {
     navigate(route) {
         popUpTo(graph.findStartDestination().id) { saveState = true }

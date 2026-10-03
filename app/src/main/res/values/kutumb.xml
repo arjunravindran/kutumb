@@ -53,6 +53,14 @@
     <string name="thread_queued">%1$s · queued</string>
     <string name="thread_not_sent">%1$s · not sent. Family sync is off, or has no relay.</string>
     <string name="thread_resend">Send again</string>
+    <string name="message_channel_name">Messages</string>
+    <string name="message_channel_description">A note when someone you have met in person writes to you.</string>
+    <string name="message_public_title">New message</string>
+    <string name="message_notification_someone">Someone</string>
+    <string name="settings_messages_toggle">Notify me of new messages</string>
+    <string name="settings_messages_off">Off. Messages still arrive and wait in the conversation. Android is asked to allow notifications only when you turn this on.</string>
+    <string name="settings_messages_on">On. A note says who wrote and what; on a locked phone it says only that there is a new message. Needs family sync.</string>
+    <string name="settings_messages_denied">Android did not allow notifications, so this stays off.</string>
     <string name="network_hint">Vouched contacts unlock messaging once you meet them in person.</string>
     <string name="network_removed_person">Someone removed from the tree</string>
     <string name="network_empty_title">No one paired yet</string>
