@@ -300,3 +300,17 @@ The release APK, signed with the debug key (there is no `keystore.properties` he
 **Not exercised in a release build:** anything needing a second person (pairing, recovery, messaging, a note arriving), since a release build has no seeder and there is one emulator. Those paths are covered on a debug build by the tests above.
 
 Added to `proguard-rules.pro` as a precaution, in the file's own style: `PairingMethod`, `LocationLabel`, `LocationSource`, `DeliveryStatus`, `RewardType`, `RedemptionStatus` and `TreeKind`, which are stored by name like the enums already listed. The release build was fine without them where it could be exercised; they are there so a change in R8's choices cannot turn into silent data loss.
+
+## Real relays (2026-10-03)
+
+Until now the websocket client and the sync engine had only met fakes and a plaintext loopback. `LiveRelayTest` (JVM, opt-in) runs the real thing: two engines with throwaway keys and in-memory storage, Alice enqueues a gift-wrapped `MESSAGE` for Bob, flushes it to the relays, and Bob, subscribed on the same relays, receives and decrypts it.
+
+Run against `wss://relay.damus.io` and `wss://nos.lol`: both accepted the event (`done=1`, acked by the relays), and Bob had it **250 ms after the publish**, with the hand-written RFC 6455 client over real TLS and BIP-340 / NIP-44 / NIP-59 / the envelope all agreeing end to end. That settles the biggest "not verified" in the old handoff.
+
+Off unless asked for, so builds never touch the network:
+
+    FTREE_LIVE_RELAYS=wss://relay.damus.io,wss://nos.lol ./gradlew :app:testDebugUnitTest --tests '*LiveRelayTest*'
+
+What it publishes is one encrypted note addressed to a key invented for the run (body "f-tree relay test, please ignore"); nothing of anyone's is in it, and the relays keep it as they keep any event. It ran once against each of those two relays while writing this; run it from a different network or a relay of your own if you want a second opinion.
+
+Still not exercised: two real phones (pairing, then a message between them), relays that demand proof of work or authentication before accepting an event, a relay that closes the socket mid-run, and battery behaviour of the background job.
