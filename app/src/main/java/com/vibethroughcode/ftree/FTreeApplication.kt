@@ -7,6 +7,7 @@ import android.os.Handler
 import android.os.Looper
 import com.vibethroughcode.ftree.data.CatalogStore
 import com.vibethroughcode.ftree.data.TreeCatalog
+import com.vibethroughcode.ftree.data.Person
 import com.vibethroughcode.ftree.data.TreeInfo
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -20,6 +21,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 
 class FTreeApplication : Application() {
@@ -66,7 +68,7 @@ class FTreeApplication : Application() {
 
     private fun open(tree: TreeInfo) {
         // A tree that was syncing in the background already has its wiring running; reuse it.
-        synchronized(background) { container = background.remove(tree.id) ?: AppContainer(this, tree, syncPreferences) }
+        synchronized(background) { container = background.remove(tree.id) ?: AppContainer(this, tree, syncPreferences, ::everyoneInAllTrees) }
         // An alarm does not survive being force-stopped, so every start puts the morning's back.
         // With reminders off this reads one preference and builds nothing else.
         if (container.reminderPreferences.enabled.value) container.reminders.ensure()
@@ -102,12 +104,43 @@ class FTreeApplication : Application() {
         delay(window)
     }
 
+    /**
+     * Everyone in every tree, for the birthday reminders: a reminder is about people the reader knows,
+     * and which tree holds them is their own business. The same person recorded in two trees (same
+     * name and dates) is one line, not two. A tree that is not open is read and closed again; this runs
+     * once a morning, so the cost is a few small queries.
+     */
+    suspend fun everyoneInAllTrees(): List<Person> = withContext(Dispatchers.IO) {
+        val seen = HashSet<String>()
+        val out = ArrayList<Person>()
+        for (tree in catalog.trees) {
+            for (person in peopleOf(tree)) {
+                val name = person.name?.trim()?.lowercase()
+                val same = if (name.isNullOrEmpty() || (person.birthDate == null && person.deathDate == null)) null
+                else "$name|${person.birthDate}|${person.deathDate}"
+                if (same == null || seen.add(same)) out += person
+            }
+        }
+        out
+    }
+
+    private suspend fun peopleOf(tree: TreeInfo): List<Person> {
+        val open = synchronized(background) { if (tree.id == container.tree.id) container else background[tree.id] }
+        if (open != null) return open.familyRepository.allPeople()
+        val shut = AppContainer(this, tree, syncPreferences)
+        try {
+            return shut.familyRepository.allPeople()
+        } finally {
+            shut.closeDatabase()
+        }
+    }
+
     /** Starts a service for every tree but the open one; each stays idle until its tree has an identity. */
     private fun syncOtherTrees() {
         for (tree in catalog.trees) {
             val held = synchronized(background) {
                 if (tree.id == container.tree.id || tree.id in background) null
-                else AppContainer(this, tree, syncPreferences).also { background[tree.id] = it }
+                else AppContainer(this, tree, syncPreferences, ::everyoneInAllTrees).also { background[tree.id] = it }
             } ?: continue
             held.syncService
             adoptTreeKey(held)

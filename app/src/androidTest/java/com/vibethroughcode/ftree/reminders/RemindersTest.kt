@@ -173,4 +173,32 @@ class RemindersTest {
         nothingShown()
         assertNull(container.reminderPreferences.lastHandled)
     }
+
+    @Test
+    fun aBirthdayInAnotherTreeIsRemindedTooAndTheSamePersonInTwoIsOneLine() = runBlocking {
+        val circle = (app.catalog.create("Reminder ${System.nanoTime()}", com.vibethroughcode.ftree.data.TreeKind.CIRCLE) as com.vibethroughcode.ftree.data.CatalogResult.Ok).tree
+        try {
+            container.familyRepository.addPerson(Person(name = "Asha Devi", birthDate = born(0, 60)))
+            assertTrue(app.switchTo(circle.id))
+            val inCircle = app.container.familyRepository
+            inCircle.addPerson(Person(name = "Meera Rani", birthDate = born(0, 40)))
+            inCircle.addPerson(Person(name = " asha devi ", birthDate = born(0, 60))) // the same Asha, recorded again
+            assertTrue(app.switchTo(com.vibethroughcode.ftree.data.TreeCatalog.ORIGINAL.id))
+
+            val everywhere = Reminders(app, app.container.reminderPreferences, app.container.familyRepository, { app.everyoneInAllTrees() }) { halfPastTen }
+            app.container.reminderPreferences.setLead(ReminderLead.ON_THE_DAY)
+            everywhere.enable()
+            app.container.reminderPreferences.lastHandled = today.minusDays(1)
+            everywhere.deliver()
+
+            assertEquals("2 birthdays today", settled(1).single().notification.extras.getString("android.title"))
+            val census = everywhere.census()
+            assertEquals(2, census.covered)
+            everywhere.disable()
+        } finally {
+            app.switchTo(com.vibethroughcode.ftree.data.TreeCatalog.ORIGINAL.id)
+            Thread.sleep(3_500)
+            (app.catalog.remove(circle.id) as? com.vibethroughcode.ftree.data.CatalogResult.Ok)?.let { app.deleteFilesOf(it.tree) }
+        }
+    }
 }

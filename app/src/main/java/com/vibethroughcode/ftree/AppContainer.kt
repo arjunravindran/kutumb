@@ -5,6 +5,7 @@ import com.vibethroughcode.ftree.data.ChartPreferences
 import com.vibethroughcode.ftree.data.FTreeDatabase
 import com.vibethroughcode.ftree.data.FamilyRepository
 import com.vibethroughcode.ftree.data.KinshipPreferences
+import com.vibethroughcode.ftree.data.Person
 import com.vibethroughcode.ftree.data.PhotoStore
 import com.vibethroughcode.ftree.data.TreeCatalog
 import com.vibethroughcode.ftree.data.TreeInfo
@@ -82,6 +83,8 @@ class AppContainer(
      * the phone's, and each container's service must see a change made through another's screen.
      */
     val syncPreferences: SyncPreferences = SyncPreferences(context),
+    /** Every person in every tree, for the birthday reminders; null means just this tree's. */
+    private val everyoneInAllTrees: (suspend () -> List<Person>)? = null,
 ) {
     private val databaseLazy = lazy { FTreeDatabase.build(context, tree.databaseName) }
 
@@ -249,7 +252,7 @@ class AppContainer(
     val reminderPreferences: ReminderPreferences by lazy { ReminderPreferences(context) }
 
     /** Birthday reminders (#154). Nothing is scheduled unless [ReminderPreferences.enabled] is on. */
-    val reminders: Reminders by lazy { Reminders(context, reminderPreferences, familyRepository) }
+    val reminders: Reminders by lazy { Reminders(context, reminderPreferences, familyRepository, everyoneInAllTrees) }
 
     val nearbyPreferences: NearbyPreferences by lazy { NearbyPreferences(context) }
     val nearbyIdentity: NearbyIdentity by lazy { NearbyIdentity(context) }

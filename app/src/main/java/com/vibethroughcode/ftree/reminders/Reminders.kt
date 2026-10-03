@@ -13,6 +13,7 @@ import androidx.core.app.NotificationManagerCompat
 import com.vibethroughcode.ftree.data.FamilyRepository
 import com.vibethroughcode.ftree.data.Occasions
 import com.vibethroughcode.ftree.data.OccasionCensus
+import com.vibethroughcode.ftree.data.Person
 import java.time.ZonedDateTime
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -38,6 +39,8 @@ class Reminders(
     context: Context,
     private val preferences: ReminderPreferences,
     private val repository: FamilyRepository,
+    /** Everyone to remind about, across every tree. Left out, it is just this tree's people. */
+    private val everyone: (suspend () -> List<Person>)? = null,
     private val clock: () -> ZonedDateTime = ZonedDateTime::now,
 ) {
     private val context = context.applicationContext
@@ -95,7 +98,7 @@ class Reminders(
         if (ReminderSchedule.isDue(now, preferences.lastHandled)) {
             val target = ReminderSchedule.targetDay(now.toLocalDate(), preferences.lead.value)
             val occasions = ReminderSchedule.select(
-                Occasions.on(repository.allPeople(), target),
+                Occasions.on(people(), target),
                 preferences.remembrance.value,
             )
             if (occasions.isNotEmpty() && canNotify()) notifier.post(occasions, preferences.lead.value)
@@ -105,7 +108,9 @@ class Reminders(
     }
 
     /** Who a reminder covers, for the line under the switch. */
-    suspend fun census(): OccasionCensus = Occasions.census(repository.allPeople(), clock().toLocalDate())
+    suspend fun census(): OccasionCensus = Occasions.census(people(), clock().toLocalDate())
+
+    private suspend fun people(): List<Person> = everyone?.invoke() ?: repository.allPeople()
 
     private fun arm() {
         val at = ReminderSchedule.nextTrigger(clock(), preferences.lastHandled)
