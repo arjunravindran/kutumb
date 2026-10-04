@@ -379,6 +379,7 @@ fun FTreeApp(
                     composable<PathRoute> {
                         PathScreen(
                             onBack = { navController.popBackStack() },
+                            onMessage = { navController.navigate(ThreadRoute(it)) },
                             onTree = { personId ->
                                 navController.navigate(TreeRoute(focusId = personId)) {
                                     popUpTo<TreeRoute> { inclusive = true }
