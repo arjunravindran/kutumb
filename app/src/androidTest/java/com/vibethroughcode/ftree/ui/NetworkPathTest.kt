@@ -1,7 +1,7 @@
 package com.vibethroughcode.ftree.ui
 
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
@@ -23,6 +23,7 @@ import com.vibethroughcode.ftree.ui.network.PathChainTag
 import com.vibethroughcode.ftree.ui.network.PathDistanceTag
 import com.vibethroughcode.ftree.ui.network.PathFactsTag
 import com.vibethroughcode.ftree.ui.network.PathMessageTag
+import com.vibethroughcode.ftree.ui.network.ThreadInputTag
 import com.vibethroughcode.ftree.ui.network.networkRowTag
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
@@ -73,8 +74,10 @@ class NetworkPathTest {
     }
 
     @Test
-    fun messagingIsOfferedForADirectPairingButNotYetWorking() {
-        rule.onNodeWithTag(PathMessageTag).assertIsNotEnabled()
+    fun messagingIsOfferedForADirectPairingAndOpensTheConversation() {
+        rule.onNodeWithTag(PathMessageTag).assertIsEnabled().performClick()
+        rule.waitUntil(5_000) { rule.onAllNodesWithTag(ThreadInputTag).fetchSemanticsNodes().isNotEmpty() }
+        rule.onNodeWithTag(ThreadInputTag).assertIsDisplayed()
     }
 
     @Test
