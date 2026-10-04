@@ -1,6 +1,7 @@
 package com.vibethroughcode.ftree.update
 
 import android.content.Context
+import com.vibethroughcode.ftree.BuildConfig
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -17,12 +18,14 @@ class UpdatePreferences(context: Context) {
     private val prefs = context.applicationContext
         .getSharedPreferences("update-preferences", Context.MODE_PRIVATE)
 
-    private val _enabled = MutableStateFlow(prefs.getBoolean(KEY_ENABLED, false))
+    private val _enabled = MutableStateFlow(BuildConfig.SELF_UPDATE && prefs.getBoolean(KEY_ENABLED, false))
 
     /** Observed by the settings screen and checked before any request is made. */
     val enabled: StateFlow<Boolean> = _enabled.asStateFlow()
 
     fun setEnabled(value: Boolean) {
+        // The Play build cannot update itself, so nothing may turn this on there.
+        if (!BuildConfig.SELF_UPDATE) return
         prefs.edit().putBoolean(KEY_ENABLED, value).apply()
         _enabled.value = value
         if (!value) {

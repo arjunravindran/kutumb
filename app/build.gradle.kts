@@ -95,6 +95,12 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
+        // Whether the app may replace itself with an APK it downloaded. True for the builds handed
+        // out directly; the `play` build type turns it off, because Google Play does not allow an
+        // app to update itself by any route but Play. With it off the updater's switch is not shown
+        // and `UpdatePreferences.enabled` stays false, so nothing here can make a request.
+        buildConfigField("boolean", "SELF_UPDATE", "true")
+
         // Where the optional updater looks. Here rather than in Kotlin so a fork points at its own
         // releases by editing one line, and so the single network endpoint is visible in the build.
         buildConfigField(
@@ -187,6 +193,21 @@ android {
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
             // Test-only keeps, never in the shipping APK. See the file's own comment.
             testProguardFiles("proguard-test-rules.pro")
+        }
+
+        /*
+         * What goes to Google Play: the release build without the self-updater. Build it with
+         * `./gradlew bundlePlay` (Play takes an .aab, not an .apk). `src/play/AndroidManifest.xml`
+         * drops REQUEST_INSTALL_PACKAGES, and SELF_UPDATE is false.
+         *
+         * A build type rather than a product flavor on purpose: a flavor renames every task
+         * (`connectedDebugAndroidTest` and the rest of the documented commands) and changes what
+         * the release workflow builds.
+         */
+        create("play") {
+            initWith(getByName("release"))
+            matchingFallbacks += "release"
+            buildConfigField("boolean", "SELF_UPDATE", "false")
         }
     }
 

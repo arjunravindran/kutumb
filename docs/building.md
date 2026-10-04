@@ -138,3 +138,19 @@ the database persists by name. `app/proguard-rules.pro` explains what must be ke
 - [Architecture](architecture.md)
 - [The website and the browser viewer](site.md)
 - [CONTRIBUTING.md](../CONTRIBUTING.md)
+
+## The Google Play build
+
+Play takes an Android App Bundle and does not allow an app to update itself, so it has its own build type:
+
+```bash
+./gradlew bundlePlay      # app/build/outputs/bundle/play/app-play.aab
+./gradlew assemblePlay    # the same build as an .apk, for testing on a device
+```
+
+`play` is the release build with `BuildConfig.SELF_UPDATE` false: the updater's settings are not shown,
+`UpdatePreferences.enabled` cannot be turned on (so nothing makes a network request on its own), and
+`app/src/play/AndroidManifest.xml` removes `REQUEST_INSTALL_PACKAGES`. Book-template downloads sit
+behind the same switch, so they are not offered in this build either. The release workflow attaches the
+bundle to the run as an artefact. It is signed with the key in `keystore.properties`, which Play treats
+as the upload key.

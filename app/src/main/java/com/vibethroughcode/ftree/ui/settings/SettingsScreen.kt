@@ -206,7 +206,8 @@ fun SettingsScreen(
 
             ReminderSettings(viewModel, focus = focusReminders, onFocused = onRemindersFocused)
 
-            Column {
+            // Absent from the Play build: Google Play does not allow an app to update itself.
+            if (BuildConfig.SELF_UPDATE) Column {
                 SectionRule(stringResource(R.string.settings_section_updates))
 
                 SettingsSwitch(

@@ -93,6 +93,17 @@ jobs:
           "$apksigner" verify --print-certs app/build/outputs/apk/release/app-release.apk
           cp app/build/outputs/apk/release/app-release.apk "f-tree-${{ env.version }}.apk"
 
+      # The Google Play build: no self-updater, and an .aab because Play does not take an .apk.
+      # Kept as a workflow artefact rather than a release asset: it is uploaded to Play by hand,
+      # and the signature on it is the upload key, not the one users of the APK see.
+      - name: Build the Play bundle
+        run: ./gradlew bundlePlay
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: f-tree-${{ env.version }}-play-bundle
+          path: app/build/outputs/bundle/play/app-play.aab
+
       - name: Publish
         env:
           GH_TOKEN: ${{ github.token }}
