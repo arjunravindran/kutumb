@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 500" width="1024" height="500">
+  <rect width="1024" height="500" fill="#2A5138"/>
+  <rect width="1024" height="500" fill="#0C2417" opacity="0.35"/>
+  <!-- the mark -->
+  <g transform="translate(70 90) scale(10.5)" fill="none" stroke="#CDE6D5" stroke-width="1.7" stroke-linecap="round">
+    <circle cx="11" cy="9.5" r="3.1"/>
+    <circle cx="21" cy="9.5" r="3.1"/>
+    <path d="M14.1 9.5h3.8"/>
+    <path d="M16 12.6v3.4M9 16h14M9 16v2.6M23 16v2.6"/>
+    <circle cx="9" cy="22" r="3.1"/>
+    <circle cx="23" cy="22" r="3.1" stroke="#E3C38C" stroke-dasharray="2.2 2"/>
+  </g>
+  <!-- the name and the one line that says what it is for -->
+  <text x="450" y="235" font-family="Georgia, serif" font-size="110" font-weight="bold" fill="#F7F6F1">f-tree</text>
+  <line x1="454" y1="272" x2="700" y2="272" stroke="#E3C38C" stroke-width="4" stroke-linecap="round" stroke-dasharray="14 12"/>
+  <text x="450" y="330" font-family="Georgia, serif" font-size="34" fill="#CDE6D5">Your family tree, including</text>
+  <text x="450" y="376" font-family="Georgia, serif" font-size="34" font-style="italic" fill="#E3C38C">the people nobody can name.</text>
+</svg>
