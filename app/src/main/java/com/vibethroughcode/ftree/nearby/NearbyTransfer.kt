@@ -1,5 +1,6 @@
 package com.vibethroughcode.ftree.nearby
 
+import android.util.Log
 import com.vibethroughcode.ftree.nearby.wire.Abort
 import com.vibethroughcode.ftree.nearby.wire.Dh
 import com.vibethroughcode.ftree.nearby.wire.Handshake
@@ -194,11 +195,13 @@ class NearbySendTransfer(
         return try {
             drive(session, link)
         } catch (failure: NearbyFailure) {
+            note("sender: failure ${failure.problem}, known=$known", failure)
             known = known ?: failure.problem
             runCatching { link.send(NearbyProtocol.TYPE_ABORT, Abort(failure.problem).encode()) }
             listener.onFailed(known!!, failure.importProblem)
             known
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            note("sender: exception, known=$known", e)
             // A dead socket after the reason is known is the reason's echo, not a second failure.
             val problem = known ?: NearbyProblem.CONNECTION_LOST
             listener.onFailed(problem)
@@ -443,10 +446,12 @@ class NearbyReceiveTransfer(
         return try {
             drive(session, link)
         } catch (failure: NearbyFailure) {
+            note("receiver: failure ${failure.problem}", failure)
             runCatching { link.send(NearbyProtocol.TYPE_ABORT, Abort(failure.problem).encode()) }
             listener.onFailed(failure.problem, failure.importProblem)
             failure.problem
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            note("receiver: exception", e)
             listener.onFailed(NearbyProblem.CONNECTION_LOST)
             NearbyProblem.CONNECTION_LOST
         }
@@ -640,4 +645,11 @@ class NearbyReceiveTransfer(
             else -> null
         }
     }
+}
+
+private const val TAG = "FtreeNearby"
+
+/** Diagnostics for a phone; a JVM test has no Log, and a missing log must never break a transfer. */
+private fun note(message: String, error: Throwable? = null) {
+    runCatching { Log.w(TAG, message, error) }
 }
