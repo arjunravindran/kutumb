@@ -163,6 +163,21 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/share_paths" />
         </provider>
+        <!--
+            The "Coming up" home-screen widget. Exported because the launcher, which is another
+            app, has to be able to send it APPWIDGET_UPDATE. It reads the family from this phone
+            and nothing else.
+        -->
+        <receiver
+            android:name=".widget.UpcomingWidget"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_upcoming_info" />
+        </receiver>
         <!-- The morning alarm's own receiver: reachable by this app's alarm and nothing else. -->
         <receiver
             android:name=".reminders.ReminderReceiver"

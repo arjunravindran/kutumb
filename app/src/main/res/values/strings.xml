@@ -16,6 +16,8 @@
     <string name="people_none_living">Everyone matching this is recorded as no longer living.</string>
 
     <!-- Coming up (#230): the family's next 30 days. The desktop uses the same words. -->
+    <string name="widget_description">The next birthdays and remembered days in your family, on your home screen.</string>
+    <string name="widget_empty">Birthdays appear here once someone has a day and month recorded.</string>
     <string name="coming_up_title">Coming up</string>
     <string name="coming_up_window">Next 30 days</string>
     <string name="coming_up_remembering">Remembering</string>

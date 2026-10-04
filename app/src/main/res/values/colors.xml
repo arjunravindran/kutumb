@@ -1,4 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="ic_launcher_background">#2A5138</color>
+
+    <!-- The home-screen widget: bone ground and forest ink by day, the night palette after dark. -->
+    <color name="widget_background">#F7F6F1</color>
+    <color name="widget_ink">#1A1C1A</color>
+    <color name="widget_ink_soft">#4E6355</color>
+    <color name="widget_brass">#8A6420</color>
 </resources>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    "Coming up" on the home screen. Home screen only: a family's names are nobody else's business,
+    and a keyguard widget is read by whoever picks the phone up. Refreshed about hourly by the
+    system, which is enough for a list that changes by the day.
+-->
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:minWidth="250dp"
+    android:minHeight="110dp"
+    android:targetCellWidth="4"
+    android:targetCellHeight="2"
+    android:minResizeWidth="180dp"
+    android:minResizeHeight="110dp"
+    android:resizeMode="horizontal|vertical"
+    android:updatePeriodMillis="3600000"
+    android:widgetCategory="home_screen"
+    android:initialLayout="@layout/widget_upcoming"
+    android:previewLayout="@layout/widget_upcoming"
+    android:description="@string/widget_description" />
