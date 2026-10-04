@@ -277,7 +277,7 @@ class NostrProtocolTest {
     fun `relay frames in the wild`() {
         assertEquals(RelayFrame.Ok("abc", true, ""), RelayFrame.parse("[\"OK\",\"abc\",true,\"\"]"))
         assertEquals(RelayFrame.Eose("x"), RelayFrame.parse("[\"EOSE\", \"x\"]"))
-        assertEquals(RelayFrame.Unknown("AUTH"), RelayFrame.parse("[\"AUTH\",\"challenge\"]"))
+        assertEquals(RelayFrame.Auth("challenge"), RelayFrame.parse("[\"AUTH\",\"challenge\"]"))
         assertEquals(RelayFrame.Unknown("CLOSED"), RelayFrame.parse("[\"CLOSED\",\"s\",\"error: shutting down\"]"))
     }
 
@@ -289,5 +289,24 @@ class NostrProtocolTest {
         )) {
             assertNull(bad, RelayFrame.parse(bad))
         }
+    }
+
+    // ---- NIP-42 ----
+
+    @Test
+    fun `an auth answer is a signed kind 22242 event naming the relay and the challenge`() {
+        val e = Nip42.answer(alice, "wss://relay.example.com", "abc123", 1_700_000_000L, TestScheme)
+        assertEquals(22242, e.kind)
+        assertEquals(alice.publicKey, e.pubkey)
+        assertEquals(listOf(listOf("relay", "wss://relay.example.com"), listOf("challenge", "abc123")), e.tags)
+        assertTrue(e.verify(TestScheme))
+    }
+
+    @Test
+    fun `an auth frame is read in both directions`() {
+        val answer = Nip42.answer(alice, "wss://r", "c", 5L, TestScheme)
+        assertEquals(RelayFrame.AuthResponse(answer), RelayFrame.parse(RelayFrame.AuthResponse(answer).toJson()))
+        assertEquals(RelayFrame.Auth("c"), RelayFrame.parse(RelayFrame.Auth("c").toJson()))
+        assertNull(RelayFrame.parse("[\"AUTH\",7]"))
     }
 }

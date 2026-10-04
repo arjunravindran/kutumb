@@ -1,5 +1,6 @@
 package com.vibethroughcode.ftree.kutumb.sync
 
+import android.util.Log
 import com.vibethroughcode.ftree.kutumb.KutumbRepository
 import com.vibethroughcode.ftree.kutumb.sync.relay.RelayConnection
 import com.vibethroughcode.ftree.kutumb.sync.relay.RelayConnector
@@ -106,6 +107,9 @@ class SyncEngine(
     private class Link(val connection: RelayConnection) {
         val pending = ConcurrentHashMap<String, CompletableDeferred<Boolean>>()
         var reader: Job? = null
+
+        /** One answer to AUTH per connection: a relay that refuses it would otherwise be asked again, and again. */
+        var authAnswered = false
     }
 
     private val linksLock = Mutex()
@@ -221,7 +225,10 @@ class SyncEngine(
     }
 
     /** Decides what to do with one inbound wrap; exposed for the reader and for tests. */
-    suspend fun process(wrap: NostrEvent): InboundOutcome = decide(wrap).also { diagnostics.inbound(wrap.id, it) }
+    suspend fun process(wrap: NostrEvent): InboundOutcome = decide(wrap).also {
+        note("inbound ${wrap.id.take(8)} -> $it")
+        diagnostics.inbound(wrap.id, it)
+    }
 
     private suspend fun decide(wrap: NostrEvent): InboundOutcome {
         if (wrap.kind != Nip59.KIND_GIFT_WRAP || keyPair.publicKey !in wrap.tags.filter { it.size >= 2 && it[0] == "p" }.map { it[1] }) {
@@ -268,9 +275,11 @@ class SyncEngine(
             connector.connect(url)
         } catch (e: CancellationException) {
             throw e
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            note("connect failed: $url", e)
             return null
         }
+        note("connected: $url inbound=${url in inboundUrls}")
         val link = Link(connection)
         links[url] = link
         link.reader = scope.launch {
@@ -286,21 +295,47 @@ class SyncEngine(
         link
     }
 
+    /**
+     * A relay that wants proof of the key (NIP-42) sends AUTH and closes the inbox subscription
+     * that asked for gift wraps. Answer it, then ask again: without this, messages can be sent to
+     * such a relay but never collected from it.
+     */
+    private suspend fun authenticate(link: Link, challenge: String) {
+        val url = link.connection.url
+        if (link.authAnswered) {
+            note("relay asked for auth again, not answering twice: $url")
+            return
+        }
+        link.authAnswered = true
+        val event = Nip42.answer(keyPair, url, challenge, clock() / 1000, scheme)
+        note("relay asked for auth: $url")
+        link.connection.send(RelayFrame.AuthResponse(event).toJson())
+        if (url in inboundUrls) link.connection.send(RelayFrame.Req(INBOX_SUBSCRIPTION, listOf(inboxFilter())).toJson())
+    }
+
     private fun inboxFilter() = RelayFrame.filter(kinds = listOf(Nip59.KIND_GIFT_WRAP), tags = mapOf("p" to listOf(keyPair.publicKey)))
 
     private fun onFrame(link: Link, text: String) {
         when (val frame = RelayFrame.parse(text) ?: return) {
             is RelayFrame.Ok -> {
+                note("relay OK accepted=${frame.accepted} msg=[${frame.message.take(120)}] for ${frame.eventId.take(8)} from ${link.connection.url}")
                 val waiting = link.pending.remove(frame.eventId)
                 if (waiting != null) waiting.complete(frame.accepted)
                 else if (frame.accepted) scope.launch { lateAck(frame.eventId, link.connection.url) }
             }
             is RelayFrame.EventDelivery -> if (frame.subscriptionId == INBOX_SUBSCRIPTION) inbox.trySend(frame.event)
-            else -> Unit
+            is RelayFrame.Auth -> scope.launch { authenticate(link, frame.challenge) }
+            else -> note("relay frame: ${text.take(160)}")
         }
     }
 
+    /** Diagnostics for a phone; a JVM test has no Log, and a missing log must never break the engine. */
+    private fun note(message: String, error: Throwable? = null) {
+        runCatching { Log.i(TAG, message, error) }
+    }
+
     private companion object {
+        const val TAG = "FtreeSync"
         const val INBOX_SUBSCRIPTION = "kutumb-inbox"
     }
 }

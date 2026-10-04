@@ -3,7 +3,7 @@ package com.vibethroughcode.ftree.kutumb.sync
 /**
  * The NIP-01 websocket messages, as JSON arrays. Client to relay: [Event] (publish), [Req], [Close].
  * Relay to client: [EventDelivery], [Ok], [Eose], [Notice]. [parse] reads any of them (and
- * [Unknown] for a well-formed array it does not model, such as CLOSED or AUTH); it returns null,
+ * [Unknown] for a well-formed array it does not model, such as CLOSED); it returns null,
  * never throws, for anything that is not a valid frame.
  */
 sealed interface RelayFrame {
@@ -46,6 +46,16 @@ sealed interface RelayFrame {
     /** Human-readable relay message: `["NOTICE", <message>]`. */
     data class Notice(val message: String) : RelayFrame {
         override fun toJson() = Json.write(listOf("NOTICE", message))
+    }
+
+    /** Relay asks the client to prove it holds a key (NIP-42): `["AUTH", <challenge>]`. */
+    data class Auth(val challenge: String) : RelayFrame {
+        override fun toJson() = Json.write(listOf("AUTH", challenge))
+    }
+
+    /** Client answers an [Auth] with a signed kind-22242 event: `["AUTH", <event>]`. */
+    data class AuthResponse(val event: NostrEvent) : RelayFrame {
+        override fun toJson() = Json.write(listOf("AUTH", event.toJsonMap()))
     }
 
     /** A well-formed frame of a type this client does not model. */
@@ -105,6 +115,11 @@ sealed interface RelayFrame {
                 }
                 "EOSE" -> if (array.size == 2) (array[1] as? String)?.let(::Eose) else null
                 "NOTICE" -> if (array.size == 2) (array[1] as? String)?.let(::Notice) else null
+                "AUTH" -> when (val body = array.getOrNull(1)) {
+                    is String -> if (array.size == 2) Auth(body) else null
+                    is Map<*, *> -> if (array.size == 2) NostrEvent.fromMap(body)?.let(::AuthResponse) else null
+                    else -> null
+                }
                 else -> Unknown(type)
             }
         }

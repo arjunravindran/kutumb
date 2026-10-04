@@ -333,4 +333,18 @@ class SyncEngineTest {
         runCurrent()
         assertEquals(1, b.received.size)
     }
+
+    @Test
+    fun aRelayThatAsksForAuthIsAnsweredAndTheInboxIsAskedForAgain() = runTest {
+        r1.requiresAuth = true
+        val b = Node(bob, this)
+        b.trust(alice, "alice")
+        b.engine.startInbound(relays)
+        runCurrent()
+        // Answered, then asked again: the subscription now stands.
+        assertEquals(1, r1.subscriptions.size)
+        r1.inject(wrapFor(bob))
+        runCurrent()
+        assertEquals(1, b.received.size)
+    }
 }

@@ -20,6 +20,14 @@ class FakeRelay(val url: String) {
     var ack: FakeAck = FakeAck.ACCEPT
     var rejectMessage: String = "blocked: not welcome"
 
+    /**
+     * Like a relay that hands out gift wraps only to a client that has answered AUTH (NIP-42): the
+     * first REQ on a connection is answered with AUTH and a CLOSED, and is not remembered.
+     */
+    var requiresAuth: Boolean = false
+    private val authenticated = mutableSetOf<FakeConnection>()
+    private val challenge = "test-challenge"
+
     /** While false, [FakeRelayConnector.connect] throws, as for an unreachable relay. */
     var online: Boolean = true
 
@@ -70,7 +78,18 @@ class FakeRelay(val url: String) {
                     FakeAck.SILENT -> Unit
                 }
             }
-            is RelayFrame.Req -> {
+            is RelayFrame.AuthResponse -> {
+                val e = frame.event
+                val relayTag = e.tags.firstOrNull { it.firstOrNull() == "relay" }?.getOrNull(1)
+                val challengeTag = e.tags.firstOrNull { it.firstOrNull() == "challenge" }?.getOrNull(1)
+                val ok = e.kind == 22242 && relayTag == url && challengeTag == challenge
+                if (ok) authenticated += from
+                from.push(RelayFrame.Ok(e.id, ok, if (ok) "" else "auth: bad").toJson())
+            }
+            is RelayFrame.Req -> if (requiresAuth && from !in authenticated) {
+                from.push(RelayFrame.Auth(challenge).toJson())
+                from.push("[\"CLOSED\",\"${frame.subscriptionId}\",\"auth-required: requested filter requires authentication\"]")
+            } else {
                 subscriptions += from to frame
                 stored.filter { e -> frame.filters.any { matches(it, e) } }
                     .forEach { from.push(RelayFrame.EventDelivery(frame.subscriptionId, it).toJson()) }

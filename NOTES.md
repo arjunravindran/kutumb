@@ -314,3 +314,13 @@ Off unless asked for, so builds never touch the network:
 What it publishes is one encrypted note addressed to a key invented for the run (body "f-tree relay test, please ignore"); nothing of anyone's is in it, and the relays keep it as they keep any event. It ran once against each of those two relays while writing this; run it from a different network or a relay of your own if you want a second opinion.
 
 Still not exercised: two real phones (pairing, then a message between them), relays that demand proof of work or authentication before accepting an event, a relay that closes the socket mid-run, and battery behaviour of the background job.
+
+## Two real phones, 2026-10-04
+
+Paired a Pixel 7 and a Galaxy S22+ over the LAN (QR), then sent messages through a public relay.
+
+- **`relay.damus.io` cannot deliver messages.** It accepts a publish, but answers the inbox REQ with `AUTH` and then `CLOSED ... auth-required`. The app now answers AUTH (NIP-42, `Nip42.kt`, `SyncEngine.authenticate`), and damus then refuses the answer: "relay needs serviceUrl to be configured before AUTH can work". That is the relay's own misconfiguration, so nothing a client does gets past it. Sending worked, receiving never did, and the message stayed "queued" for ever because that is the only success state. **`wss://nos.lol` works in both directions.** The earlier live test only proved sending to damus.
+- The AUTH answer is made once per connection. A relay that refuses it is not asked again.
+- **The Message button on the relationship screen was always disabled:** `PathScreen` was created without `onMessage`. Fixed in `FTreeApp.kt`.
+- `FtreeSync` and `FtreeNearby` log tags (`adb logcat -s FtreeSync:V`) report relay frames, auth, and why a pairing stopped. They carry no message text.
+- **Not understood:** a first pairing attempt failed with "connection lost" / "said something out of turn", before any logging existed, and a second try worked. Unreproduced. The Pixel also failed to connect to damus for about 12 minutes, then connected.
