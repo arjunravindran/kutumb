@@ -45,6 +45,22 @@ class SyncPreferences(private val prefs: SharedPreferences) {
 
     companion object {
         const val MAX_RELAYS = 5
+
+        /**
+         * Public relays offered in Settings as a convenience. None is used until a person picks
+         * it, so a fresh install still contacts nothing. Each was checked on 2026-10-05 to accept
+         * a connection and answer a subscription without demanding authentication; `nos.lol` is
+         * also the one proven end to end between two phones. `relay.damus.io` is left out on
+         * purpose: it asks for NIP-42 authentication it cannot complete, so messages never arrive.
+         */
+        val SUGGESTED_RELAYS = listOf(
+            "wss://nos.lol",
+            "wss://relay.primal.net",
+            "wss://offchain.pub",
+            "wss://nostr.mom",
+            "wss://relay.snort.social",
+            "wss://nostr.einundzwanzig.space",
+        )
         private const val KEY_ENABLED = "enabled"
         private const val KEY_RELAYS = "relays"
 

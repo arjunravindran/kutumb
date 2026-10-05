@@ -5,6 +5,7 @@ import android.net.Uri
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -29,6 +30,8 @@ import androidx.compose.material.icons.filled.WarningAmber
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedButton
@@ -64,6 +67,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.vibethroughcode.ftree.BuildConfig
 import com.vibethroughcode.ftree.R
+import com.vibethroughcode.ftree.kutumb.sync.SyncPreferences
 import com.vibethroughcode.ftree.book.TemplateDownloader
 import com.vibethroughcode.ftree.data.KinshipLanguage
 import com.vibethroughcode.ftree.ui.common.SectionRule
@@ -105,6 +109,7 @@ const val SettingsBetaConfirmTag = "settings-beta-confirm"
 const val SettingsNearbyToggleTag = "settings-nearby-toggle"
 const val SettingsSyncToggleTag = "settings-sync-toggle"
 const val SettingsSyncRelaysTag = "settings-sync-relays"
+const val SettingsSyncRelayPickerTag = "settings-sync-relay-picker"
 const val SettingsNearbySendTag = "settings-nearby-send"
 const val SettingsNearbyReceiveTag = "settings-nearby-receive"
 const val SettingsNearbyRenameTag = "settings-nearby-rename"
@@ -404,6 +409,29 @@ fun SettingsScreen(
                             maxLines = 6,
                             modifier = Modifier.fillMaxWidth().padding(top = 8.dp).testTag(SettingsSyncRelaysTag),
                         )
+                        var menuOpen by remember { mutableStateOf(false) }
+                        Box {
+                            OutlinedButton(
+                                onClick = { menuOpen = true },
+                                modifier = Modifier.testTag(SettingsSyncRelayPickerTag),
+                            ) {
+                                Text(stringResource(R.string.settings_sync_relays_pick))
+                            }
+                            DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
+                                SyncPreferences.SUGGESTED_RELAYS.forEach { relay ->
+                                    DropdownMenuItem(
+                                        text = { Text(relay.removePrefix("wss://")) },
+                                        onClick = {
+                                            menuOpen = false
+                                            val have = relayText.split(',', '\n', ' ').map { it.trim() }.filter { it.isNotEmpty() }
+                                            if (relay !in have && have.size < SyncPreferences.MAX_RELAYS) {
+                                                relayText = (have + relay).joinToString(", ")
+                                            }
+                                        },
+                                    )
+                                }
+                            }
+                        }
                         if (refused.isNotEmpty()) {
                             Text(
                                 stringResource(R.string.settings_sync_relays_refused, refused.joinToString(", ")),

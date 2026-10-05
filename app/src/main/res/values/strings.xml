@@ -546,8 +546,9 @@
     <string name="trees_error_other">That did not work</string>
     <string name="settings_section_sync">Family sync over the internet</string>
     <string name="settings_sync_toggle">Sync with family over the internet</string>
-    <string name="settings_sync_explainer">Off by default. When on, this phone connects to the relay servers you name below and exchanges end-to-end encrypted messages with the people you have paired with. Relays see that messages pass through, never what they say. Nothing is sent until you turn this on and add a relay. While it is on, the phone also wakes up about every fifteen minutes, even with the app closed, to collect and send what is waiting.</string>
+    <string name="settings_sync_explainer">Off by default. When on, this phone connects to the relay servers you name below and exchanges end-to-end encrypted messages with the people you have paired with. Relays see that messages pass through, never what they say. Nothing is sent until you turn this on and add a relay. You can pick from a short list or type your own. While it is on, the phone also wakes up about every fifteen minutes, even with the app closed, to collect and send what is waiting.</string>
     <string name="settings_sync_relays_label">Relays (wss:// addresses separated by commas, up to 5)</string>
+    <string name="settings_sync_relays_pick">Choose a relay…</string>
     <string name="settings_sync_relays_save">Save relays</string>
     <string name="settings_sync_relays_refused">Not used (only wss:// addresses work): %1$s</string>
     <string name="settings_sync_status_on">Connected to your relays</string>

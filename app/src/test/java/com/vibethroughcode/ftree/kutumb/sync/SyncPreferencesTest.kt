@@ -18,4 +18,11 @@ class SyncPreferencesTest {
         assertNull(normalizeRelay("wss://a b.example.com"))
         assertNull(normalizeRelay(""))
     }
+
+    @Test fun `every suggested relay is already in canonical form, unique, and not the broken one`() {
+        val list = SyncPreferences.SUGGESTED_RELAYS
+        assertEquals(list, list.map { normalizeRelay(it) })
+        assertEquals(list.size, list.distinct().size)
+        assertEquals(false, list.any { "damus" in it })
+    }
 }
