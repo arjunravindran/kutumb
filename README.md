@@ -1,3 +1,5 @@
+> **Kutumb** is a separate app, now going its own way. It began as a fork of [f-tree](https://github.com/thisisankit27/f-tree) by Ankit Srivastava, and is used under f-tree's MIT licence, whose copyright notice is kept in [LICENSE](LICENSE). The rest of this README still describes the f-tree it came from and has not been rewritten yet.
+
 <div align="center">
 
 <img src="site/favicon.svg" width="76" alt="f-tree">

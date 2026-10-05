@@ -271,7 +271,7 @@ fun readBook(text: String, fontKeys: Set<String> = BookFonts.FILES.keys): Book {
     if (format != Book.FORMAT && format != Book.FORMAT_MAX) {
         throw SerializationException(
             "book format $declared; this app draws formats ${Book.FORMAT} and ${Book.FORMAT_MAX}. " +
-                "Update f-tree to make this book.",
+                "Update Kutumb to make this book.",
         )
     }
     // Read before decoding: `null` and `{}` would otherwise both arrive as "no symbols", and a

@@ -108,7 +108,7 @@ class BookFormat2Test {
         // Nothing else here would parse: the format alone decides, and the message says so.
         val message = refusal("""{"format":3,"pages":"a hologram","t":"sphere"}""")
         assertTrue(message, "format 3" in message)
-        assertTrue(message, "Update f-tree" in message)
+        assertTrue(message, "Update Kutumb" in message)
     }
 
     @Test
@@ -237,7 +237,7 @@ class BookFormat2Test {
         assertTrue(message, "book_serif" in message)
         assertTrue(message, "\"strong\"" in message)
         for (key in BookFonts.FILES.keys) assertTrue("$key in: $message", key in message)
-        assertTrue(message, "update f-tree" in message)
+        assertTrue(message, "update Kutumb" in message)
     }
 
     @Test

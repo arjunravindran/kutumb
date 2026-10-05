@@ -377,7 +377,7 @@ private fun FailureCard(failure: BookFailure, onRetry: () -> Unit, modifier: Mod
 
 /** What a report needs to find the fault: the versions involved and the composer's own error. */
 private fun failureDetails(failure: BookFailure): String =
-    "f-tree ${BuildConfig.VERSION_NAME}, Android ${Build.VERSION.RELEASE} (API ${Build.VERSION.SDK_INT}), " +
+    "Kutumb ${BuildConfig.VERSION_NAME}, Android ${Build.VERSION.RELEASE} (API ${Build.VERSION.SDK_INT}), " +
         "WebView ${WebView.getCurrentWebViewPackage()?.versionName ?: "none"}\n${failure.message}"
 
 @OptIn(ExperimentalMaterial3Api::class)

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">f-tree</string>
+    <string name="app_name">Kutumb</string>
 
     <!-- People list -->
     <string name="people_title">Family</string>
@@ -220,7 +220,7 @@
     <string name="card_caption_label">Sent with the picture</string>
     <string name="card_send">Send</string>
     <string name="card_failed">Couldn\'t make that picture.</string>
-    <string name="card_caption">%1$s\n\nWorked out in f-tree, a family tree that stays on your phone: %2$s</string>
+    <string name="card_caption">%1$s\n\nWorked out in Kutumb, a family tree that stays on your phone: %2$s</string>
     <string name="share_branch">Share this family</string>
     <string name="share_chooser_title">Send %1$s\'s family</string>
     <string name="share_failed">Couldn\'t prepare that family to send.</string>
@@ -229,8 +229,8 @@
         this app and is looking at an attachment in a chat: what it is, how many people are in it,
         where to get the app, and that importing it will not overwrite anything they already have.
     -->
-    <string name="share_message">Hey — I\'ve shared %1$s\'s family tree with you: %2$s.\n\nf-tree is a free family tree app that keeps everything on your phone. Get it at %3$s, then tap the file and choose f-tree to open it. It merges into your own tree; nothing of yours is replaced.</string>
-    <string name="share_message_unnamed">Hey — I\'ve shared part of my family tree with you: %1$s.\n\nf-tree is a free family tree app that keeps everything on your phone. Get it at %2$s, then tap the file and choose f-tree to open it. It merges into your own tree; nothing of yours is replaced.</string>
+    <string name="share_message">Hey — I\'ve shared %1$s\'s family tree with you: %2$s.\n\nKutumb is a free family tree app that keeps everything on your phone. Get it at %3$s, then tap the file and choose Kutumb to open it. It merges into your own tree; nothing of yours is replaced.</string>
+    <string name="share_message_unnamed">Hey — I\'ve shared part of my family tree with you: %1$s.\n\nKutumb is a free family tree app that keeps everything on your phone. Get it at %2$s, then tap the file and choose Kutumb to open it. It merges into your own tree; nothing of yours is replaced.</string>
     <string name="export_empty">There is nobody in your tree to export yet.</string>
     <string name="import_tree">Import a tree</string>
     <string name="import_title">Import this tree?</string>
@@ -254,14 +254,14 @@
     <string name="import_conflicts">%1$d details differed; yours were kept.</string>
     <string name="import_failed_not_archive">That file isn\'t a family tree export.</string>
     <string name="import_failed_not_tree">That file isn\'t a family tree export.</string>
-    <string name="import_failed_newer">That file was made by a newer version of f-tree. Update the app to open it.</string>
+    <string name="import_failed_newer">That file was made by a newer version of Kutumb. Update the app to open it.</string>
     <string name="import_failed_empty">There is nobody in that file.</string>
     <string name="import_failed_unreadable">Couldn\'t read that file.</string>
     <string name="import_local_label">Yours</string>
     <string name="import_incoming_label">In the file</string>
 
     <string name="about_body">A local-first family tree. Everything stays on this device: no account, no cloud, no backend. Share a tree by exporting it to a file; importing one merges it into yours instead of replacing it.</string>
-    <string name="about_fonts">f-tree is open source under the MIT licence. Literata, JetBrains Mono, Rozha One, Mukta and Kalam are used under the SIL Open Font Licence 1.1. Town and city names come from GeoNames (geonames.org), used under CC BY 4.0.</string>
+    <string name="about_fonts">Kutumb is open source under the MIT licence, and began as a fork of f-tree by Ankit Srivastava (github.com/thisisankit27/f-tree), whose copyright notice stays in the licence. Literata, JetBrains Mono, Rozha One, Mukta and Kalam are used under the SIL Open Font Licence 1.1. Town and city names come from GeoNames (geonames.org), used under CC BY 4.0.</string>
 
     <!-- Shared -->
     <string name="a11y_person_avatar">Photo of %1$s</string>
@@ -370,7 +370,7 @@
     <string name="settings_update_cancel">Cancel</string>
     <string name="settings_update_notes">What changed</string>
     <string name="settings_update_permission_title">Android needs your permission</string>
-    <string name="settings_update_permission_body">To install an update, f-tree needs permission to install apps. You can switch it back off afterwards.</string>
+    <string name="settings_update_permission_body">To install an update, Kutumb needs permission to install apps. You can switch it back off afterwards.</string>
     <string name="settings_update_permission_action">Open settings</string>
 
     <string name="update_failed_network">Could not reach GitHub. Check your connection and try again.</string>
@@ -383,7 +383,7 @@
     <string name="update_failed_checksum">The download did not match the checksum GitHub published for it, so it was discarded.</string>
     <string name="update_failed_signature">That download is signed with a different key, so it cannot update this copy. Install it by hand only if you are certain where it came from — it would replace the app, and your tree with it.</string>
     <string name="update_failed_wrong_package">That download is a different app.</string>
-    <string name="update_failed_install_not_permitted">Android has not been given permission to install apps from f-tree.</string>
+    <string name="update_failed_install_not_permitted">Android has not been given permission to install apps from Kutumb.</string>
 
     <string name="settings_export">Export your tree</string>
     <string name="settings_export_body">Writes everyone, every connection and every photo to a single .ftree file.</string>
@@ -421,12 +421,12 @@
     <string name="settings_reminders_remembrance">Remembrance days</string>
     <string name="settings_reminders_remembrance_body">Also the birthdays and death anniversaries of those no longer with us.</string>
     <string name="settings_reminders_denied">Android was asked and said no, so reminders stay off.</string>
-    <string name="settings_reminders_blocked">Notifications for f-tree are turned off in Android\'s settings, so no reminder can be shown.</string>
+    <string name="settings_reminders_blocked">Notifications for Kutumb are turned off in Android\'s settings, so no reminder can be shown.</string>
     <string name="settings_reminders_open_settings">Open notification settings</string>
 
     <!-- The morning's note. -->
     <string name="reminder_channel_name">Birthdays</string>
-    <string name="reminder_channel_description">A note on the morning of a birthday, if you turn reminders on in f-tree\'s settings.</string>
+    <string name="reminder_channel_description">A note on the morning of a birthday, if you turn reminders on in Kutumb\'s settings.</string>
     <string name="reminder_title_turns_today">%1$s turns %2$d today</string>
     <string name="reminder_title_birthday_today">It\'s %1$s\'s birthday today</string>
     <plurals name="reminder_title_birthdays_today">
@@ -567,7 +567,7 @@
     </plurals>
     <string name="nearby_none_yet">On the other device, open Receive from a nearby device. It appears here when it is ready.</string>
     <!-- A device on a protocol version this build cannot speak. Listed, greyed, rather than hidden. -->
-    <string name="nearby_other_version">On a different version of f-tree. Update both to share.</string>
+    <string name="nearby_other_version">On a different version of Kutumb. Update both to share.</string>
     <string name="nearby_type_address">Can\'t see it? Type its address</string>
     <string name="nearby_address_label">Address shown on the other device</string>
     <string name="nearby_address_invalid">That doesn\'t look like a local address and port, like 192.168.1.20:43121.</string>
@@ -582,11 +582,11 @@
     <string name="nearby_scan_stop">Stop scanning</string>
     <string name="nearby_scan_hint">Point the camera at the code on the other device. Nothing is recorded or saved.</string>
     <string name="nearby_camera_title">Use the camera to read the code?</string>
-    <string name="nearby_camera_body">f-tree only looks for the code on the other screen. Nothing is recorded or saved, and the camera is used for nothing else.</string>
+    <string name="nearby_camera_body">Kutumb only looks for the code on the other screen. Nothing is recorded or saved, and the camera is used for nothing else.</string>
     <string name="nearby_camera_allow">Allow camera</string>
     <string name="nearby_camera_type_instead">Type the code instead</string>
     <string name="nearby_camera_blocked_title">Camera access is off</string>
-    <string name="nearby_camera_blocked_body">Android is set to refuse f-tree the camera. You can change that in the app\'s settings, or pick the device from the list or type its address instead.</string>
+    <string name="nearby_camera_blocked_body">Android is set to refuse Kutumb the camera. You can change that in the app\'s settings, or pick the device from the list or type its address instead.</string>
     <string name="nearby_camera_open_settings">Open settings</string>
     <string name="nearby_no_address">This device isn\'t on a Wi-Fi network, so nothing nearby can reach it.</string>
     <string name="nearby_connecting">Connecting to %1$s…</string>
@@ -627,9 +627,9 @@
     <string name="nearby_failed_title">It didn\'t go</string>
     <string name="nearby_failed_alarm_title">Stopped for your safety</string>
 
-    <string name="nearby_problem_protocol_too_new">The other device has a newer f-tree. Update this one to exchange trees with it.</string>
-    <string name="nearby_problem_protocol_too_old">The other device has an older f-tree. Update it to exchange trees with this one.</string>
-    <string name="nearby_problem_not_a_peer">Something answered at that address, but it isn\'t f-tree.</string>
+    <string name="nearby_problem_protocol_too_new">The other device has a newer Kutumb. Update this one to exchange trees with it.</string>
+    <string name="nearby_problem_protocol_too_old">The other device has an older Kutumb. Update it to exchange trees with this one.</string>
+    <string name="nearby_problem_not_a_peer">Something answered at that address, but it isn\'t Kutumb.</string>
     <string name="nearby_problem_malformed">The other device sent something this one couldn\'t read.</string>
     <string name="nearby_problem_unexpected">The other device said something out of turn, so the transfer stopped.</string>
     <string name="nearby_problem_bad_key">The other device sent a key that isn\'t safe to use, so the transfer stopped.</string>
@@ -646,7 +646,7 @@
     <string name="nearby_problem_no_space">There isn\'t room on this device for that tree.</string>
     <string name="nearby_problem_incomplete">The transfer ended before all of the tree arrived.</string>
     <string name="nearby_problem_mismatch">What arrived isn\'t what was sent, so it was thrown away.</string>
-    <string name="nearby_problem_tree_too_new">The other device has an older f-tree that can\'t read this tree. Update it first.</string>
+    <string name="nearby_problem_tree_too_new">The other device has an older Kutumb that can\'t read this tree. Update it first.</string>
     <string name="nearby_problem_import_refused">The other device couldn\'t read what was sent.</string>
     <string name="nearby_problem_network">Couldn\'t reach the other device. Check both are on the same Wi-Fi — guest networks often keep devices apart.</string>
     <string name="nearby_problem_permission">Android didn\'t allow the connection.</string>
@@ -667,7 +667,7 @@
     <string name="relation_pick_title">Who?</string>
     <string name="relation_pick_hint">Search by name</string>
     <string name="relation_pick_none">Nobody by that name.</string>
-    <string name="relation_hint">Pick two people and f-tree traces the line between them, however far apart they sit in the tree.</string>
+    <string name="relation_hint">Pick two people and Kutumb traces the line between them, however far apart they sit in the tree.</string>
     <string name="relation_hint_chart">Choose two people below, or tap them on the chart.</string>
     <string name="relation_close">Close</string>
     <string name="relation_change_pair">Change who</string>
@@ -800,7 +800,7 @@
     <string name="book_share">Share</string>
     <string name="book_save">Save to device</string>
     <string name="book_share_chooser">Share the family book</string>
-    <string name="book_share_caption">%1$s, a family book made with f-tree.</string>
+    <string name="book_share_caption">%1$s, a family book made with Kutumb.</string>
     <string name="book_saved">Saved “%1$s”</string>
     <string name="book_action_failed">The book could not be written: %1$s</string>
     <string name="book_making">Making your book…</string>

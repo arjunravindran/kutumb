@@ -120,7 +120,7 @@ fun validateBook(book: Book, fontKeys: Set<String>): List<String> {
     for ((role, key) in book.fonts) {
         if (key !in fontKeys) {
             problems += "the \"$role\" text is set in font $key, which this app does not carry " +
-                "(it has ${fontKeys.sorted().joinToString(", ")}); update f-tree to make this book"
+                "(it has ${fontKeys.sorted().joinToString(", ")}); update Kutumb to make this book"
         }
     }
 
