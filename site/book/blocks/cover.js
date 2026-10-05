@@ -154,7 +154,7 @@ export function cover(ctx) {
   }
   if (c.ornaments.includes('rangoli')) items.push(...rangoliRing(W / 2, cy, 250, 24, [P.petalA, P.petalB], P.gold));
   items.push(constellation(ctx, { cx: W / 2, cy, rMax: c.ornaments.includes('rangoli') ? 205 : 225, motif: c.motif }));
-  if (ctx.attribution) items.push(ctx.line(W / 2, H - 34, 'Made with f-tree', 'text', 8, P.mist, { align: 'middle' }));
+  if (ctx.attribution) items.push(ctx.line(W / 2, H - 34, 'Made with Kutumb', 'text', 8, P.mist, { align: 'middle' }));
   return ctx.page('Cover', items);
 }
 

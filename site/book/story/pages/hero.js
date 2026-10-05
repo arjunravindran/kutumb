@@ -282,7 +282,7 @@ function cover(ctx, page, story) {
     // Round 2, finding 15: `flame` - the palette's lightest warm token - still read as
     // near-invisible against the cover's own deep night sky; `card`, a near-white, does not.
     const credit = ghat.at('credit');
-    items.push(ctx.line(credit.x + 4, credit.y + 15, 'Made with f-tree', 'text', 7.5, P.card, { width: credit.w, op: 0.85, kind: 'folio' }));
+    items.push(ctx.line(credit.x + 4, credit.y + 15, 'Made with Kutumb', 'text', 7.5, P.card, { width: credit.w, op: 0.85, kind: 'folio' }));
   }
   return ctx.page(tpl.cover.greeting, items, P.deep);
 }
@@ -617,7 +617,7 @@ const noteFor = (ctx, page, person) => page.chapters.map((c) => noteCaption(c, c
 /* ------------------------------------------------------------------ the closing */
 
 const MISSING = 'Is someone missing?';
-const SCAN = 'Scan to get f-tree';
+const SCAN = 'Scan to get Kutumb';
 const CAP_SIZE = 9.5;   // the QR caption
 const CAP_DROP = 17;    // its baseline, below the plate's foot
 const CAP_GAP = 5;      // and the clear air between it and the folio row

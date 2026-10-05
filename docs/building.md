@@ -1,6 +1,6 @@
 # Building, testing and releasing
 
-Everything you need to get f-tree running from source, and how a release is cut.
+Everything you need to get Kutumb running from source, and how a release is cut.
 
 New contributors: read [CONTRIBUTING.md](../CONTRIBUTING.md) first — it has the short version and
 a list of good first issues.
@@ -95,7 +95,7 @@ keyPassword=…
 **Or let CI do it.** Bump `versionName` in `app/build.gradle.kts`, tag it, push the tag:
 
 ```bash
-git tag -a v0.2.0 -m "f-tree 0.2.0" && git push origin v0.2.0
+git tag -a v0.2.0 -m "Kutumb 0.2.0" && git push origin v0.2.0
 ```
 
 [`.github/workflows/release.yml`](../.github/workflows/release.yml) checks the tag matches the app's

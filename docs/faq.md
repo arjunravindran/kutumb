@@ -6,7 +6,7 @@
 
 ## Getting it
 
-### Is f-tree free?
+### Is Kutumb free?
 
 Yes, and open source under the [MIT licence](../LICENSE). There is no paid tier, no subscription,
 no advertisement and no upsell. There is nothing to buy because there is no server to pay for.
@@ -14,7 +14,7 @@ no advertisement and no upsell. There is nothing to buy because there is no serv
 ### Is it on the Google Play Store?
 
 No. It is distributed as an APK from [GitHub
-Releases](https://github.com/thisisankit27/f-tree/releases/latest) and from
+Releases](https://github.com/arjunravindran/f-tree/releases/latest) and from
 [ftree.vibethroughcode.com](https://ftree.vibethroughcode.com/).
 
 Android will ask you to allow installing from your browser or file manager once. The website walks
@@ -26,7 +26,7 @@ Every release publishes a SHA-256, shown on the website and in the GitHub releas
 installing:
 
 ```bash
-sha256sum f-tree-0.7.0.apk
+sha256sum kutumb-0.7.0.apk
 ```
 
 The APK is built and signed by [GitHub Actions from a
@@ -85,7 +85,7 @@ photographs in it, and the [format is documented](ftree-format.md) so that anyth
 ### Is my tree encrypted?
 
 Beyond Android's own full-disk encryption, no, and the export is a plain ZIP on purpose — so the
-data outlives the app. Somebody with your unlocked phone can open f-tree. This is a documented
+data outlives the app. Somebody with your unlocked phone can open Kutumb. This is a documented
 limitation rather than an oversight; see the [security policy](../SECURITY.md).
 
 ### What happens to my tree if this project is abandoned?
@@ -99,7 +99,7 @@ is no server whose shutdown could take anything with it.
 
 ### How do I record someone whose name nobody remembers?
 
-Add them and leave the name blank. **A person with no name is a valid person in f-tree** — not a
+Add them and leave the name blank. **A person with no name is a valid person in Kutumb** — not a
 placeholder, not an error — and they appear on the chart with a dashed brass edge, meaning the gap
 is in what the family remembers rather than a fault in the record.
 
@@ -121,7 +121,7 @@ about what is known.
 
 ### How does the relation finder work?
 
-Pick any two people. f-tree gives you two things:
+Pick any two people. Kutumb gives you two things:
 
 - **The word for it**, from the nearest shared ancestor — *first cousin once removed*,
   *great-great-grandfather*, *mother-in-law*.
@@ -135,7 +135,7 @@ chain.
 ### Why does it sometimes not give me a single word?
 
 Because English often has none. "My aunt's husband's brother" is what he is, and the chain says it
-better than an invented word could. Rather than a flat "related by marriage", f-tree shows the
+better than an invented word could. Rather than a flat "related by marriage", Kutumb shows the
 chain and says who married whom.
 
 ### What is the difference between Compact, Chart and Everyone?
@@ -175,7 +175,7 @@ Very likely, and this is the contribution the project most wants. Bengali, Marat
 Punjabi, Tamil and Telugu are already covered structurally — each is a word list plus a small rules
 file. It needs a **native speaker** more than a developer.
 
-[Open an issue and say which language.](https://github.com/thisisankit27/f-tree/issues/new/choose)
+[Open an issue and say which language.](https://github.com/arjunravindran/f-tree/issues/new/choose)
 
 ---
 
@@ -185,7 +185,7 @@ file. It needs a **native speaker** more than a developer.
 
 A designed, printable PDF of your tree — a cover, everyone in the family on one page, a page of
 facts about the family, a page per generation, an index to find yourself in, and a closing page.
-It is made on your phone or your laptop, the same as everything else in f-tree: no account, no
+It is made on your phone or your laptop, the same as everything else in Kutumb: no account, no
 upload, nothing sent anywhere until you choose to share the file yourself. See
 [docs/family-book.md](family-book.md) for the full design.
 
@@ -207,7 +207,7 @@ come out a little larger than a desktop-made one, which uses ordinary JPEG compr
 both stay comfortably under a 10 MB budget so the file still moves through a chat app. Turning
 photographs off drops the estimate to a few hundred kilobytes: pages, names and dates only.
 
-### What is "Made with f-tree" and the QR code on the last page?
+### What is "Made with Kutumb" and the QR code on the last page?
 
 The book's only advertisement for itself, and it is deliberately small: a line of text on every
 page, and a closing page with a QR code to the site and the words *Is someone missing? Add them*.
@@ -225,7 +225,7 @@ never leaves the list and is what a book opens on the rest of the year.
 
 ### Does making a book send anything anywhere?
 
-No. It is composed and drawn entirely on your device, exactly like every other screen in f-tree.
+No. It is composed and drawn entirely on your device, exactly like every other screen in Kutumb.
 Nothing leaves your phone or your laptop until *you* choose **Share** or **Save PDF…** and send
 the resulting file somewhere yourself — the same rule as an exported `.ftree`.
 
@@ -295,7 +295,7 @@ lost.
 
 ### How do in-app updates work?
 
-Off until you switch them on in Settings. When on, f-tree checks GitHub for a newer release and,
+Off until you switch them on in Settings. When on, Kutumb checks GitHub for a newer release and,
 before installing anything, verifies three things in order:
 
 1. the download's SHA-256 against the digest GitHub publishes for the asset,
@@ -320,7 +320,7 @@ version over a newer one. The next stable release does. Export your tree before 
 
 ### Who makes this?
 
-[Ankit Srivastava](https://github.com/thisisankit27). It is MIT-licensed and contributions are
+[Arjun Ravindran](https://github.com/arjunravindran), from f-tree by [Ankit Srivastava](https://github.com/thisisankit27). It is MIT-licensed and contributions are
 welcome — see [CONTRIBUTING.md](../CONTRIBUTING.md).
 
 ### How can I help?
@@ -333,5 +333,5 @@ families find it.
 ### I found a security problem.
 
 Please do not open a public issue. Report it through the [private advisory
-form](https://github.com/thisisankit27/f-tree/security/advisories/new); scope and expectations are
+form](https://github.com/arjunravindran/f-tree/security/advisories/new); scope and expectations are
 in [SECURITY.md](../SECURITY.md).

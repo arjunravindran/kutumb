@@ -35,36 +35,36 @@ const THE_OTHER = 'the other device';
  */
 const PROBLEMS = {
   PROTOCOL_TOO_NEW: {
-    title: 'These two versions of f-tree can’t talk to each other',
-    send: (peer) => `${peer} has an older f-tree that doesn’t understand this one. Update f-tree `
+    title: 'These two versions of Kutumb can’t talk to each other',
+    send: (peer) => `${peer} has an older Kutumb that doesn’t understand this one. Update Kutumb `
       + `on ${peer}, then try again.`,
-    receive: (peer) => `${peer} has a newer f-tree than this computer. Update f-tree here, then `
+    receive: (peer) => `${peer} has a newer Kutumb than this computer. Update Kutumb here, then `
       + 'try again.',
   },
   PROTOCOL_TOO_OLD: {
-    title: 'These two versions of f-tree can’t talk to each other',
-    send: (peer) => `This f-tree is too old for ${peer}. Update f-tree on this computer, then try `
+    title: 'These two versions of Kutumb can’t talk to each other',
+    send: (peer) => `This Kutumb is too old for ${peer}. Update Kutumb on this computer, then try `
       + 'again.',
-    receive: (peer) => `${peer} has an older f-tree that this one no longer understands. Update `
-      + `f-tree on ${peer}, then try again.`,
+    receive: (peer) => `${peer} has an older Kutumb that this one no longer understands. Update `
+      + `Kutumb on ${peer}, then try again.`,
   },
   NOT_A_NEARBY_PEER: {
-    title: 'That isn’t f-tree',
-    send: () => 'Something answered at that address, but it wasn’t f-tree. Check the address on '
+    title: 'That isn’t Kutumb',
+    send: () => 'Something answered at that address, but it wasn’t Kutumb. Check the address on '
       + 'the other device’s Receive screen.',
-    receive: () => 'Something connected that wasn’t f-tree, and was turned away.',
+    receive: () => 'Something connected that wasn’t Kutumb, and was turned away.',
   },
   MALFORMED_FRAME: {
     title: 'The connection sent something unreadable',
-    send: (peer) => `${peer} sent something this f-tree couldn’t read, so it stopped. Nothing was `
+    send: (peer) => `${peer} sent something this Kutumb couldn’t read, so it stopped. Nothing was `
       + 'sent.',
-    receive: (peer) => `${peer} sent something this f-tree couldn’t read, so it stopped. Nothing `
+    receive: (peer) => `${peer} sent something this Kutumb couldn’t read, so it stopped. Nothing `
       + 'was added.',
   },
   FRAME_TOO_LARGE: {
     title: 'The connection sent something unreadable',
-    send: (peer) => `${peer} sent more at once than f-tree ever sends, so it stopped.`,
-    receive: (peer) => `${peer} sent more at once than f-tree ever sends, so it stopped. Nothing `
+    send: (peer) => `${peer} sent more at once than Kutumb ever sends, so it stopped.`,
+    receive: (peer) => `${peer} sent more at once than Kutumb ever sends, so it stopped. Nothing `
       + 'was added.',
   },
   UNEXPECTED_MESSAGE: {
@@ -164,10 +164,10 @@ const PROBLEMS = {
       + 'away before anything read it. Ask them to send it again.',
   },
   TREE_FORMAT_TOO_NEW: {
-    title: 'One of these copies of f-tree is too old',
-    send: (peer) => `${peer} has an f-tree too old to read trees from this one. Update f-tree `
+    title: 'One of these copies of Kutumb is too old',
+    send: (peer) => `${peer} has a Kutumb too old to read trees from this one. Update Kutumb `
       + `on ${peer}, then try again.`,
-    receive: (peer) => `${peer} writes trees this f-tree is too old to read. Update f-tree here, `
+    receive: (peer) => `${peer} writes trees this Kutumb is too old to read. Update Kutumb here, `
       + 'then try again.',
   },
   IMPORT_REFUSED: {
@@ -177,16 +177,16 @@ const PROBLEMS = {
   },
   NETWORK: {
     title: 'This computer can’t reach the network',
-    send: () => 'f-tree couldn’t connect. Check this computer is on the same Wi-Fi as the other '
+    send: () => 'Kutumb couldn’t connect. Check this computer is on the same Wi-Fi as the other '
       + 'device, and that the address is the one on its Receive screen.',
-    receive: () => 'f-tree couldn’t start listening on this network. Check this computer is on '
-      + 'Wi-Fi, and that a firewall isn’t blocking f-tree.',
+    receive: () => 'Kutumb couldn’t start listening on this network. Check this computer is on '
+      + 'Wi-Fi, and that a firewall isn’t blocking Kutumb.',
   },
   PERMISSION: {
-    title: 'f-tree isn’t allowed on the network',
-    send: () => 'This computer isn’t letting f-tree use the local network. Allow it in the '
+    title: 'Kutumb isn’t allowed on the network',
+    send: () => 'This computer isn’t letting Kutumb use the local network. Allow it in the '
       + 'system’s privacy or firewall settings, then try again.',
-    receive: () => 'This computer isn’t letting f-tree use the local network. Allow it in the '
+    receive: () => 'This computer isn’t letting Kutumb use the local network. Allow it in the '
       + 'system’s privacy or firewall settings, then try again.',
   },
   BUSY: {
@@ -219,7 +219,7 @@ const PROBLEMS = {
 const IMPORT_PROBLEMS = {
   notAnArchive: 'it isn’t a .ftree file',
   notATreeFile: 'there’s no family tree inside it',
-  fromANewerVersion: 'it was written by a newer f-tree than theirs',
+  fromANewerVersion: 'it was written by a newer Kutumb than theirs',
   empty: 'there’s nobody in it',
   unreadable: 'part of it couldn’t be read',
 };
@@ -306,11 +306,11 @@ export function mergeArrivals(previous, current) {
  */
 export function arrivalAnnouncement(arrived, total) {
   if (!arrived.length) return null;
-  // A device on another version of f-tree is announced as being there, and as not being usable in
+  // A device on another version of Kutumb is announced as being there, and as not being usable in
   // the same breath (#191). Saying only that it appeared would send somebody to a row that cannot
   // be pressed, with nothing said about why.
   const named = arrived.length === 1
-    ? `${arrived[0].name} appeared${arrived[0].speakable === false ? ', on a different version of f-tree' : ''}`
+    ? `${arrived[0].name} appeared${arrived[0].speakable === false ? ', on a different version of Kutumb' : ''}`
     : `${arrived.length} devices appeared`;
   return `${named}. ${total === 1 ? '1 device' : `${total} devices`} nearby.`;
 }

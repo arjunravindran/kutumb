@@ -1,10 +1,10 @@
-# f-tree Family Network — Baseline Spec (v1)
+# Kutumb Family Network — Baseline Spec (v1)
 
 Sep 19, 2026 · @arjun
 
 ## Goals & non-goals
 
-Extend f-tree with location-aware stats, a fun-facts layer, and an async family trivia game — while keeping the app's existing no-accounts, no-server, offline-first posture intact everywhere except the one place that genuinely needs the internet (remote sync after the first in-person pairing).
+Extend Kutumb with location-aware stats, a fun-facts layer, and an async family trivia game — while keeping the app's existing no-accounts, no-server, offline-first posture intact everywhere except the one place that genuinely needs the internet (remote sync after the first in-person pairing).
 
 **Non-goals:**
 

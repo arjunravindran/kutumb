@@ -84,7 +84,7 @@ export function rangoliRing(cx, cy, radius, count, colours, rule) {
   return items;
 }
 
-/** The f-tree mark: two discs joined to a third, which is the dashed brass ring of a name unknown. */
+/** The Kutumb mark: two discs joined to a third, which is the dashed brass ring of a name unknown. */
 export function logo(x, y, size, ink, brass) {
   const k = size / 24;
   const P = (px, py) => [x + px * k, y + py * k];

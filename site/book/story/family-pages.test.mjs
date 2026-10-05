@@ -592,7 +592,7 @@ test('a half-sibling group is drawn as its own household, not merged into one ro
 test('the folio diya always stands beside the page number, on both parities (#257 round 3, regression 2)', async () => {
   // `ctx.footer` (compose.js) alternates the number and the credit to the outer foot by page
   // parity - odd right, even left. `folio()` (parts/paper.js) used to hang the lamp at a fixed x,
-  // so it read correctly on an odd page and sat stranded under "Made with f-tree" on an even one.
+  // so it read correctly on an odd page and sat stranded under "Made with Kutumb" on an even one.
   const { book, report } = await compose('story-large');
   const mine = report.pages.filter((p) => MINE.includes(p.archetype));
   const odd = mine.find((p) => p.page % 2 === 1);

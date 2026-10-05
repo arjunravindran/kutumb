@@ -13,7 +13,7 @@
  * exactly as it was.
  *
  * That is cheaper than it sounds -- a tree is a few hundred kilobytes and no disk is touched --
- * and it turns a whole category of writer bug from "somebody's family is gone" into "f-tree
+ * and it turns a whole category of writer bug from "somebody's family is gone" into "Kutumb
  * would not save, and said why".
  */
 
@@ -83,7 +83,7 @@ export async function bytesForTree(tree, photos = new Map(), now = new Date()) {
      * end. From here that is the same outcome as a failed check and deserves the same answer:
      * nothing was written, and here is why.
      */
-    throw new SaveRefused('f-tree could not write your tree to a file.',
+    throw new SaveRefused('Kutumb could not write your tree to a file.',
       `${error.message}\n\nNothing has been saved and the file on disk is unchanged.`);
   }
 
@@ -98,15 +98,15 @@ export async function bytesForTree(tree, photos = new Map(), now = new Date()) {
       if (!archive.has(name)) throw new Error(`the archive came back without ${name}`);
     }
   } catch (error) {
-    throw new SaveRefused('f-tree could not verify the file it was about to write.',
+    throw new SaveRefused('Kutumb could not verify the file it was about to write.',
       `${error.message}\n\nNothing has been saved and the file on disk is unchanged.`);
   }
 
   const problems = differences(held, read);
   if (problems.length) {
-    throw new SaveRefused('f-tree would have written a file that does not match your tree.',
+    throw new SaveRefused('Kutumb would have written a file that does not match your tree.',
       `${problems.join('\n')}\n\nNothing has been saved and the file on disk is unchanged. `
-      + 'Please report this — it is a bug in f-tree, not in your tree.');
+      + 'Please report this — it is a bug in Kutumb, not in your tree.');
   }
 
   return {

@@ -253,7 +253,7 @@ private fun Browse(
 /**
  * One device.
  *
- * A device on a version of f-tree this one cannot speak to is shown rather than left out (#191): a
+ * A device on a version of Kutumb this one cannot speak to is shown rather than left out (#191): a
  * row that is never drawn reads as a network fault, and "I can't see it" is the hardest thing to
  * work out over the phone with a relative. It is the same row, dimmed, with no click to give and a
  * line saying what to do about it -- and it is marked disabled so TalkBack says so too.

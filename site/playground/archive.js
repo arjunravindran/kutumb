@@ -209,7 +209,7 @@ export function parseDocument(text) {
   }
   if (!raw || typeof raw !== 'object') throw new ArchiveError('The tree.json is not an object.');
   if (raw.format !== 'f-tree') {
-    throw new ArchiveError(`That file says its format is "${raw.format ?? 'missing'}", not f-tree.`);
+    throw new ArchiveError(`That file says its format is "${raw.format ?? 'missing'}", not Kutumb.`);
   }
   const version = Number(raw.version);
   if (!Number.isFinite(version)) throw new ArchiveError('That file does not say which format version it is.');

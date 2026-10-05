@@ -49,7 +49,7 @@ const SEND_REFUSALS = {
   TOO_LARGE: 'This tree is larger than nearby sharing carries, which is 512 MB.',
   NOT_OPEN: 'The nearby window was closed. Open it again to send.',
   BAD_REQUEST: 'This tree couldn’t be prepared for sending.',
-  VERSION: 'That device is on a different version of f-tree. Update both to share.',
+  VERSION: 'That device is on a different version of Kutumb. Update both to share.',
 };
 
 /**
@@ -204,7 +204,7 @@ export function createNearby({ shell, hooks, drawCode = null }) {
       intro: 'Nearby sharing is off.',
       content: [
         h('p', { class: 'nearby-prose' },
-          'Turned on, this computer can send a tree to f-tree on another device on the same Wi-Fi, or '
+          'Turned on, this computer can send a tree to Kutumb on another device on the same Wi-Fi, or '
           + 'receive one from it — directly, with nothing uploaded anywhere.'),
         h('p', { class: 'nearby-prose' },
           'It can only be seen while this window is open, and nothing arrives unless you accept it.'),
@@ -242,7 +242,7 @@ export function createNearby({ shell, hooks, drawCode = null }) {
   /*
    * One device. The same row either way, because it is the same list.
    *
-   * A device on a version of f-tree this one cannot speak to is shown rather than left out (#191):
+   * A device on a version of Kutumb this one cannot speak to is shown rather than left out (#191):
    * a row that is never drawn reads as a network fault, and "I can't see it" is the hardest thing
    * to work out over the phone. It is the same row, disabled and dimmed, and where the address
    * would be it says what to do about it instead -- the address is no use until both are updated.
@@ -254,7 +254,7 @@ export function createNearby({ shell, hooks, drawCode = null }) {
       },
       h('span', { class: 'nearby-peer-name', text: peer.name }),
       h('span', { class: 'nearby-peer-where' },
-        h('span', { text: 'On a different version of f-tree. Update both to share.' })));
+        h('span', { text: 'On a different version of Kutumb. Update both to share.' })));
     }
     return h('button', {
       type: 'button', class: 'nearby-peer', 'data-key': peer.key,
@@ -413,7 +413,7 @@ export function createNearby({ shell, hooks, drawCode = null }) {
       h('li', {}, 'On the other device, open ', h('b', {}, 'Send to a nearby device'), '.'),
       h('li', {}, 'Pick ', h('b', { text: session.deviceName }), ' in its list, and check the two codes match.'));
     const others = [
-      picture ? h('p', { class: 'nearby-or' }, 'Or scan this code with f-tree on a phone.') : null,
+      picture ? h('p', { class: 'nearby-or' }, 'Or scan this code with Kutumb on a phone.') : null,
       where ? h('p', { class: 'nearby-or' }, 'Or type this address on the other device: ',
         h('code', { class: 'nearby-where', text: where })) : null,
     ];

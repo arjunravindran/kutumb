@@ -440,7 +440,7 @@ function context(family, options, tpl, allowance, now, rec) {
       const numberRight = ctx.tpl.format !== 2 || ctx.pageNo % 2 === 1;
       const items = [said(text(numberRight ? PAGE.w - 40 : 40, PAGE.h - 22, String(ctx.pageNo), 'text', 7.5, ink, { align: numberRight ? 'end' : 'start', w: 30, op: 0.85 }), 'folio')];
       if (ctx.attribution) {
-        items.push(said(text(numberRight ? 40 : PAGE.w - 40, PAGE.h - 22, 'Made with f-tree', 'text', 7, ink, { align: numberRight ? 'start' : 'end', w: 120, op: 0.75 }), 'folio'));
+        items.push(said(text(numberRight ? 40 : PAGE.w - 40, PAGE.h - 22, 'Made with Kutumb', 'text', 7, ink, { align: numberRight ? 'start' : 'end', w: 120, op: 0.75 }), 'folio'));
       }
       return items;
     },

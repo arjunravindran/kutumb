@@ -1,4 +1,4 @@
-# f-tree documentation
+# Kutumb documentation
 
 [← back to the README](../README.md) · [website](https://ftree.vibethroughcode.com/) ·
 [browser viewer](https://ftree.vibethroughcode.com/playground/)

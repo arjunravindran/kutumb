@@ -120,7 +120,7 @@ export function canSave(decision) {
  * book was limited or locked, which is worse than the plainest possible wording.
  */
 const REASONS = {
-  'unknown-feature': 'This edition of f-tree does not have a book feature for the version installed.',
+  'unknown-feature': 'This edition of Kutumb does not have a book feature for the version installed.',
   'quota-used': 'The free plan’s book exports on this machine have been used up.',
   'generation-scope': 'The free plan covers only part of this family’s generations; the rest are left out below.',
   'premium-template': 'This template isn’t included in the free plan.',

@@ -185,7 +185,7 @@ const autosave = createAutosave({
   onStatus: () => paintSaveState(),
   onFailure: (error) => toast(
     `Couldn’t save ${state.name}: ${describeWriteFailure(error)}. `
-      + 'Your changes are still here, and f-tree will keep trying.',
+      + 'Your changes are still here, and Kutumb will keep trying.',
     'bad',
     { action: { label: 'Save as…', run: () => save({ as: true }) } },
   ),
@@ -272,7 +272,7 @@ function paintSaveState() {
  */
 function showFileName(name) {
   $('file-name').textContent = name ?? '';
-  document.title = name ? `${name} — f-tree` : 'f-tree';
+  document.title = name ? `${name} — Kutumb` : 'Kutumb';
 }
 
 /** Keeps the window, the menu and the save state in step with whether there is work not on disk. */
@@ -738,7 +738,7 @@ function paintPrefs() {
     : prefs.reminders
       ? remindersCoverageLine()
       : 'Off. When on, a note at 9 in the morning on a birthday — one a day, however many share '
-        + 'it — while f-tree is open, or when you next open it that day.';
+        + 'it — while Kutumb is open, or when you next open it that day.';
 
   // The name can only be chosen once there is something to name. With sharing off there is no
   // device id yet, so no generated name to show as the placeholder either -- and nothing to say it to.
@@ -3322,7 +3322,7 @@ let nearbyDialog = null;
 function drawCode(text) {
   if (typeof globalThis.qrcode !== 'function') return null;
   try {
-    return qrSvg(qrMatrix(globalThis.qrcode, text), { label: 'A code to scan with f-tree on a phone' });
+    return qrSvg(qrMatrix(globalThis.qrcode, text), { label: 'A code to scan with Kutumb on a phone' });
   } catch {
     return null;
   }

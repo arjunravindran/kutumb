@@ -1,5 +1,5 @@
 /*
- * f-tree site behaviour.
+ * Kutumb site behaviour.
  *
  * Three jobs: read the real release data from GitHub so the page can never quote a stale
  * version or checksum, count downloads from the same source, and run the one interactive
@@ -11,7 +11,7 @@
 (function () {
   'use strict';
 
-  var REPO = 'thisisankit27/f-tree';
+  var REPO = 'arjunravindran/f-tree';
   var API = 'https://api.github.com/repos/' + REPO + '/releases';
   var CACHE_KEY = 'ftree.release.v2';
   var CACHE_TTL = 10 * 60 * 1000;
@@ -584,7 +584,7 @@
 
     if (!desktop || !(desktop.assets || []).length) {
       assurance.innerHTML = 'Could not reach GitHub just now. '
-        + '<a href="https://github.com/thisisankit27/f-tree/releases?q=desktop&expanded=true">'
+        + '<a href="https://github.com/arjunravindran/f-tree/releases?q=desktop&expanded=true">'
         + 'The releases page has every build.</a>';
       return;
     }
@@ -616,7 +616,7 @@
 
     if (platform === 'android' || platform === 'ios') {
       assurance.innerHTML = 'This page is for a laptop. On a phone, '
-        + '<a href="../thanks/">f-tree is an Android app</a>.';
+        + '<a href="../thanks/">Kutumb is an Android app</a>.';
     } else if (platform === 'mac') {
       assurance.textContent = 'There is no macOS build yet — these are the Windows and Linux files.';
     }
@@ -793,7 +793,7 @@
     else if (onThanks) wireThanks(data);
     else showCounter(data);
   }).catch(function (err) {
-    if (window.console) console.warn('f-tree: release data unavailable —', err.message);
+    if (window.console) console.warn('Kutumb: release data unavailable —', err.message);
     if (onDesktopThanks) wireThanksDesktop(null);
     else if (onDownloads) wireDownloads(null);
     else if (onThanks) wireThanks(null);

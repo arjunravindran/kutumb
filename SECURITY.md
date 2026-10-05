@@ -2,7 +2,7 @@
 
 ## Supported versions
 
-f-tree ships as a single APK from GitHub Releases. Only the **latest stable release** is supported.
+Kutumb ships as a single APK from GitHub Releases. Only the **latest stable release** is supported.
 Pre-releases (`-beta.N`) are supported only in the sense that a report against one is welcome —
 fixes land in the next release rather than being backported.
 
@@ -17,7 +17,7 @@ fixes land in the next release rather than being backported.
 **Please do not open a public issue for a security problem.**
 
 Report it privately through GitHub's [Report a
-vulnerability](https://github.com/thisisankit27/f-tree/security/advisories/new) form, which opens a
+vulnerability](https://github.com/arjunravindran/f-tree/security/advisories/new) form, which opens a
 private advisory visible only to the maintainer.
 
 Please include what you were able to do, the version you tested, and — if you have one — a proof of
@@ -27,7 +27,7 @@ you would rather not be.
 
 ## What is in scope
 
-The parts of f-tree where a vulnerability would have real consequences:
+The parts of Kutumb where a vulnerability would have real consequences:
 
 ### The updater (`update/`)
 
@@ -119,14 +119,14 @@ These are deliberate, and knowing them may save you time:
   a network you are already on, with no account and nothing in between. Two of the app's six
   permissions, `INTERNET` and `REQUEST_INSTALL_PACKAGES`, exist only for the opt-in updater; three
   more exist only for nearby sharing and do nothing while both of its screens are closed.
-- **An APK signed with a different key cannot update an installed f-tree** — Android refuses it.
+- **An APK signed with a different key cannot update an installed Kutumb** — Android refuses it.
   The updater checks the certificate itself so that this is refused early, with an explanation,
   rather than discovered at the end of a download.
 - **Verify your download.** Every release publishes a SHA-256, shown on the
   [website](https://ftree.vibethroughcode.com/) and in the GitHub release:
-  `sha256sum f-tree-<version>.apk`.
+  `sha256sum kutumb-<version>.apk`.
 
 ## Thank you
 
-f-tree holds something people cannot re-create if it is lost. Time spent looking at it carefully is
+Kutumb holds something people cannot re-create if it is lost. Time spent looking at it carefully is
 genuinely appreciated.

@@ -767,7 +767,7 @@ somebody's log or dialog, and a number is all a sentence needs.
 ## Versions, and what a later release may change
 
 A peer announcing a `minVersion` this release cannot speak is **shown, greyed, with a note that it
-needs a newer f-tree** — not hidden. It is the same choice the importer makes when it refuses a file
+needs a newer Kutumb** — not hidden. It is the same choice the importer makes when it refuses a file
 from a later version out loud rather than pretending it is not there: a peer that vanishes is a bug
 report, a peer that explains itself is an upgrade.
 

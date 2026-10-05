@@ -96,7 +96,7 @@
       ],
       "category": "Office",
       "synopsis": "A local-first family tree",
-      "description": "Read and explore a family tree exported from the f-tree Android app. Everything stays on this machine: no account, no cloud, no backend.",
+      "description": "Read and explore a family tree exported from the Kutumb Android app. Everything stays on this machine: no account, no cloud, no backend.",
       "icon": "build/icons",
       "mimeTypes": [
         "application/x-ftree"
@@ -116,13 +116,13 @@
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
       "perMachine": false,
-      "shortcutName": "f-tree"
+      "shortcutName": "Kutumb"
     },
     "fileAssociations": [
       {
         "ext": "ftree",
-        "name": "f-tree export",
-        "description": "A family tree exported from f-tree",
+        "name": "Kutumb export",
+        "description": "A family tree exported from Kutumb",
         "role": "Viewer"
       }
     ]
@@ -130,6 +130,6 @@
   "homepage": "https://ftree.vibethroughcode.com/",
   "repository": {
     "type": "git",
-    "url": "https://github.com/thisisankit27/f-tree.git"
+    "url": "https://github.com/arjunravindran/f-tree.git"
   }
 }

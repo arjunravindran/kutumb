@@ -365,7 +365,7 @@ private fun FailureCard(failure: BookFailure, onRetry: () -> Unit, modifier: Mod
                 onClick = {
                     // Onto this phone's clipboard and nowhere else: the reader decides whether to send it.
                     context.getSystemService(ClipboardManager::class.java)
-                        ?.setPrimaryClip(ClipData.newPlainText("f-tree", failureDetails(failure)))
+                        ?.setPrimaryClip(ClipData.newPlainText("Kutumb", failureDetails(failure)))
                     copied = true
                 },
                 modifier = Modifier.testTag(BookCopyDetailsTag),

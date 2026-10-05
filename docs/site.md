@@ -18,7 +18,7 @@ edit the HTML and push.
 It reads version, size, release date, SHA-256 and the download count from the GitHub Releases API
 at run time, so cutting a release updates the site with no edit here, and the download count is
 real asset downloads rather than a third-party tracker. There is no analytics script on either
-page. Asset paths are relative, so the site works both at `thisisankit27.github.io/f-tree/` and at
+page. Asset paths are relative, so the site works both at `arjunravindran.github.io/f-tree/` and at
 a custom domain.
 
 ## The viewer
@@ -88,14 +88,14 @@ python3 -m http.server 8731 --directory site
 ## Custom domain
 
 The site is served at **[ftree.vibethroughcode.com](https://ftree.vibethroughcode.com/)**, with
-`thisisankit27.github.io/f-tree/` still working. Asset paths are relative so that both do.
+`arjunravindran.github.io/f-tree/` still working. Asset paths are relative so that both do.
 
 The domain is held in the repository's **Pages settings**, not in a `site/CNAME` file — this
 deployment builds the pages as a workflow artifact rather than serving a branch, so GitHub keeps
 the custom domain as a repository setting and there is nothing to commit. Check it with:
 
 ```bash
-gh api repos/thisisankit27/f-tree/pages --jq '.cname'
+gh api repos/arjunravindran/f-tree/pages --jq '.cname'
 ```
 
 If you are pointing a *new* subdomain at this repository, order matters: add the `CNAME` record

@@ -186,7 +186,7 @@ inside, and the person is named by relation in `hand`.
 
 - **Margins.** A4 is 595 × 842 pt. The text-safe area is inset 42 pt at the sides, 54 pt at the
   top and 50 pt at the foot. Art may bleed.
-- **Folio.** A small lit diya and the page number at the outer foot, with "Made with f-tree"
+- **Folio.** A small lit diya and the page number at the outer foot, with "Made with Kutumb"
   quietly at the opposite corner.
 - **Chapter openings** each use a different composition: arch window, full scene, doorways, lane,
   register, niches.

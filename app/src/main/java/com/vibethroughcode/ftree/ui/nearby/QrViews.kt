@@ -220,7 +220,7 @@ fun ScanAction(onScanned: (QrLink) -> Unit) {
  *
  * Frames are analysed on one background thread, newest only — a scanner that queues frames falls
  * further behind the longer somebody holds it still. Each frame's luminance plane goes to
- * [QrCodes.decode] as it arrived. A code that is not an f-tree code (a menu, a Wi-Fi password) is
+ * [QrCodes.decode] as it arrived. A code that is not a Kutumb code (a menu, a Wi-Fi password) is
  * ignored rather than reported, because the person is still aiming. Nothing is recorded or saved.
  */
 @Composable

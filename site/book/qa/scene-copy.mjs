@@ -23,7 +23,7 @@ const display = (s, size, fill) => ({ s, font: 'book_display', size, lead: size 
 export const SAMPLE_COPY = {
   'ghat-night': {
     title: [display('शुभ दीपावली', 58, 'gold'), display('from the Kumar family', 34, 'card'), hand('Twenty-three lamps, one for each of us.', 17, 'flame')],
-    credit: [{ s: 'Made with f-tree', font: 'book_text', size: 7.5, lead: 10, fill: 'card', align: 'start' }],
+    credit: [{ s: 'Made with Kutumb', font: 'book_text', size: 7.5, lead: 10, fill: 'card', align: 'start' }],
   },
   banyan: {
     title: [display('Our roots', 36, 'ink'), hand('Five generations before Ankit', 15, 'inkSoft')],
@@ -45,7 +45,7 @@ export const SAMPLE_COPY = {
   'closing-sky': {
     title: [display('Happy Diwali', 44, 'gold'), hand('from all of us, to all of you', 17, 'flame')],
     missing: [display('Is someone missing?', 22, 'card'), body('If you know a name, a date or a face that belongs in this book, tell us. The family grows every time someone remembers.', 'card')],
-    credit: [{ s: 'Made with f-tree', font: 'book_text', size: 7.5, lead: 10, fill: 'card', align: 'start' }],
+    credit: [{ s: 'Made with Kutumb', font: 'book_text', size: 7.5, lead: 10, fill: 'card', align: 'start' }],
   },
 };
 

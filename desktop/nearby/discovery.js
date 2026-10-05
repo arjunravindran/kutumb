@@ -62,7 +62,7 @@ class PeerTable extends EventEmitter {
       maxVersion: beacon.maxVersion,
       minVersion: beacon.minVersion,
       // Whether this build and that one can hold a conversation at all. Kept on the peer rather
-      // than filtered out, so a device on another version of f-tree can be shown and said to be
+      // than filtered out, so a device on another version of Kutumb can be shown and said to be
       // on another version, instead of simply never appearing (#191).
       speakable: beaconWire.speakable(beacon),
       lastSeen: atMillis,

@@ -1,6 +1,6 @@
 # The `.ftree` format, sharing, and merging
 
-An f-tree export is an ordinary ZIP with a documented JSON document inside it. It is the only way
+A Kutumb export is an ordinary ZIP with a documented JSON document inside it. It is the only way
 a tree leaves the phone, and it is designed so that **importing one adds to your tree rather than
 replacing it**.
 

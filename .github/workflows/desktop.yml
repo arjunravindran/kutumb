@@ -275,7 +275,7 @@ jobs:
           # ordinary update channel.
           gh release create "$GITHUB_REF_NAME" installers/* \
             --prerelease \
-            --title "f-tree desktop $version" \
+            --title "Kutumb desktop $version" \
             --notes "The desktop app for Windows and Linux, version $version.
 
           - **Windows**: the \`.exe\` installer.

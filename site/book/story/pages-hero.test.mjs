@@ -368,8 +368,8 @@ test('the closing carries its own farewell, the call to action, the QR code and 
   assert.notEqual(STORY_TEMPLATE.copy.closing.title, STORY_TEMPLATE.cover.greeting, 'the farewell repeats the cover\'s own greeting');
   assert.ok(!words.includes(STORY_TEMPLATE.cover.greeting), 'the closing still says what the cover said');
   assert.match(words, /Is someone missing\?/);
-  assert.match(words, /Scan to get f-tree/);
-  assert.match(words, /Made with f-tree/);
+  assert.match(words, /Scan to get Kutumb/);
+  assert.match(words, /Made with Kutumb/);
   // The code itself: one long path of dark modules, drawn where the scene keeps room for it.
   const qr = book.pages[page.page - 1].items.filter((it) => it.t === 'path' && it.d.length > 2000);
   assert.equal(qr.length, 1, 'the QR code is not on the page');
@@ -592,7 +592,7 @@ test('finding 8: the closing’s QR code is mounted - a mat, a gold hairline, a 
   assert.ok(mat, 'no mounting mat for the QR code');
   assert.ok(items.some((it) => it.t === 'rect' && it.stroke === PAPERCUT_PALETTE.gold), 'no gold hairline around the QR code');
   assert.ok(items.some((it) => it.t === 'rect' && it.fill === PAPERCUT_PALETTE.ink), 'no paper shadow under the QR plate');
-  const caption = texts(report, page.page).find((b) => b.s === 'Scan to get f-tree');
+  const caption = texts(report, page.page).find((b) => b.s === 'Scan to get Kutumb');
   assert.ok(caption, 'no caption');
   assert.ok(caption.y > mat.y + mat.h, 'the caption floats beside the plate rather than sitting under it');
 });
@@ -790,6 +790,6 @@ test('the cover never prints a bad count: no "1 lamps", and nothing numeric with
   assert.match(one, /One lamp\b/, `a family of one should say one lamp: ${one}`);
 
   const none = textOf(composeBook({ format: 1, people: [], links: [] }, { now: NOW }, template));
-  assert.ok(!/\d/.test(none.replace(/Made with f-tree/g, '')), `the cover printed a number with nobody to count: ${none}`);
+  assert.ok(!/\d/.test(none.replace(/Made with Kutumb/g, '')), `the cover printed a number with nobody to count: ${none}`);
   assert.ok(!/\blamps?\b/i.test(none), `the cover counted lamps with nobody to count: ${none}`);
 });

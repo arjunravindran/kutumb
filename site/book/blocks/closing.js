@@ -3,7 +3,7 @@
  *
  * A family book is always missing somebody, and the person who notices is usually the one it was
  * sent to. So the last page asks for them - a name, a year, a photograph - and says how: the QR
- * code opens the website, where the app is. That is the whole of f-tree's reach into the world;
+ * code opens the website, where the app is. That is the whole of Kutumb's reach into the world;
  * there is no account to join and nothing is sent anywhere by scanning it.
  *
  * The edition line ("This edition: September 2026") is what makes a second book worth sending.
@@ -29,10 +29,10 @@ export function closingPage(ctx) {
   if (ctx.attribution) {
     items.push(rect(W / 2 - 66, 440, 132, 132, { r: 10, fill: P.star }));
     items.push(qrPath(SITE_QR, W / 2 - 56, 450, 112, P.night));
-    items.push(ctx.line(W / 2, 604, 'Scan to get f-tree', 'display', 18, P.star, { align: 'middle' }));
+    items.push(ctx.line(W / 2, 604, 'Scan to get Kutumb', 'display', 18, P.star, { align: 'middle' }));
     items.push(ctx.line(W / 2, 624, 'Free and private. Your family stays on your phone.', 'text', 11, P.mist, { align: 'middle' }));
     items.push(...logo(W / 2 - 50, 724, 16, P.star, P.gold));
-    items.push(ctx.line(W / 2 - 28, 737, 'Made with f-tree', 'text', 10, P.star));
+    items.push(ctx.line(W / 2 - 28, 737, 'Made with Kutumb', 'text', 10, P.star));
   }
   return ctx.page('Is someone missing?', items);
 }

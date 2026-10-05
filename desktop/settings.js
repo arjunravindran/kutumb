@@ -72,7 +72,7 @@ const DEFAULTS = Object.freeze({
   nearbyName: null,
   /**
    * Birthday reminders (#154): a note at nine in the morning on a birthday, one a day however many
-   * share it, while f-tree is open or on the same-day catch-up when it is next opened. Off by
+   * share it, while Kutumb is open or on the same-day catch-up when it is next opened. Off by
    * default for the same reason the network settings are: a notification nobody asked for is not a
    * quiet default, it is a surprise.
    */

@@ -1,6 +1,6 @@
 # Architecture
 
-How f-tree is built, and why it is built that way. This is the long-form companion to the
+How Kutumb is built, and why it is built that way. This is the long-form companion to the
 [README](../README.md) — read it if you want to change the app, or if you are curious how a
 family tree is modelled once you accept that families are not trees.
 

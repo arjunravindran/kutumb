@@ -1,7 +1,7 @@
 /*
  * The desktop shell.
  *
- * f-tree on a laptop is the same reader as the one on the website, in a window of its own: the
+ * Kutumb on a laptop is the same reader as the one on the website, in a window of its own: the
  * chart, the people index, the search and the relation finder are `site/playground/`, loaded from
  * disk rather than over the network. That is deliberate and is the whole reason this app is a few
  * hundred lines rather than a second application - one viewer, two shells, so a fix to the chart
@@ -45,7 +45,7 @@ const {
  * first costs one line and turns a silent crash into an answer.
  */
 if (process.platform === 'linux' && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY) {
-  console.error('f-tree: no display found. $DISPLAY and $WAYLAND_DISPLAY are both unset, so there '
+  console.error('Kutumb: no display found. $DISPLAY and $WAYLAND_DISPLAY are both unset, so there '
     + 'is nowhere to open a window. If you are on a remote shell, this needs a desktop session.');
   process.exit(1);
 }
@@ -239,7 +239,7 @@ async function saveInto(win, target, bytes, { quiet = false } = {}) {
     await backUpBefore(target, { root: backupRoot(), takenThisRun: backedUpThisRun });
   } catch (error) {
     // Never a reason to refuse the write: that would lose the very edit the backup protects.
-    console.warn(`f-tree: could not back up ${target} — ${error.message}`);
+    console.warn(`Kutumb: could not back up ${target} — ${error.message}`);
   }
 
   try {
@@ -317,7 +317,7 @@ async function openInto(win, file) {
 async function chooseInto(win) {
   const picked = await dialog.showOpenDialog(win, {
     title: 'Open a family tree',
-    filters: [{ name: 'f-tree export', extensions: ['ftree'] }, { name: 'All files', extensions: ['*'] }],
+    filters: [{ name: 'Kutumb export', extensions: ['ftree'] }, { name: 'All files', extensions: ['*'] }],
     properties: ['openFile'],
   });
   if (picked.canceled || !picked.filePaths.length) return null;
@@ -327,7 +327,7 @@ async function chooseInto(win) {
 
 /* ------------------------------------------------------------------ updates */
 
-const RELEASES_API = 'https://api.github.com/repos/thisisankit27/f-tree/releases?per_page=30';
+const RELEASES_API = 'https://api.github.com/repos/arjunravindran/f-tree/releases?per_page=30';
 
 /*
  * The one key that says which book templates this app will accept from that same place (#214): the
@@ -419,7 +419,7 @@ function fetchReleases() {
   return new Promise((resolve, reject) => {
     const request = net.request({ url: RELEASES_API, useSessionCookies: false });
     request.setHeader('accept', 'application/vnd.github+json');
-    request.setHeader('user-agent', `f-tree-desktop/${app.getVersion()}`);
+    request.setHeader('user-agent', `kutumb-desktop/${app.getVersion()}`);
     request.on('response', (response) => {
       if (response.statusCode !== 200) {
         response.on('data', () => {});
@@ -442,7 +442,7 @@ function fetchReleases() {
 function download(url, into) {
   return new Promise((resolve, reject) => {
     const request = net.request({ url, useSessionCookies: false });
-    request.setHeader('user-agent', `f-tree-desktop/${app.getVersion()}`);
+    request.setHeader('user-agent', `kutumb-desktop/${app.getVersion()}`);
     request.on('response', (response) => {
       if (response.statusCode !== 200) {
         response.on('data', () => {});
@@ -514,7 +514,7 @@ async function checkForUpdates(win, { quiet = false } = {}) {
       await dialog.showMessageBox(win, {
         type: 'info',
         message: found.kind === 'up-to-date'
-          ? `f-tree ${app.getVersion()} is the newest build.`
+          ? `Kutumb ${app.getVersion()} is the newest build.`
           : 'There is no build on offer for this system just now.',
         buttons: ['OK'],
       });
@@ -531,7 +531,7 @@ async function checkForUpdates(win, { quiet = false } = {}) {
   if (!found.file) {
     const go = await dialog.showMessageBox(win, {
       type: 'info',
-      message: `f-tree ${found.version} is available.`,
+      message: `Kutumb ${found.version} is available.`,
       detail: 'This copy was installed in a way the app should not overwrite by itself — a .deb '
         + 'needs your permission, and a folder you unpacked is yours to replace. The download '
         + 'page has the file for your system.',
@@ -555,7 +555,7 @@ async function checkForUpdates(win, { quiet = false } = {}) {
 
   const answer = await dialog.showMessageBox(win, {
     type: 'info',
-    message: `f-tree ${found.version} is available.`,
+    message: `Kutumb ${found.version} is available.`,
     detail: `${found.notes ? found.notes.slice(0, 700) + '\n\n' : ''}`
       + `${found.file.name} · ${(found.file.size / 1048576).toFixed(1)} MB`
       + `${found.file.sha256 ? '' : '\n\nGitHub has published no checksum for this file.'}`,
@@ -605,9 +605,9 @@ async function checkForUpdates(win, { quiet = false } = {}) {
   const windows = process.platform === 'win32';
   const next = await dialog.showMessageBox(win, {
     type: 'info',
-    message: `Downloaded and verified f-tree ${found.version}.`,
+    message: `Downloaded and verified Kutumb ${found.version}.`,
     detail: windows
-      ? 'Run the installer to finish. f-tree will close while it installs.'
+      ? 'Run the installer to finish. Kutumb will close while it installs.'
       : `Saved to ${got.path}\n\nAn AppImage replaces the one you are running: make it `
         + 'executable with chmod +x and start it. Nothing has been changed for you.',
     buttons: windows ? ['Run the installer', 'Show the file', 'Later'] : ['Show the file', 'Later'],
@@ -683,7 +683,7 @@ function buildMenu(win) {
         { type: 'separator' },
         /*
          * A designed PDF of the tree (#200, #207), the same accelerator every other app on the
-         * desktop uses for printing -- this is, in effect, the one thing in f-tree that gets
+         * desktop uses for printing -- this is, in effect, the one thing in Kutumb that gets
          * printed. Greyed the same way "Send to a nearby device…" is: there is no book to be made
          * of a tree with nobody in it, and the reader is told so in the dialog it opens rather than
          * left to wonder why a menu item does nothing.
@@ -799,14 +799,14 @@ function buildMenu(win) {
     {
       label: 'Help',
       submenu: [
-        { label: 'f-tree on the web', click: () => shell.openExternal('https://ftree.vibethroughcode.com/') },
-        { label: 'Report a problem', click: () => shell.openExternal('https://github.com/thisisankit27/f-tree/issues') },
+        { label: 'Kutumb on the web', click: () => shell.openExternal('https://ftree.vibethroughcode.com/') },
+        { label: 'Report a problem', click: () => shell.openExternal('https://github.com/arjunravindran/f-tree/issues') },
         { type: 'separator' },
         {
-          label: 'About f-tree',
+          label: 'About Kutumb',
           click: () => dialog.showMessageBox(win, {
             type: 'info',
-            message: `f-tree ${app.getVersion()}`,
+            message: `Kutumb ${app.getVersion()}`,
             detail: 'A local-first family tree. Everything stays on this machine: no account, no '
               + 'cloud, no backend. It reads and writes .ftree files, the same ones the Android '
               + 'app uses — but it does not need it: a tree can start here.',
@@ -909,7 +909,7 @@ const VIEWER_PARTITION = 'persist:viewer';
 function refuseTheNetwork(ses) {
   ses.webRequest.onBeforeRequest({ urls: ['http://*/*', 'https://*/*', 'ws://*/*', 'wss://*/*'] },
     (details, callback) => {
-      console.warn(`f-tree: refused a network request to ${details.url}`);
+      console.warn(`Kutumb: refused a network request to ${details.url}`);
       callback({ cancel: true });
     });
 }
@@ -1034,7 +1034,7 @@ async function createWindow() {
     minHeight: 560,
     backgroundColor: '#f7f6f1',
     show: false,
-    title: 'f-tree',
+    title: 'Kutumb',
     // Packaged builds take it from the installer's own resources, but a window manager that asks
     // the app rather than the desktop entry - and every run from source - gets it from here.
     icon: ICON_FOR_WINDOW,
@@ -1057,14 +1057,14 @@ async function createWindow() {
   } catch (error) {
     // Without them the app falls back to the system serif and monospace. Worth a line in the log,
     // not worth refusing to open somebody's family tree over.
-    console.warn(`f-tree: could not load the bundled typefaces — ${error.message}`);
+    console.warn(`Kutumb: could not load the bundled typefaces — ${error.message}`);
   }
   try {
     await win.webContents.insertCSS(await bookFontCss());
   } catch (error) {
     // The book dialog's preview would fall back to the system serif -- worth logging, not worth
     // refusing the whole window over, same as the two typefaces above.
-    console.warn(`f-tree: could not load the book's typefaces — ${error.message}`);
+    console.warn(`Kutumb: could not load the book's typefaces — ${error.message}`);
   }
   buildMenu(win);
 
@@ -1205,7 +1205,7 @@ ipcMain.handle('tree:chooseImport', async (event) => {
   const picked = await dialog.showOpenDialog(win, {
     title: 'Choose a family tree to import',
     buttonLabel: 'Import',
-    filters: [{ name: 'f-tree export', extensions: ['ftree'] },
+    filters: [{ name: 'Kutumb export', extensions: ['ftree'] },
       { name: 'All files', extensions: ['*'] }],
     properties: ['openFile'],
   });
@@ -1258,7 +1258,7 @@ ipcMain.handle('tree:saveAs', async (event, { bytes, suggest }) => {
   const picked = await dialog.showSaveDialog(win, {
     title: 'Save the family tree',
     defaultPath: suggest || 'family-tree.ftree',
-    filters: [{ name: 'f-tree export', extensions: ['ftree'] }],
+    filters: [{ name: 'Kutumb export', extensions: ['ftree'] }],
   });
   if (picked.canceled || !picked.filePath) return { ok: false, reason: 'CANCELLED' };
   return saveInto(win, picked.filePath, bytes);
@@ -1369,7 +1369,7 @@ ipcMain.handle('book:assets', async () => {
     // same principle applies here: a staging mistake must not quietly take the feature away, so an
     // empty catalogue is what the dialog sees, and it says so, rather than the page hanging on a
     // rejected promise it never expected.
-    console.warn(`f-tree: could not read the book's templates or policy — ${error.message}`);
+    console.warn(`Kutumb: could not read the book's templates or policy — ${error.message}`);
     return { catalog: null, templates: [], downloaded: [], available: [], policy: null };
   }
 });

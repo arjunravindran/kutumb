@@ -10,11 +10,11 @@
  */
 
 const PROBLEM = {
-  /** Their f-tree speaks a version this one does not. */
+  /** Their Kutumb speaks a version this one does not. */
   PROTOCOL_TOO_NEW: 0x01,
   PROTOCOL_TOO_OLD: 0x02,
 
-  /** Something answered on that port, but it was not f-tree. */
+  /** Something answered on that port, but it was not Kutumb. */
   NOT_A_NEARBY_PEER: 0x03,
 
   MALFORMED_FRAME: 0x04,

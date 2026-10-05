@@ -118,7 +118,7 @@ class UpdateClient(
             connectTimeout = 15_000
             readTimeout = 30_000
             instanceFollowRedirects = true
-            setRequestProperty("User-Agent", "f-tree/${BuildConfig.VERSION_NAME}")
+            setRequestProperty("User-Agent", "Kutumb/${BuildConfig.VERSION_NAME}")
         }
     }
 }

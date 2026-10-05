@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Quick Reference
 
-**f-tree** is a family tree app for Android, with companion desktop (Windows/Linux) and web viewers. It's built around modeling real families as graphs with optional fields, featuring pure logic for relationship rules and chart layout.
+**Kutumb** is a family tree app for Android, with companion desktop (Windows/Linux) and web viewers. It's built around modeling real families as graphs with optional fields, featuring pure logic for relationship rules and chart layout.
 
 ### Build & Run
 
@@ -204,7 +204,7 @@ keyPassword=…
 1. Bump `versionName` in `app/build.gradle.kts`
 2. Tag and push:
    ```bash
-   git tag -a v0.2.0 -m "f-tree 0.2.0" && git push origin v0.2.0
+   git tag -a v0.2.0 -m "Kutumb 0.2.0" && git push origin v0.2.0
    ```
 3. CI (`.github/workflows/release.yml`) builds, signs, verifies, and attaches the APK to the release.
 

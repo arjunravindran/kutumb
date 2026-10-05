@@ -1,6 +1,6 @@
-# Contributing to f-tree
+# Contributing to Kutumb
 
-Thank you for looking. f-tree is a small app with a deliberately small dependency list, and it is
+Thank you for looking. Kutumb is a small app with a deliberately small dependency list, and it is
 possible to hold the whole thing in your head in an afternoon — which is the point.
 
 There are two ways to help that need no Android experience at all, so they come first.
@@ -16,7 +16,7 @@ speaker** far more than it needs a developer.
 
 English kinship is two numbers: how many generations up to a shared ancestor, and how many back
 down. That throws away the side of the family and the birth order — which is fine for "uncle" and
-useless for most of the world. f-tree already carries a `KinshipPath` alongside those numbers,
+useless for most of the world. Kutumb already carries a `KinshipPath` alongside those numbers,
 recording the genders the line ran through and, where the dates prove it, which of two siblings was
 born first.
 
@@ -26,7 +26,7 @@ already**. Each is a word list plus a small rules file, following the shape of
 [`res/values/kinship_hi.xml`](app/src/main/res/values/kinship_hi.xml).
 
 If you speak one of these and are willing to review a word list, **[open an
-issue](https://github.com/thisisankit27/f-tree/issues/new/choose)** and say so. Terms will not ship
+issue](https://github.com/arjunravindran/f-tree/issues/new/choose)** and say so. Terms will not ship
 in a language without a native speaker checking them — a wrong kinship word is the kind of mistake
 a family notices immediately.
 
@@ -55,8 +55,8 @@ Anything on this repo's pages. Corrections, clarifications, or translation.
 ## Getting set up
 
 ```bash
-git clone https://github.com/thisisankit27/f-tree.git
-cd f-tree
+git clone https://github.com/arjunravindran/f-tree.git
+cd Kutumb
 ./gradlew assembleDebug
 ```
 
@@ -160,7 +160,7 @@ outcome for everybody than a five-minute issue thread.
 
 ## Reporting a bug
 
-Use the [issue templates](https://github.com/thisisankit27/f-tree/issues/new/choose). The two
+Use the [issue templates](https://github.com/arjunravindran/f-tree/issues/new/choose). The two
 things that matter most: **what you expected to happen**, and **the shape of the family** it
 happened with.
 

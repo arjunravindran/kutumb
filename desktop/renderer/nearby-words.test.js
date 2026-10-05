@@ -135,7 +135,7 @@ test('arrivals are announced in one sentence, not one per device', () => {
   // A device that cannot be sent to is announced as being there and as not being usable, in one
   // breath: otherwise a screen reader sends somebody to a row that will not respond (#191).
   assert.strictEqual(arrivalAnnouncement([{ name: 'Quiet Heron', speakable: false }], 1),
-    'Quiet Heron appeared, on a different version of f-tree. 1 device nearby.');
+    'Quiet Heron appeared, on a different version of Kutumb. 1 device nearby.');
 });
 
 test('the offer is described as the sender\'s claim, not as fact', () => {

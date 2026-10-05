@@ -99,7 +99,7 @@ async function backUpBefore(target, { root, now = new Date(), takenThisRun }) {
   await fs.writeFile(written, existing);
   // Which tree this folder is for, in words, for whoever opens it from File > Show backups.
   await fs.writeFile(path.join(folder, 'README.txt'),
-    `Earlier versions of ${resolved}, kept by f-tree.\n`
+    `Earlier versions of ${resolved}, kept by Kutumb.\n`
     + 'Open one with File > Open tree to look at it; save it under a new name to keep it.\n');
   takenThisRun.add(resolved);
 

@@ -104,7 +104,7 @@ test('an unreadable archive is refused rather than written', async () => {
 test('a refusal says nothing was saved, because nothing was', async () => {
   const tree = brokenTree((doc) => ({ ...doc, people: [] }));
   await assert.rejects(() => bytesForTree(tree), (error) => {
-    assert.match(error.message, /f-tree/);
+    assert.match(error.message, /Kutumb/);
     assert.match(error.detail, /Nothing has been saved/);
     return true;
   });

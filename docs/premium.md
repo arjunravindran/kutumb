@@ -1,6 +1,6 @@
 # The policy switch
 
-f-tree has one piece of groundwork for a feature that might one day cost money: a single place
+Kutumb has one piece of groundwork for a feature that might one day cost money: a single place
 that asks *"may this person do this, and how much of it?"* Today it always answers **yes, all of
 it**. Nothing in the app is gated. This page is what to read before that ever changes.
 
@@ -58,7 +58,7 @@ enforcement was never going to hold anyway.
 
 ## The code is public: a gate is a product control, not enforcement
 
-f-tree ships its source. Anyone who wants to read `policy.json`, or build the app with a version of
+Kutumb ships its source. Anyone who wants to read `policy.json`, or build the app with a version of
 `Entitlements.kt` that always returns `Allowed`, can already do that today, and nothing proposed
 here changes that. The switch this issue builds is for the overwhelming majority of readers who
 install the app as published and would simply like to know, honestly, what is free and what is
@@ -104,7 +104,7 @@ pressure.
   "reason": "premium-template"
 }
 
-// Attribution removal: the closing page's "Made with f-tree" and the quiet per-page footer
+// Attribution removal: the closing page's "Made with Kutumb" and the quiet per-page footer
 // (see the family-book umbrella, issue #200) are a plausible premium extra precisely because
 // they are presentation, not data -- removing them changes nothing about what the book contains.
 { "feature": "book.attribution-removal", "plan": "free", "grant": "none", "reason": "not-included" }
@@ -120,12 +120,12 @@ unconditionally free is the one outcome worse than not building the gate at all.
 
 | Where | What it says today |
 |---|---|
-| `app/src/main/res/values/strings.xml:185` | `share_message` — the text attached to a shared branch: *"f-tree is a free family tree app that keeps everything on your phone."* |
-| `app/src/main/res/values/strings.xml:186` | `share_message_unnamed` — the same claim, for a share with no name recorded: *"f-tree is a free family tree app that keeps everything on your phone."* |
+| `app/src/main/res/values/strings.xml:185` | `share_message` — the text attached to a shared branch: *"Kutumb is a free family tree app that keeps everything on your phone."* |
+| `app/src/main/res/values/strings.xml:186` | `share_message_unnamed` — the same claim, for a share with no name recorded: *"Kutumb is a free family tree app that keeps everything on your phone."* |
 | `app/src/main/res/values/strings.xml:216` | `about_body`, the About screen: *"A local-first family tree. Everything stays on this device: no account, no cloud, no backend."* Does not use the word "free," but reads as a complete, unconditional promise and needs to keep meaning that once anything is gated. |
 
 These two `share_message` strings are the ones that travel the furthest: they are attached to
-every `.ftree` file sent through a chat app, to people who have never opened f-tree. A share sent
+every `.ftree` file sent through a chat app, to people who have never opened Kutumb. A share sent
 the day before a gate ships is a promise that outlives the release.
 
 ### The website (`site/index.html`)

@@ -1,6 +1,6 @@
 # The Hindi family vocabulary
 
-f-tree can name relationships in Hindi instead of English — **Settings → Family words**. This page
+Kutumb can name relationships in Hindi instead of English — **Settings → Family words**. This page
 is the whole vocabulary, so a Hindi speaker can check the words without reading any Kotlin.
 
 ## Why this is not a translation

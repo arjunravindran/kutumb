@@ -33,7 +33,7 @@ Examples of unacceptable behavior include:
 
 ### A note particular to this project
 
-f-tree is about families, and family structures differ enormously across cultures, religions and
+Kutumb is about families, and family structures differ enormously across cultures, religions and
 generations. Discussions here will touch on kinship terms, marriage, adoption, gender and naming
 conventions from many traditions.
 
@@ -63,9 +63,9 @@ as an appointed representative at an online or offline event.
 
 Instances of abusive, harassing, or otherwise unacceptable behavior may be reported to the
 community leaders responsible for enforcement by opening a [private security
-advisory](https://github.com/thisisankit27/f-tree/security/advisories/new) — which is the private
+advisory](https://github.com/arjunravindran/f-tree/security/advisories/new) — which is the private
 channel available on this repository — or by contacting the maintainer,
-[@thisisankit27](https://github.com/thisisankit27), directly.
+[@arjunravindran](https://github.com/arjunravindran), directly.
 
 All complaints will be reviewed and investigated promptly and fairly. All community leaders are
 obligated to respect the privacy and security of the reporter of any incident.

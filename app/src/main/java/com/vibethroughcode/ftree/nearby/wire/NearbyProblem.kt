@@ -14,11 +14,11 @@ import com.vibethroughcode.ftree.transfer.ImportProblem
  */
 enum class NearbyProblem(val code: Int) {
 
-    /** Their f-tree speaks a version this one does not. The sender's side of "from a newer version". */
+    /** Their Kutumb speaks a version this one does not. The sender's side of "from a newer version". */
     PROTOCOL_TOO_NEW(0x01),
     PROTOCOL_TOO_OLD(0x02),
 
-    /** Something answered on that port, but it was not f-tree. */
+    /** Something answered on that port, but it was not Kutumb. */
     NOT_A_NEARBY_PEER(0x03),
 
     MALFORMED_FRAME(0x04),

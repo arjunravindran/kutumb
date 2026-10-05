@@ -645,7 +645,7 @@ four as of #248; the desktop equivalent is #249.
 
 `allowance` is what the policy switch (#156, [premium.md](premium.md)) granted. Today it is always
 empty, which means everything. `maxGenerations` keeps that many generations from the eldest down;
-`attribution: false` leaves out the f-tree credit. Both are tested, so the day a policy uses them
+`attribution: false` leaves out the Kutumb credit. Both are tested, so the day a policy uses them
 is a policy change, not a composer change.
 
 ## The book screen, the same on both shells

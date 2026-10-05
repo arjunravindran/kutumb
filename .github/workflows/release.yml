@@ -91,7 +91,7 @@ jobs:
         run: |
           apksigner=$(find "$ANDROID_HOME/build-tools" -name apksigner | sort -V | tail -1)
           "$apksigner" verify --print-certs app/build/outputs/apk/release/app-release.apk
-          cp app/build/outputs/apk/release/app-release.apk "f-tree-${{ env.version }}.apk"
+          cp app/build/outputs/apk/release/app-release.apk "kutumb-${{ env.version }}.apk"
 
       # The Google Play build: no self-updater, and an .aab because Play does not take an .apk.
       # Kept as a workflow artefact rather than a release asset: it is uploaded to Play by hand,
@@ -101,14 +101,14 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: f-tree-${{ env.version }}-play-bundle
+          name: kutumb-${{ env.version }}-play-bundle
           path: app/build/outputs/bundle/play/app-play.aab
 
       - name: Publish
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          apk="f-tree-${{ env.version }}.apk"
+          apk="kutumb-${{ env.version }}.apk"
 
           # A version with a suffix — 0.6.0-beta.1 — is a beta, and GitHub has to be told so. It is
           # what keeps `releases/latest` answering with the last stable release, which is the whole
@@ -124,7 +124,7 @@ jobs:
             gh release upload "$GITHUB_REF_NAME" "$apk" --clobber
           else
             gh release create "$GITHUB_REF_NAME" "$apk" $prerelease \
-              --title "f-tree ${{ env.version }}" \
+              --title "Kutumb ${{ env.version }}" \
               --generate-notes
           fi
 

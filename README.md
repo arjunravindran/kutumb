@@ -4,7 +4,7 @@
 
 <img src="site/favicon.svg" width="76" alt="f-tree">
 
-# f-tree
+# Kutumb
 
 ### Your family tree — including the people nobody can name.
 
@@ -15,12 +15,12 @@ Ask how any two people are related and it names the relationship, in English or 
 
 <br>
 
-[![Latest release](https://img.shields.io/github/v/release/thisisankit27/f-tree?style=for-the-badge&color=2a5138&labelColor=1a1c1a&label=release)](https://github.com/thisisankit27/f-tree/releases/latest)
-[![APK downloads](https://img.shields.io/github/downloads/thisisankit27/f-tree/total?style=for-the-badge&color=8a6420&labelColor=1a1c1a&label=downloads)](https://github.com/thisisankit27/f-tree/releases)
-[![Stars](https://img.shields.io/github/stars/thisisankit27/f-tree?style=for-the-badge&color=8a6420&labelColor=1a1c1a&label=stars)](https://github.com/thisisankit27/f-tree/stargazers)
+[![Latest release](https://img.shields.io/github/v/release/arjunravindran/f-tree?style=for-the-badge&color=2a5138&labelColor=1a1c1a&label=release)](https://github.com/arjunravindran/f-tree/releases/latest)
+[![APK downloads](https://img.shields.io/github/downloads/arjunravindran/f-tree/total?style=for-the-badge&color=8a6420&labelColor=1a1c1a&label=downloads)](https://github.com/arjunravindran/f-tree/releases)
+[![Stars](https://img.shields.io/github/stars/arjunravindran/f-tree?style=for-the-badge&color=8a6420&labelColor=1a1c1a&label=stars)](https://github.com/arjunravindran/f-tree/stargazers)
 [![License: MIT](https://img.shields.io/badge/license-MIT-2a5138?style=for-the-badge&labelColor=1a1c1a)](LICENSE)
 
-[![CI](https://img.shields.io/github/actions/workflow/status/thisisankit27/f-tree/ci.yml?branch=main&style=flat-square&label=CI&color=2a5138&labelColor=1a1c1a)](https://github.com/thisisankit27/f-tree/actions/workflows/ci.yml)
+[![CI](https://img.shields.io/github/actions/workflow/status/arjunravindran/f-tree/ci.yml?branch=main&style=flat-square&label=CI&color=2a5138&labelColor=1a1c1a)](https://github.com/arjunravindran/f-tree/actions/workflows/ci.yml)
 [![Android 8.0+](https://img.shields.io/badge/Android-8.0%2B-2a5138?style=flat-square&labelColor=1a1c1a&logo=android&logoColor=white)](#install)
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.3-8a6420?style=flat-square&labelColor=1a1c1a&logo=kotlin&logoColor=white)](https://kotlinlang.org)
 [![Jetpack Compose](https://img.shields.io/badge/Jetpack%20Compose-2a5138?style=flat-square&labelColor=1a1c1a&logo=jetpackcompose&logoColor=white)](https://developer.android.com/compose)
@@ -29,7 +29,7 @@ Ask how any two people are related and it names the relationship, in English or 
 
 <br>
 
-<a href="https://github.com/thisisankit27/f-tree/releases/latest"><img src="https://img.shields.io/badge/Download%20the%20APK-2a5138?style=for-the-badge&logo=android&logoColor=white" alt="Download the APK" height="34"></a>
+<a href="https://github.com/arjunravindran/f-tree/releases/latest"><img src="https://img.shields.io/badge/Download%20the%20APK-2a5138?style=for-the-badge&logo=android&logoColor=white" alt="Download the APK" height="34"></a>
 &nbsp;
 <a href="https://ftree.vibethroughcode.com/playground/"><img src="https://img.shields.io/badge/Try%20it%20in%20your%20browser-8a6420?style=for-the-badge&logo=googlechrome&logoColor=white" alt="Try it in your browser" height="34"></a>
 
@@ -59,13 +59,13 @@ Every family tree app assumes you know who everybody is. Real families do not wo
 is always a great-grandmother whose name nobody wrote down, an uncle nobody can place, and a cousin
 whose exact relationship starts an argument at every wedding.
 
-f-tree is built around those gaps instead of around a form you have to fill in completely.
+Kutumb is built around those gaps instead of around a form you have to fill in completely.
 
 |  | |
 |---|---|
 | 🕳️ **A person needs no name.** | A blank person is a valid *unknown person* — the grandfather's brother nobody remembers — and can be named years later without disturbing a single relationship. |
 | 🔗 **A graph, not a tree.** | Multiple spouses, children across marriages, half-siblings, adoption, step-relations and unknown ancestors all work without special cases. |
-| ❓ **"How are we related?"** | Pick any two people. f-tree names it — *first cousin once removed*, *great-great-grandfather* — and lists every person the line runs through. It walks marriages as well as blood, because "my wife's mother" is what people actually ask. |
+| ❓ **"How are we related?"** | Pick any two people. Kutumb names it — *first cousin once removed*, *great-great-grandfather* — and lists every person the line runs through. It walks marriages as well as blood, because "my wife's mother" is what people actually ask. |
 | 🇮🇳 **Hindi kinship, done properly.** | Hindi has five words where English has "uncle". Your mother's brother is **मामा**, your father's younger brother **चाचा**, his wife **चाची**. Not a translation — a different model of the family. |
 | 📴 **No account, no cloud.** | No login, no backend, no sync, no analytics. Every permission the app declares exists only for the opt-in updater or for nearby sharing, and neither touches the network until you ask it to. |
 | 🤝 **Sharing that merges, never overwrites.** | Send one branch as a small file over WhatsApp. The recipient imports it and it *merges* into their tree. The worst an import can do is add a duplicate you can then merge. |
@@ -86,7 +86,7 @@ f-tree is built around those gaps instead of around a form you have to fill in c
 
 ## Install
 
-**[Download the latest APK](https://github.com/thisisankit27/f-tree/releases/latest)** — Android 8.0 (Oreo) or newer, about 2 MB.
+**[Download the latest APK](https://github.com/arjunravindran/f-tree/releases/latest)** — Android 8.0 (Oreo) or newer, about 2 MB.
 
 It is not on the Play Store, so Android will ask you to allow installing from your browser or file
 manager once. The [website](https://ftree.vibethroughcode.com/) walks through it with the exact
@@ -94,7 +94,7 @@ wording your phone shows, and publishes the SHA-256 of every release so you can 
 downloaded:
 
 ```bash
-sha256sum f-tree-0.7.0.apk
+sha256sum kutumb-0.7.0.apk
 ```
 
 Once installed, **updates can happen in place** — an opt-in setting checks GitHub for a newer
@@ -126,8 +126,8 @@ There is a sample family loaded on the page. Your file is never uploaded; it is 
 ### Build from source
 
 ```bash
-git clone https://github.com/thisisankit27/f-tree.git
-cd f-tree
+git clone https://github.com/arjunravindran/f-tree.git
+cd Kutumb
 ./gradlew assembleDebug
 ```
 
@@ -266,7 +266,7 @@ Especially wanted:
 - 📝 **Documentation and translation** of anything on this page.
 
 Start with [CONTRIBUTING.md](CONTRIBUTING.md) and the
-[good first issues](https://github.com/thisisankit27/f-tree/labels/good%20first%20issue).
+[good first issues](https://github.com/arjunravindran/f-tree/labels/good%20first%20issue).
 
 <br>
 
@@ -300,7 +300,7 @@ separately licensed under the SIL Open Font Licence 1.1. Their licence texts shi
 under `assets/licenses/` and are surfaced on its About screen. See [docs/fonts.md](docs/fonts.md)
 for which font does what, and why the book's fonts are static rather than variable.
 
-**Everything the app can do with your own tree is free, and stays free.** f-tree has one piece of
+**Everything the app can do with your own tree is free, and stays free.** Kutumb has one piece of
 groundwork for a feature that might one day cost money — a single policy switch that today always
 answers "yes, all of it" — and the rule it is built to keep is written down plainly so nobody ever
 has to relearn it under pressure: **gate presentation, never data.** Exporting, importing and
@@ -312,22 +312,22 @@ ever apply to a designed extra like a book template or its attribution line. See
 
 <div align="center">
 
-**If f-tree is useful to you — or if the idea of a family tree with room for the people nobody can
+**If Kutumb is useful to you — or if the idea of a family tree with room for the people nobody can
 name is one you want to exist — a star helps other families find it.**
 
 <br>
 
-<a href="https://github.com/thisisankit27/f-tree"><img src="https://img.shields.io/badge/Star%20this%20repo-8a6420?style=for-the-badge&logo=github&logoColor=white" alt="Star this repo" height="34"></a>
+<a href="https://github.com/arjunravindran/f-tree"><img src="https://img.shields.io/badge/Star%20this%20repo-8a6420?style=for-the-badge&logo=github&logoColor=white" alt="Star this repo" height="34"></a>
 &nbsp;
-<a href="https://github.com/thisisankit27/f-tree/releases/latest"><img src="https://img.shields.io/badge/Download%20the%20APK-2a5138?style=for-the-badge&logo=android&logoColor=white" alt="Download the APK" height="34"></a>
+<a href="https://github.com/arjunravindran/f-tree/releases/latest"><img src="https://img.shields.io/badge/Download%20the%20APK-2a5138?style=for-the-badge&logo=android&logoColor=white" alt="Download the APK" height="34"></a>
 &nbsp;
 <a href="https://ftree.vibethroughcode.com/"><img src="https://img.shields.io/badge/Website-414942?style=for-the-badge&logo=safari&logoColor=white" alt="Website" height="34"></a>
 &nbsp;
-<a href="https://github.com/thisisankit27/f-tree/discussions"><img src="https://img.shields.io/badge/Discussions-414942?style=for-the-badge&logo=github&logoColor=white" alt="Discussions" height="34"></a>
+<a href="https://github.com/arjunravindran/f-tree/discussions"><img src="https://img.shields.io/badge/Discussions-414942?style=for-the-badge&logo=github&logoColor=white" alt="Discussions" height="34"></a>
 
 <br>
 <br>
 
-<sub>Built by <a href="https://github.com/thisisankit27">Ankit Srivastava</a> · <a href="https://ftree.vibethroughcode.com/">ftree.vibethroughcode.com</a></sub>
+<sub>Built by <a href="https://github.com/arjunravindran">Arjun Ravindran</a>, from f-tree by <a href="https://github.com/thisisankit27">Ankit Srivastava</a> · <a href="https://ftree.vibethroughcode.com/">ftree.vibethroughcode.com</a></sub>
 
 </div>

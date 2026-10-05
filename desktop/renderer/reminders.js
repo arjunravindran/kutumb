@@ -1,7 +1,7 @@
 /*
  * When a reminder is due, and what it says (#154).
  *
- * Desktop reminders exist only while f-tree is open: there is no tray, no login item, and no
+ * Desktop reminders exist only while Kutumb is open: there is no tray, no login item, and no
  * process running once the window is closed. What that buys back is the same-day catch-up --
  * somebody who opens the app once a week still gets today's reminder the moment they do, because
  * `dueNow` asks "is it past nine, and have we not already told them today" rather than "did an
@@ -17,7 +17,7 @@
  * "birthday today" assertion depends on.
  *
  * A port of nothing in particular: Android's half of #154 schedules through `AlarmManager`, which
- * this app has no equivalent of and does not want one, precisely because "while f-tree is open" is
+ * this app has no equivalent of and does not want one, precisely because "while Kutumb is open" is
  * the whole design. What is shared is the wording, kept identical by eye against the phone's
  * strings so a family member switching devices reads the same sentence either way.
  */

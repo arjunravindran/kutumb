@@ -222,7 +222,7 @@ class Nearby extends EventEmitter {
 
     if (link) {
       const parsed = typeof link === 'string' ? parseQrLink(link) : link;
-      if (!parsed) throw new Error('that is not an f-tree nearby link');
+      if (!parsed) throw new Error('that is not a Kutumb nearby link');
       ({ address, port } = parsed);
       pairingToken = parsed.token;
       pairedByQr = parsed.token !== null;

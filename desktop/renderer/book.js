@@ -486,7 +486,7 @@ export function createBook({ shell, hooks }) {
   }
 
   function paintError(error) {
-    console.warn(`f-tree: the book could not be composed — ${error?.message ?? error}`);
+    console.warn(`Kutumb: the book could not be composed — ${error?.message ?? error}`);
     preview.replaceChildren();
     const box = document.createElement('div');
     box.className = 'book-error';
@@ -498,7 +498,7 @@ export function createBook({ shell, hooks }) {
     copy.textContent = 'Copy details';
     copy.addEventListener('click', () => {
       // Onto this computer's clipboard and nowhere else: the reader decides whether to send it.
-      const text = `f-tree desktop, ${navigator.userAgent}\n${error?.message ?? error}\n${error?.stack ?? ''}`;
+      const text = `Kutumb desktop, ${navigator.userAgent}\n${error?.message ?? error}\n${error?.stack ?? ''}`;
       navigator.clipboard?.writeText(text).then(() => { copy.textContent = 'Details copied'; }, () => {});
     });
     box.append(message, copy);

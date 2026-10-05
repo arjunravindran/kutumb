@@ -197,10 +197,10 @@ test('an allowance of generations keeps that many, from the eldest down', async 
   assert.ok(two.pages.some((p) => JSON.stringify(p).includes('The second generation')));
 });
 
-test('without attribution, the book carries no f-tree credit', async () => {
+test('without attribution, the book carries no Kutumb credit', async () => {
   const book = composeBook(await sampleDoc(), { now: NOW }, TEMPLATES.heirloom, { attribution: false });
-  assert.ok(!JSON.stringify(book).includes('Made with f-tree'));
-  assert.ok(!JSON.stringify(book).includes('Scan to get f-tree'));
+  assert.ok(!JSON.stringify(book).includes('Made with Kutumb'));
+  assert.ok(!JSON.stringify(book).includes('Scan to get Kutumb'));
 });
 
 test('a branch book holds exactly the branch', async () => {

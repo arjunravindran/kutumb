@@ -147,7 +147,7 @@ export function describeWriteFailure(error) {
     case 'ENOSPC': return 'the disk is full';
     case 'EROFS': return 'that drive is read-only';
     case 'EACCES':
-    case 'EPERM': return 'f-tree isn’t allowed to write there';
+    case 'EPERM': return 'Kutumb isn’t allowed to write there';
     case 'ENOENT': return 'its folder is no longer there — was a drive removed?';
     case 'EBUSY': return 'another program has the file open';
     default: return text || 'the write did not finish';

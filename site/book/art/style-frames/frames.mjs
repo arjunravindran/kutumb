@@ -40,7 +40,7 @@ function folio(p, n, { ink = 'inkSoft', credit = true, y = H - 25.5 } = {}) {
   const x = right ? W - 44 : 44;
   M.diya(p, right ? x - 16 : x + 2, y - 4.5, 11);
   p.text(right ? x : x + 16, y, String(n), { font: 'strong', size: 8.5, fill: ink, align: right ? 'end' : 'start' });
-  if (credit) p.text(right ? 44 : W - 44, y, 'Made with f-tree', { font: 'text', size: 7, fill: ink, align: right ? 'start' : 'end', op: 0.7 });
+  if (credit) p.text(right ? 44 : W - 44, y, 'Made with Kutumb', { font: 'text', size: 7, fill: ink, align: right ? 'start' : 'end', op: 0.7 });
 }
 
 /** The book's one handwritten note: a torn card and a strip of tape. */
@@ -209,7 +209,7 @@ function cover() {
   p.text(W / 2, 218, 'शुभ दीपावली', { font: 'display', size: 58, fill: 'gold', align: 'middle' });
   p.text(W / 2, 270, 'from the Kumar family', { font: 'display', size: 34, fill: 'card', align: 'middle' });
   p.text(W / 2, 310, 'Twenty-three lamps, one for each of us.', { font: 'hand', size: 17, fill: 'flame', align: 'middle' });
-  p.text(22, H - 14, 'Made with f-tree', { font: 'text', size: 7.5, fill: 'card', op: 0.6 });
+  p.text(22, H - 14, 'Made with Kutumb', { font: 'text', size: 7.5, fill: 'card', op: 0.6 });
   return p;
 }
 

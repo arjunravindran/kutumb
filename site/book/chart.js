@@ -164,7 +164,7 @@ export function chartBook(ctx) {
   items.push(ctx.line(CHART_PAD.left, CHART_PAD.top - 36, family.title, 'strong', TITLE_SIZE, P.ink,
     { width: size.w - CHART_PAD.left - CHART_PAD.right, kind: 'body' }));
   if (ctx.attribution) {
-    items.push(ctx.line(size.w - CHART_PAD.right, size.h - 22, 'Made with f-tree', 'text', 9, P.inkSoft,
+    items.push(ctx.line(size.w - CHART_PAD.right, size.h - 22, 'Made with Kutumb', 'text', 9, P.inkSoft,
       { align: 'end', width: 120, op: 0.75, kind: 'folio' }));
   }
 
