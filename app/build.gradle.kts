@@ -87,7 +87,7 @@ android {
     compileSdk = 37
 
     defaultConfig {
-        applicationId = "com.vibethroughcode.ftree"
+        applicationId = "com.vibethroughcode.kutumb"
         minSdk = 26
         targetSdk = 36
         versionCode = 34
@@ -171,7 +171,7 @@ android {
         /*
          * A debug build installs as its OWN app, beside the real one, never over it.
          *
-         * Without this they share `com.vibethroughcode.ftree`, so installing a debug build over a
+         * Without this they share `com.vibethroughcode.kutumb`, so installing a debug build over a
          * release one fails with INSTALL_FAILED_UPDATE_INCOMPATIBLE (the signatures differ) and the
          * documented way out is `adb uninstall` - which silently destroys the family tree on the
          * device, because Android deletes app-private data with the app. That is a real tree on a
