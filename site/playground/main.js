@@ -879,6 +879,12 @@ applyPrefs();
 // Canvas text is measured against the real faces, so the first paint waits for them.
 document.fonts?.ready.then(() => chart.invalidate());
 
+// Offline and from the home screen. Only on the web: the desktop shell loads this from disk, where
+// a worker cannot register and its files are already local.
+if (!desktop && 'serviceWorker' in navigator && location.protocol.startsWith('http')) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+
 // A file can be handed over by the OS share sheet or a launch handler on some platforms.
 if ('launchQueue' in window) {
   window.launchQueue.setConsumer((launch) => {
