@@ -63,7 +63,7 @@ as an appointed representative at an online or offline event.
 
 Instances of abusive, harassing, or otherwise unacceptable behavior may be reported to the
 community leaders responsible for enforcement by opening a [private security
-advisory](https://github.com/arjunravindran/f-tree/security/advisories/new) — which is the private
+advisory](https://github.com/arjunravindran/kutumb/security/advisories/new) — which is the private
 channel available on this repository — or by contacting the maintainer,
 [@arjunravindran](https://github.com/arjunravindran), directly.
 

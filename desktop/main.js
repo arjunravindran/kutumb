@@ -327,7 +327,7 @@ async function chooseInto(win) {
 
 /* ------------------------------------------------------------------ updates */
 
-const RELEASES_API = 'https://api.github.com/repos/arjunravindran/f-tree/releases?per_page=30';
+const RELEASES_API = 'https://api.github.com/repos/arjunravindran/kutumb/releases?per_page=30';
 
 /*
  * The one key that says which book templates this app will accept from that same place (#214): the
@@ -800,7 +800,7 @@ function buildMenu(win) {
       label: 'Help',
       submenu: [
         { label: 'Kutumb on the web', click: () => shell.openExternal('https://ftree.vibethroughcode.com/') },
-        { label: 'Report a problem', click: () => shell.openExternal('https://github.com/arjunravindran/f-tree/issues') },
+        { label: 'Report a problem', click: () => shell.openExternal('https://github.com/arjunravindran/kutumb/issues') },
         { type: 'separator' },
         {
           label: 'About Kutumb',

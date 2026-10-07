@@ -15,12 +15,12 @@ Ask how any two people are related and it names the relationship, in English or 
 
 <br>
 
-[![Latest release](https://img.shields.io/github/v/release/arjunravindran/f-tree?style=for-the-badge&color=2a5138&labelColor=1a1c1a&label=release)](https://github.com/arjunravindran/f-tree/releases/latest)
-[![APK downloads](https://img.shields.io/github/downloads/arjunravindran/f-tree/total?style=for-the-badge&color=8a6420&labelColor=1a1c1a&label=downloads)](https://github.com/arjunravindran/f-tree/releases)
-[![Stars](https://img.shields.io/github/stars/arjunravindran/f-tree?style=for-the-badge&color=8a6420&labelColor=1a1c1a&label=stars)](https://github.com/arjunravindran/f-tree/stargazers)
+[![Latest release](https://img.shields.io/github/v/release/arjunravindran/kutumb?style=for-the-badge&color=2a5138&labelColor=1a1c1a&label=release)](https://github.com/arjunravindran/kutumb/releases/latest)
+[![APK downloads](https://img.shields.io/github/downloads/arjunravindran/kutumb/total?style=for-the-badge&color=8a6420&labelColor=1a1c1a&label=downloads)](https://github.com/arjunravindran/kutumb/releases)
+[![Stars](https://img.shields.io/github/stars/arjunravindran/kutumb?style=for-the-badge&color=8a6420&labelColor=1a1c1a&label=stars)](https://github.com/arjunravindran/kutumb/stargazers)
 [![License: MIT](https://img.shields.io/badge/license-MIT-2a5138?style=for-the-badge&labelColor=1a1c1a)](LICENSE)
 
-[![CI](https://img.shields.io/github/actions/workflow/status/arjunravindran/f-tree/ci.yml?branch=main&style=flat-square&label=CI&color=2a5138&labelColor=1a1c1a)](https://github.com/arjunravindran/f-tree/actions/workflows/ci.yml)
+[![CI](https://img.shields.io/github/actions/workflow/status/arjunravindran/kutumb/ci.yml?branch=main&style=flat-square&label=CI&color=2a5138&labelColor=1a1c1a)](https://github.com/arjunravindran/kutumb/actions/workflows/ci.yml)
 [![Android 8.0+](https://img.shields.io/badge/Android-8.0%2B-2a5138?style=flat-square&labelColor=1a1c1a&logo=android&logoColor=white)](#install)
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.3-8a6420?style=flat-square&labelColor=1a1c1a&logo=kotlin&logoColor=white)](https://kotlinlang.org)
 [![Jetpack Compose](https://img.shields.io/badge/Jetpack%20Compose-2a5138?style=flat-square&labelColor=1a1c1a&logo=jetpackcompose&logoColor=white)](https://developer.android.com/compose)
@@ -29,7 +29,7 @@ Ask how any two people are related and it names the relationship, in English or 
 
 <br>
 
-<a href="https://github.com/arjunravindran/f-tree/releases/latest"><img src="https://img.shields.io/badge/Download%20the%20APK-2a5138?style=for-the-badge&logo=android&logoColor=white" alt="Download the APK" height="34"></a>
+<a href="https://github.com/arjunravindran/kutumb/releases/latest"><img src="https://img.shields.io/badge/Download%20the%20APK-2a5138?style=for-the-badge&logo=android&logoColor=white" alt="Download the APK" height="34"></a>
 &nbsp;
 <a href="https://ftree.vibethroughcode.com/playground/"><img src="https://img.shields.io/badge/Try%20it%20in%20your%20browser-8a6420?style=for-the-badge&logo=googlechrome&logoColor=white" alt="Try it in your browser" height="34"></a>
 
@@ -86,7 +86,7 @@ Kutumb is built around those gaps instead of around a form you have to fill in c
 
 ## Install
 
-**[Download the latest APK](https://github.com/arjunravindran/f-tree/releases/latest)** — Android 8.0 (Oreo) or newer, about 2 MB.
+**[Download the latest APK](https://github.com/arjunravindran/kutumb/releases/latest)** — Android 8.0 (Oreo) or newer, about 2 MB.
 
 It is not on the Play Store, so Android will ask you to allow installing from your browser or file
 manager once. The [website](https://ftree.vibethroughcode.com/) walks through it with the exact
@@ -126,7 +126,7 @@ There is a sample family loaded on the page. Your file is never uploaded; it is 
 ### Build from source
 
 ```bash
-git clone https://github.com/arjunravindran/f-tree.git
+git clone https://github.com/arjunravindran/kutumb.git
 cd Kutumb
 ./gradlew assembleDebug
 ```
@@ -266,7 +266,7 @@ Especially wanted:
 - 📝 **Documentation and translation** of anything on this page.
 
 Start with [CONTRIBUTING.md](CONTRIBUTING.md) and the
-[good first issues](https://github.com/arjunravindran/f-tree/labels/good%20first%20issue).
+[good first issues](https://github.com/arjunravindran/kutumb/labels/good%20first%20issue).
 
 <br>
 
@@ -317,13 +317,13 @@ name is one you want to exist — a star helps other families find it.**
 
 <br>
 
-<a href="https://github.com/arjunravindran/f-tree"><img src="https://img.shields.io/badge/Star%20this%20repo-8a6420?style=for-the-badge&logo=github&logoColor=white" alt="Star this repo" height="34"></a>
+<a href="https://github.com/arjunravindran/kutumb"><img src="https://img.shields.io/badge/Star%20this%20repo-8a6420?style=for-the-badge&logo=github&logoColor=white" alt="Star this repo" height="34"></a>
 &nbsp;
-<a href="https://github.com/arjunravindran/f-tree/releases/latest"><img src="https://img.shields.io/badge/Download%20the%20APK-2a5138?style=for-the-badge&logo=android&logoColor=white" alt="Download the APK" height="34"></a>
+<a href="https://github.com/arjunravindran/kutumb/releases/latest"><img src="https://img.shields.io/badge/Download%20the%20APK-2a5138?style=for-the-badge&logo=android&logoColor=white" alt="Download the APK" height="34"></a>
 &nbsp;
 <a href="https://ftree.vibethroughcode.com/"><img src="https://img.shields.io/badge/Website-414942?style=for-the-badge&logo=safari&logoColor=white" alt="Website" height="34"></a>
 &nbsp;
-<a href="https://github.com/arjunravindran/f-tree/discussions"><img src="https://img.shields.io/badge/Discussions-414942?style=for-the-badge&logo=github&logoColor=white" alt="Discussions" height="34"></a>
+<a href="https://github.com/arjunravindran/kutumb/discussions"><img src="https://img.shields.io/badge/Discussions-414942?style=for-the-badge&logo=github&logoColor=white" alt="Discussions" height="34"></a>
 
 <br>
 <br>

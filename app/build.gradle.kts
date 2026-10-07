@@ -106,14 +106,14 @@ android {
         buildConfigField(
             "String",
             "UPDATE_RELEASE_URL",
-            "\"https://api.github.com/repos/arjunravindran/f-tree/releases/latest\"",
+            "\"https://api.github.com/repos/arjunravindran/kutumb/releases/latest\"",
         )
         // Every release, newest first. `releases/latest` deliberately skips pre-releases, so the
         // beta channel has to read the list instead.
         buildConfigField(
             "String",
             "UPDATE_RELEASES_URL",
-            "\"https://api.github.com/repos/arjunravindran/f-tree/releases?per_page=20\"",
+            "\"https://api.github.com/repos/arjunravindran/kutumb/releases?per_page=20\"",
         )
         /*
          * The one key that says which book templates this app will accept from that same place
@@ -130,7 +130,7 @@ android {
         buildConfigField(
             "String",
             "RELEASES_PAGE_URL",
-            "\"https://github.com/arjunravindran/f-tree/releases\"",
+            "\"https://github.com/arjunravindran/kutumb/releases\"",
         )
         // Where somebody who has been sent a family goes to get the app. Here for the same reason
         // as the two above: a fork points at its own place by editing one line.

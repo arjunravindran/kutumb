@@ -17,7 +17,7 @@ fixes land in the next release rather than being backported.
 **Please do not open a public issue for a security problem.**
 
 Report it privately through GitHub's [Report a
-vulnerability](https://github.com/arjunravindran/f-tree/security/advisories/new) form, which opens a
+vulnerability](https://github.com/arjunravindran/kutumb/security/advisories/new) form, which opens a
 private advisory visible only to the maintainer.
 
 Please include what you were able to do, the version you tested, and — if you have one — a proof of

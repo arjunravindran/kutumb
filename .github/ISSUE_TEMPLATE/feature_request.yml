@@ -6,11 +6,11 @@ body:
     attributes:
       value: |
         Kutumb is deliberately small, and some things are
-        [deliberately not built](https://github.com/arjunravindran/f-tree#deliberately-not-built) —
+        [deliberately not built](https://github.com/arjunravindran/kutumb#deliberately-not-built) —
         GEDCOM, cloud sync, transactional undo. Suggesting one of those is still fine; just say why
         the stated reasoning does not hold for your case, because that is the interesting part.
 
-        The [design decisions table](https://github.com/arjunravindran/f-tree/blob/main/docs/architecture.md#design-decisions-worth-knowing)
+        The [design decisions table](https://github.com/arjunravindran/kutumb/blob/main/docs/architecture.md#design-decisions-worth-knowing)
         records why the obvious alternative was not chosen in a dozen places. Worth a skim.
 
   - type: textarea

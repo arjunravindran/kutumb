@@ -95,7 +95,7 @@ deployment builds the pages as a workflow artifact rather than serving a branch,
 the custom domain as a repository setting and there is nothing to commit. Check it with:
 
 ```bash
-gh api repos/arjunravindran/f-tree/pages --jq '.cname'
+gh api repos/arjunravindran/kutumb/pages --jq '.cname'
 ```
 
 If you are pointing a *new* subdomain at this repository, order matters: add the `CNAME` record

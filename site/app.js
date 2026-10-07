@@ -11,7 +11,7 @@
 (function () {
   'use strict';
 
-  var REPO = 'arjunravindran/f-tree';
+  var REPO = 'arjunravindran/kutumb';
   var API = 'https://api.github.com/repos/' + REPO + '/releases';
   var CACHE_KEY = 'ftree.release.v2';
   var CACHE_TTL = 10 * 60 * 1000;
@@ -584,7 +584,7 @@
 
     if (!desktop || !(desktop.assets || []).length) {
       assurance.innerHTML = 'Could not reach GitHub just now. '
-        + '<a href="https://github.com/arjunravindran/f-tree/releases?q=desktop&expanded=true">'
+        + '<a href="https://github.com/arjunravindran/kutumb/releases?q=desktop&expanded=true">'
         + 'The releases page has every build.</a>';
       return;
     }

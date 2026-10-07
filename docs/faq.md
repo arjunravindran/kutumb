@@ -14,7 +14,7 @@ no advertisement and no upsell. There is nothing to buy because there is no serv
 ### Is it on the Google Play Store?
 
 No. It is distributed as an APK from [GitHub
-Releases](https://github.com/arjunravindran/f-tree/releases/latest) and from
+Releases](https://github.com/arjunravindran/kutumb/releases/latest) and from
 [ftree.vibethroughcode.com](https://ftree.vibethroughcode.com/).
 
 Android will ask you to allow installing from your browser or file manager once. The website walks
@@ -175,7 +175,7 @@ Very likely, and this is the contribution the project most wants. Bengali, Marat
 Punjabi, Tamil and Telugu are already covered structurally — each is a word list plus a small rules
 file. It needs a **native speaker** more than a developer.
 
-[Open an issue and say which language.](https://github.com/arjunravindran/f-tree/issues/new/choose)
+[Open an issue and say which language.](https://github.com/arjunravindran/kutumb/issues/new/choose)
 
 ---
 
@@ -333,5 +333,5 @@ families find it.
 ### I found a security problem.
 
 Please do not open a public issue. Report it through the [private advisory
-form](https://github.com/arjunravindran/f-tree/security/advisories/new); scope and expectations are
+form](https://github.com/arjunravindran/kutumb/security/advisories/new); scope and expectations are
 in [SECURITY.md](../SECURITY.md).

@@ -26,7 +26,7 @@ already**. Each is a word list plus a small rules file, following the shape of
 [`res/values/kinship_hi.xml`](app/src/main/res/values/kinship_hi.xml).
 
 If you speak one of these and are willing to review a word list, **[open an
-issue](https://github.com/arjunravindran/f-tree/issues/new/choose)** and say so. Terms will not ship
+issue](https://github.com/arjunravindran/kutumb/issues/new/choose)** and say so. Terms will not ship
 in a language without a native speaker checking them — a wrong kinship word is the kind of mistake
 a family notices immediately.
 
@@ -55,7 +55,7 @@ Anything on this repo's pages. Corrections, clarifications, or translation.
 ## Getting set up
 
 ```bash
-git clone https://github.com/arjunravindran/f-tree.git
+git clone https://github.com/arjunravindran/kutumb.git
 cd Kutumb
 ./gradlew assembleDebug
 ```
@@ -160,7 +160,7 @@ outcome for everybody than a five-minute issue thread.
 
 ## Reporting a bug
 
-Use the [issue templates](https://github.com/arjunravindran/f-tree/issues/new/choose). The two
+Use the [issue templates](https://github.com/arjunravindran/kutumb/issues/new/choose). The two
 things that matter most: **what you expected to happen**, and **the shape of the family** it
 happened with.
 
