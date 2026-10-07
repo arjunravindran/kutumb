@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Replaces electron-builder's default deb postinst, which decides the sandbox mode with an
-# unsound probe. See https://github.com/arjunravindran/f-tree/issues/102 — everything except
+# unsound probe. See issue 102 in the original f-tree project — everything except
 # the chrome-sandbox block is that template, kept verbatim so an upgrade is easy to diff.
 
 if type update-alternatives 2>/dev/null >&1; then

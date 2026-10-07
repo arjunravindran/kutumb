@@ -30,7 +30,7 @@ to go on.
 ## Saving: once, then automatic
 
 A tree with a file is **written back to it about a second after each change**
-([#149](https://github.com/arjunravindran/f-tree/issues/149)). The bar beside the file name says
+(`f-tree#149`). The bar beside the file name says
 where things stand:
 
 | | |
@@ -74,7 +74,7 @@ and use Save as to keep it.
 ## Editing a person
 
 The person panel keeps its edits as a draft and writes them to the tree on **Save**, which is how
-the phone's edit screen has always worked ([#148](https://github.com/arjunravindran/f-tree/issues/148)).
+the phone's edit screen has always worked (`f-tree#148`).
 It used to commit each field as it lost focus. That meant nothing on screen said an edit had been
 taken, and closing the panel with a field still focused depended on the browser firing `change`.
 
@@ -96,7 +96,7 @@ completely*. Somebody joined to nobody is deleted straight away. Either way the 
 **Undo** button.
 
 **Dates are typed into a segmented field**, `YYYY`-`MM`-`DD`, the hyphens drawn rather than typed
-([#90](https://github.com/arjunravindran/f-tree/issues/90), `renderer/date-entry.js`). Digits fill a
+(`f-tree#90`, `renderer/date-entry.js`). Digits fill a
 slot and the caret moves on by itself — `19380417` fills all three in one go, and there is no
 separator key to hunt for. A year alone (`1938`) or a year and month (`1938-04`) are whole answers on
 their own. **Leaving the year blank records a birthday nobody remembers the year of** — `--04-17` — and
@@ -250,7 +250,7 @@ Three sentences, and sometimes none:
 It is reached four ways. The bar's **Find a relation** button (Android's `compare_arrows` mark and
 its `relation_find` words) starts a fresh question. **How are we related?** starts from somebody
 already on screen, which is the commoner form of the question
-([#151](https://github.com/arjunravindran/f-tree/issues/151)): from the person panel, from any row of
+(`f-tree#151`): from the person panel, from any row of
 the people list, and from the person the compact view is centred on. Starting from a person puts
 them in the first slot even if an earlier question left somebody else there, and empties the second
 for you to fill.
@@ -272,14 +272,14 @@ is a deliberate difference, and the reason the selection rules sit in one shared
 
 **File › Send to a nearby device** and **File › Receive from a nearby device** move a tree between two
 devices on the same Wi-Fi, directly, with nothing uploaded anywhere
-([#166](https://github.com/arjunravindran/f-tree/issues/166)). The wire is specified in
+(`f-tree#166`). The wire is specified in
 [`nearby-protocol.md`](nearby-protocol.md); the Electron side of it is `desktop/nearby/`, behind one
 facade (`nearby/index.js`), which is the only file `main.js` requires from there.
 
 | | |
 |---|---|
 | **Off until switched on** | Preferences › Nearby sharing, the menu checkbox, or the dialog's own *Turn on*. Off, nothing is constructed: no socket, and no device id on disk. |
-| **Visible only while the dialog is open** | Receiving makes this machine visible; closing the dialog, for any reason, gives every socket back. There is no "always visible" and no "accept without asking" ([#171](https://github.com/arjunravindran/f-tree/issues/171)). |
+| **Visible only while the dialog is open** | Receiving makes this machine visible; closing the dialog, for any reason, gives every socket back. There is no "always visible" and no "accept without asking" (`f-tree#171`). |
 | **Sending only looks** | The send screen browses for receivers without announcing itself, so a machine trying to send never appears in anybody's list. |
 | **Six digits, compared** | Both screens show the same code; the sender says whether they match. *No* stops everything, and is worded as what it means: somebody may be in the middle. |
 | **It ends in the review** | An arrived file is read, deleted from the app's folder, and handed to the same import review File › Import opens. Nothing about the family is decided by nearby code. With nothing open, it opens as an untitled tree instead. |
@@ -596,7 +596,7 @@ contains can ever call out.
 
 ## What it deliberately does not have
 
-[#89](https://github.com/arjunravindran/f-tree/issues/89)'s parity checklist is done, so this section
+`f-tree#89`'s parity checklist is done, so this section
 is no longer a list of things being built. One item on it was closed by deciding *not* to do it, and
 that is worth keeping written down — otherwise it reads as an oversight and somebody adds it.
 

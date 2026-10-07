@@ -10,7 +10,7 @@ betas leading up to a stable release are folded into that release's entry here.
 
 ## [Unreleased]
 
-## [1.0.0](https://github.com/arjunravindran/f-tree/releases/tag/v1.0.0) — 2026-09-30
+## [1.0.0] — 2026-09-30
 
 **The first stable release.** Everything below arrived through the 0.9, 0.10 and 0.11 betas and is
 folded in here; nothing in it is new on the day. Desktop reaches 1.0.0 alongside it, and the two
@@ -224,7 +224,7 @@ going online.
   copy and the person it copies are each matched to themselves. Each import also no longer saves
   another copy of every photograph (#195).
 
-## [0.8.0](https://github.com/arjunravindran/f-tree/releases/tag/v0.8.0) — 2026-09-09
+## [0.8.0] — 2026-09-09
 
 **See the photograph you saved, and get the whole screen back on a phone held sideways.**
 
@@ -242,14 +242,14 @@ going online.
 
 Everything from 0.8.0-beta.1 and beta.2, promoted unchanged.
 
-## [0.7.1](https://github.com/arjunravindran/f-tree/releases/tag/v0.7.1) — 2026-09-07
+## [0.7.1] — 2026-09-07
 
 - **The app icon is the mark from the website.** The launcher showed something different from the
   site's logo; they are now one mark.
 - The README is a front door rather than a set of build notes, and the site's calls to action look
   like buttons.
 
-## [0.7.0](https://github.com/arjunravindran/f-tree/releases/tag/v0.7.0) — 2026-09-07
+## [0.7.0] — 2026-09-07
 
 **Ask how two people are related from the chart that answers it, and turn the whole thing sideways.**
 
@@ -262,7 +262,7 @@ Everything from 0.8.0-beta.1 and beta.2, promoted unchanged.
 - Panning is clamped against the chart that is actually on screen, fixing a stale clamp that let a
   freshly re-laid-out chart be dragged out of view.
 
-## [0.6.0](https://github.com/arjunravindran/f-tree/releases/tag/v0.6.0) — 2026-09-07
+## [0.6.0] — 2026-09-07
 
 **Send one person's family rather than the whole archive.**
 
@@ -274,12 +274,12 @@ Everything from 0.8.0-beta.1 and beta.2, promoted unchanged.
 - **Open a family tree somebody sent you** directly from the chat app.
 - A beta channel, at the bottom of Settings, behind a warning and a dialog.
 
-## [0.5.2](https://github.com/arjunravindran/f-tree/releases/tag/v0.5.2) — 2026-09-07
+## [0.5.2] — 2026-09-07
 
 - Adds the **beta releases** switch. Nothing else changes — this is 0.5.1 with the switch added, so
   that anyone who wants to help test the next version can reach it.
 
-## [0.5.1](https://github.com/arjunravindran/f-tree/releases/tag/v0.5.1) — 2026-09-07
+## [0.5.1] — 2026-09-07
 
 **Four things a careful pass turned up, three of them the app quietly not doing what it said.**
 
@@ -291,7 +291,7 @@ Everything from 0.8.0-beta.1 and beta.2, promoted unchanged.
 - At a large text size a lifespan rendered as *"1905–197"* — a wrong date, not a clipped label.
   Cards now grow with the reader's setting.
 
-## [0.5.0](https://github.com/arjunravindran/f-tree/releases/tag/v0.5.0) — 2026-09-06
+## [0.5.0] — 2026-09-06
 
 **Compact — a third way to look at your tree, for anyone who would rather not pinch a canvas.**
 
@@ -302,7 +302,7 @@ Everything from 0.8.0-beta.1 and beta.2, promoted unchanged.
 - The mode switch reads **Compact · Chart · Everyone**.
 - In landscape the cards turn on their side: four generations in view where there were two.
 
-## [0.4.0](https://github.com/arjunravindran/f-tree/releases/tag/v0.4.0) — 2026-09-06
+## [0.4.0] — 2026-09-06
 
 **Relationships named in Hindi.**
 
@@ -312,7 +312,7 @@ Everything from 0.8.0-beta.1 and beta.2, promoted unchanged.
   so with no birth years the app says पिता के भाई and offers to sharpen it.
 - Hindi falls back to English where it genuinely has no word, because that is what Hindi speakers do.
 
-## [0.3.0](https://github.com/arjunravindran/f-tree/releases/tag/v0.3.0) — 2026-09-06
+## [0.3.0] — 2026-09-06
 
 **Faces on the chart, and a landscape that is mostly chart.**
 
@@ -320,7 +320,7 @@ Everything from 0.8.0-beta.1 and beta.2, promoted unchanged.
   ground coloured by gender.
 - Photographs can be switched off on a very large tree without a single card moving.
 
-## [0.2.2](https://github.com/arjunravindran/f-tree/releases/tag/v0.2.2) — 2026-09-06
+## [0.2.2] — 2026-09-06
 
 **"Related by marriage" is gone.**
 
@@ -330,7 +330,7 @@ Everything from 0.8.0-beta.1 and beta.2, promoted unchanged.
   cousin once removed"* — rather than inventing one.
 - On a real 148-person tree this took the share of named pairs from 31% to 55%.
 
-## [0.2.1](https://github.com/arjunravindran/f-tree/releases/tag/v0.2.1) — 2026-09-05
+## [0.2.1] — 2026-09-05
 
 **The whole-tree chart was drawing real families wrongly.**
 
@@ -343,7 +343,7 @@ Everything from 0.8.0-beta.1 and beta.2, promoted unchanged.
 - A traced relation draws only the line, rather than fading a hundred and forty people who are
   still on the page.
 
-## [0.2.0](https://github.com/arjunravindran/f-tree/releases/tag/v0.2.0) — 2026-09-05
+## [0.2.0] — 2026-09-05
 
 **The first release you will not have to install by hand.**
 
@@ -357,12 +357,12 @@ Everything from 0.8.0-beta.1 and beta.2, promoted unchanged.
 
 > Because of the signing check, this is the one upgrade that still has to be done by hand.
 
-## [0.1.1](https://github.com/arjunravindran/f-tree/releases/tag/v0.1.1) — 2026-08-31
+## [0.1.1] — 2026-08-31
 
 - Licensed under [MIT](LICENSE).
 - Signed releases built and published from a tag by CI.
 
-## [0.1.0](https://github.com/arjunravindran/f-tree/releases/tag/v0.1.0) — 2026-08-30
+## [0.1.0] — 2026-08-30
 
 **The first installable build** — a local-first family tree for Android.
 
