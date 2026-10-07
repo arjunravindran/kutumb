@@ -1,7 +1,7 @@
 # Kutumb documentation
 
-[← back to the README](../README.md) · [website](https://ftree.vibethroughcode.com/) ·
-[browser viewer](https://ftree.vibethroughcode.com/playground/)
+[← back to the README](../README.md) · [website](https://kutumb.arjun.contact/) ·
+[browser viewer](https://kutumb.arjun.contact/playground/)
 
 ## For people using the app
 

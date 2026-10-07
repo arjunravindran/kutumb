@@ -31,11 +31,11 @@ Ask how any two people are related and it names the relationship, in English or 
 
 <a href="https://github.com/arjunravindran/kutumb/releases/latest"><img src="https://img.shields.io/badge/Download%20the%20APK-2a5138?style=for-the-badge&logo=android&logoColor=white" alt="Download the APK" height="34"></a>
 &nbsp;
-<a href="https://ftree.vibethroughcode.com/playground/"><img src="https://img.shields.io/badge/Try%20it%20in%20your%20browser-8a6420?style=for-the-badge&logo=googlechrome&logoColor=white" alt="Try it in your browser" height="34"></a>
+<a href="https://kutumb.arjun.contact/playground/"><img src="https://img.shields.io/badge/Try%20it%20in%20your%20browser-8a6420?style=for-the-badge&logo=googlechrome&logoColor=white" alt="Try it in your browser" height="34"></a>
 
-<a href="https://ftree.vibethroughcode.com/desktop/"><img src="https://img.shields.io/badge/Desktop%20app-1f3d2b?style=for-the-badge&logo=linux&logoColor=white" alt="Desktop app for Windows and Linux" height="34"></a>
+<a href="https://kutumb.arjun.contact/desktop/"><img src="https://img.shields.io/badge/Desktop%20app-1f3d2b?style=for-the-badge&logo=linux&logoColor=white" alt="Desktop app for Windows and Linux" height="34"></a>
 &nbsp;
-<a href="https://ftree.vibethroughcode.com/"><img src="https://img.shields.io/badge/Website-414942?style=for-the-badge&logo=safari&logoColor=white" alt="Website" height="34"></a>
+<a href="https://kutumb.arjun.contact/"><img src="https://img.shields.io/badge/Website-414942?style=for-the-badge&logo=safari&logoColor=white" alt="Website" height="34"></a>
 &nbsp;
 <a href="docs/README.md"><img src="https://img.shields.io/badge/Docs-414942?style=for-the-badge&logo=bookstack&logoColor=white" alt="Docs" height="34"></a>
 
@@ -89,7 +89,7 @@ Kutumb is built around those gaps instead of around a form you have to fill in c
 **[Download the latest APK](https://github.com/arjunravindran/kutumb/releases/latest)** — Android 8.0 (Oreo) or newer, about 2 MB.
 
 It is not on the Play Store, so Android will ask you to allow installing from your browser or file
-manager once. The [website](https://ftree.vibethroughcode.com/) walks through it with the exact
+manager once. The [website](https://kutumb.arjun.contact/) walks through it with the exact
 wording your phone shows, and publishes the SHA-256 of every release so you can check what you
 downloaded:
 
@@ -105,7 +105,7 @@ package name and signing certificate before it installs anything. See
 
 ### On a laptop — Windows and Ubuntu
 
-The **[desktop app](https://ftree.vibethroughcode.com/desktop/)**
+The **[desktop app](https://kutumb.arjun.contact/desktop/)**
 builds a family tree on a laptop, or opens a `.ftree` you already have: add people, connect them,
 edit and delete, undo, and save back to the same file. A generation is a row, ancestors at the top.
 Windows gets an installer; on Linux take the `.deb`. It does not need the Android app — a tree can
@@ -119,7 +119,7 @@ six-digit check as the Android app. Nothing leaves the machine except when you s
 
 ### Try it without installing anything
 
-The **[browser viewer](https://ftree.vibethroughcode.com/playground/)** opens an exported `.ftree`
+The **[browser viewer](https://kutumb.arjun.contact/playground/)** opens an exported `.ftree`
 and draws the whole family at once — every generation, and the people no relationship reaches.
 There is a sample family loaded on the page. Your file is never uploaded; it is read in the tab.
 
@@ -321,13 +321,13 @@ name is one you want to exist — a star helps other families find it.**
 &nbsp;
 <a href="https://github.com/arjunravindran/kutumb/releases/latest"><img src="https://img.shields.io/badge/Download%20the%20APK-2a5138?style=for-the-badge&logo=android&logoColor=white" alt="Download the APK" height="34"></a>
 &nbsp;
-<a href="https://ftree.vibethroughcode.com/"><img src="https://img.shields.io/badge/Website-414942?style=for-the-badge&logo=safari&logoColor=white" alt="Website" height="34"></a>
+<a href="https://kutumb.arjun.contact/"><img src="https://img.shields.io/badge/Website-414942?style=for-the-badge&logo=safari&logoColor=white" alt="Website" height="34"></a>
 &nbsp;
 <a href="https://github.com/arjunravindran/kutumb/discussions"><img src="https://img.shields.io/badge/Discussions-414942?style=for-the-badge&logo=github&logoColor=white" alt="Discussions" height="34"></a>
 
 <br>
 <br>
 
-<sub>Built by <a href="https://github.com/arjunravindran">Arjun Ravindran</a>, from f-tree by <a href="https://github.com/thisisankit27">Ankit Srivastava</a> · <a href="https://ftree.vibethroughcode.com/">ftree.vibethroughcode.com</a></sub>
+<sub>Built by <a href="https://github.com/arjunravindran">Arjun Ravindran</a>, from f-tree by <a href="https://github.com/thisisankit27">Ankit Srivastava</a> · <a href="https://kutumb.arjun.contact/">kutumb.arjun.contact</a></sub>
 
 </div>

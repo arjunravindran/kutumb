@@ -10,5 +10,5 @@ contact_links:
     url: https://github.com/arjunravindran/kutumb/tree/main/docs
     about: Architecture, the .ftree format, the data model, and how to build.
   - name: 🌐 Website and install guide
-    url: https://ftree.vibethroughcode.com/
+    url: https://kutumb.arjun.contact/
     about: Download the app, check a release hash, or try the browser viewer.

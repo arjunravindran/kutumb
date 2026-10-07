@@ -137,7 +137,7 @@ android {
         buildConfigField(
             "String",
             "SITE_URL",
-            "\"https://ftree.vibethroughcode.com\"",
+            "\"https://kutumb.arjun.contact\"",
         )
     }
 

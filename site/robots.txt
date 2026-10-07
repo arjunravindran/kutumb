@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://ftree.vibethroughcode.com/sitemap.xml
+Sitemap: https://kutumb.arjun.contact/sitemap.xml

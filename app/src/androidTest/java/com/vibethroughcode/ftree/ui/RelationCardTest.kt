@@ -55,7 +55,7 @@ class RelationCardTest {
     @get:Rule
     val rule = createComposeRule()
 
-    private val footer = "ftree.vibethroughcode.com"
+    private val footer = "kutumb.arjun.contact"
 
     private fun chain(vararg names: String): RelationUiState {
         val people = names.map { Person(name = it, gender = Gender.MALE) }

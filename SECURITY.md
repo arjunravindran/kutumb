@@ -91,8 +91,8 @@ worth nothing once it expires or is used once.
 
 ### The website and browser viewer
 
-[ftree.vibethroughcode.com](https://ftree.vibethroughcode.com/) and its
-[playground](https://ftree.vibethroughcode.com/playground/). The viewer parses an untrusted ZIP in
+[kutumb.arjun.contact](https://kutumb.arjun.contact/) and its
+[playground](https://kutumb.arjun.contact/playground/). The viewer parses an untrusted ZIP in
 the browser; XSS through crafted names or notes is in scope. The viewer must never upload the file
 it opens.
 
@@ -123,7 +123,7 @@ These are deliberate, and knowing them may save you time:
   The updater checks the certificate itself so that this is refused early, with an explanation,
   rather than discovered at the end of a download.
 - **Verify your download.** Every release publishes a SHA-256, shown on the
-  [website](https://ftree.vibethroughcode.com/) and in the GitHub release:
+  [website](https://kutumb.arjun.contact/) and in the GitHub release:
   `sha256sum kutumb-<version>.apk`.
 
 ## Thank you

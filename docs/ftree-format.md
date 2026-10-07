@@ -197,7 +197,7 @@ The format is deliberately boring so that anything can read it: unzip the file a
 `tree.json`. There is no proprietary container, no encryption and no server involved, which is the
 point — a family record that only one program can open is a family record with an expiry date.
 
-The [browser viewer](https://ftree.vibethroughcode.com/playground/) is a working reference reader
+The [browser viewer](https://kutumb.arjun.contact/playground/) is a working reference reader
 in about a thousand lines of dependency-free JavaScript. Its `archive.js` is the part that reads
 the ZIP, and it documents the one real trap: **read the central directory, never the local file
 headers** — see [the site notes](site.md#the-viewer).

@@ -1,7 +1,7 @@
 # The website and the browser viewer
 
-[ftree.vibethroughcode.com](https://ftree.vibethroughcode.com/) is the landing page and install
-guide. [ftree.vibethroughcode.com/playground/](https://ftree.vibethroughcode.com/playground/) is a
+[kutumb.arjun.contact](https://kutumb.arjun.contact/) is the landing page and install
+guide. [kutumb.arjun.contact/playground/](https://kutumb.arjun.contact/playground/) is a
 browser-only reader for an exported `.ftree` — it draws the whole archive at once, including the
 people no relationship reaches.
 
@@ -18,7 +18,7 @@ edit the HTML and push.
 It reads version, size, release date, SHA-256 and the download count from the GitHub Releases API
 at run time, so cutting a release updates the site with no edit here, and the download count is
 real asset downloads rather than a third-party tracker. There is no analytics script on either
-page. Asset paths are relative, so the site works both at `arjunravindran.github.io/f-tree/` and at
+page. Asset paths are relative, so the site works both at `arjunravindran.github.io/kutumb/` and at
 a custom domain.
 
 ## The viewer
@@ -87,8 +87,8 @@ python3 -m http.server 8731 --directory site
 
 ## Custom domain
 
-The site is served at **[ftree.vibethroughcode.com](https://ftree.vibethroughcode.com/)**, with
-`arjunravindran.github.io/f-tree/` still working. Asset paths are relative so that both do.
+The site is served at **[kutumb.arjun.contact](https://kutumb.arjun.contact/)**, with
+`arjunravindran.github.io/kutumb/` still working. Asset paths are relative so that both do.
 
 The domain is held in the repository's **Pages settings**, not in a `site/CNAME` file — this
 deployment builds the pages as a workflow artifact rather than serving a branch, so GitHub keeps

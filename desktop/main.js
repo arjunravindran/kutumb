@@ -539,7 +539,7 @@ async function checkForUpdates(win, { quiet = false } = {}) {
       defaultId: 0,
       cancelId: 1,
     });
-    if (go.response === 0) shell.openExternal('https://ftree.vibethroughcode.com/desktop/');
+    if (go.response === 0) shell.openExternal('https://kutumb.arjun.contact/desktop/');
     return;
   }
 
@@ -799,7 +799,7 @@ function buildMenu(win) {
     {
       label: 'Help',
       submenu: [
-        { label: 'Kutumb on the web', click: () => shell.openExternal('https://ftree.vibethroughcode.com/') },
+        { label: 'Kutumb on the web', click: () => shell.openExternal('https://kutumb.arjun.contact/') },
         { label: 'Report a problem', click: () => shell.openExternal('https://github.com/arjunravindran/kutumb/issues') },
         { type: 'separator' },
         {

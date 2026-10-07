@@ -15,7 +15,7 @@ no advertisement and no upsell. There is nothing to buy because there is no serv
 
 No. It is distributed as an APK from [GitHub
 Releases](https://github.com/arjunravindran/kutumb/releases/latest) and from
-[ftree.vibethroughcode.com](https://ftree.vibethroughcode.com/).
+[kutumb.arjun.contact](https://kutumb.arjun.contact/).
 
 Android will ask you to allow installing from your browser or file manager once. The website walks
 through it with the exact wording your phone shows.
@@ -38,7 +38,7 @@ Android 8.0 (Oreo, API 26) or newer. The app is about 2 MB.
 
 ### Is there an iPhone, web or desktop version?
 
-No app, but there is a **[browser viewer](https://ftree.vibethroughcode.com/playground/)** that
+No app, but there is a **[browser viewer](https://kutumb.arjun.contact/playground/)** that
 opens an exported `.ftree` on any device with a browser and draws the whole family at once. It is
 read-only. The file is never uploaded — it is read in the tab.
 
