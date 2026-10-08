@@ -241,7 +241,7 @@ databases through the real `FamilyRepository`.
 4. **Share and catch-up:** the share flow (snapshot with the same ids over the nearby transfer), `sync-request` for a
    phone that has been away, compaction rules. *Next.*
 5. **Photos:** resized, chunked, encrypted events, or a nearby-only path. Depends on relay size limits.
-6. **UI:** "Share this tree", members, sync status ("3 changes waiting"), the review inbox.
+6. **UI:** a per-tree **Sharing** row under **Settings > Your trees** (owner's decision, 2026-10-08): switch sharing on, choose which paired-in-person contacts are members, see sync status ("3 changes waiting"), and a review inbox for held edits. No share control on the Network tab.
 
 Phases 1–4 carry the risk and should land in that order; each is shippable behind a switch that is off by
 default, like the existing sync.
