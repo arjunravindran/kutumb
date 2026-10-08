@@ -39,6 +39,9 @@ import com.vibethroughcode.ftree.kutumb.sync.SyncPublisher
 import com.vibethroughcode.ftree.kutumb.sync.SyncPreferences
 import com.vibethroughcode.ftree.kutumb.sync.SyncService
 import com.vibethroughcode.ftree.kutumb.sync.relay.WebSocketRelay
+import com.vibethroughcode.ftree.kutumb.treesync.TreeSyncCoordinator
+import com.vibethroughcode.ftree.kutumb.treesync.TreeSyncHandler
+import com.vibethroughcode.ftree.kutumb.treesync.TreeSyncPublisher
 import com.vibethroughcode.ftree.kutumb.trust.SignatureScheme
 import com.vibethroughcode.ftree.nearby.LanTransport
 import com.vibethroughcode.ftree.nearby.NearbyIdentity
@@ -59,6 +62,7 @@ import com.vibethroughcode.ftree.update.UpdatePreferences
 import com.vibethroughcode.ftree.update.UpdateRepository
 import java.io.File
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -131,12 +135,34 @@ class AppContainer(
                         GameSyncHandler(kutumbRepository),
                         RotationSyncHandler(kutumbRepository, signatureScheme),
                         MessageSyncHandler(kutumbRepository, System::currentTimeMillis) { messageNotifier.onReceived(it) },
+                        TreeSyncHandler(treeSync),
                     ),
                 )
             },
             scope = syncScope,
             clock = System::currentTimeMillis,
-        ).also { it.start() }
+        ).also {
+            it.start()
+            startTreeSync()
+        }
+    }
+
+    /**
+     * A tree is shared only when its owner has chosen to; until then this is a single cheap query and
+     * nothing else, so an unshared tree behaves exactly as it did before tree sync existed.
+     */
+    val treeSync: TreeSyncCoordinator by lazy { TreeSyncCoordinator(database, photoStore) }
+
+    val treeSyncPublisher: TreeSyncPublisher by lazy { TreeSyncPublisher(treeSync, syncPublisher) }
+
+    private var treeSyncHandle: TreeSyncCoordinator.Handle? = null
+
+    private fun startTreeSync() {
+        syncScope.launch {
+            if (treeSync.isShared()) {
+                treeSyncHandle = treeSync.start(syncScope, afterPass = { treeSyncPublisher.flush() })
+            }
+        }
     }
 
     /** Whether a new message earns a note on the phone. Off until switched on in Settings. */
@@ -283,6 +309,7 @@ class AppContainer(
 
     /** Stops what this container started on its own: relay connections, pairing, the nearby sockets. */
     fun stopServices() {
+        treeSyncHandle?.close()
         syncScope.cancel()
         stopForeground()
     }

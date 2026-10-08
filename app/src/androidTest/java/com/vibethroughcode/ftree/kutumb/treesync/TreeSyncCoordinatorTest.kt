@@ -11,6 +11,11 @@ import com.vibethroughcode.ftree.data.Gender
 import com.vibethroughcode.ftree.data.Person
 import com.vibethroughcode.ftree.data.PhotoStore
 import com.vibethroughcode.ftree.data.RelativeKind
+import com.vibethroughcode.ftree.kutumb.sync.SyncEnvelope
+import com.vibethroughcode.ftree.kutumb.sync.SyncPublisher
+import com.vibethroughcode.ftree.kutumb.sync.UnsignedEvent
+import com.vibethroughcode.ftree.kutumb.trust.PairingMethod
+import com.vibethroughcode.ftree.kutumb.trust.TrustedContact
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -211,5 +216,79 @@ class TreeSyncCoordinatorTest {
         } finally {
             handle.close()
         }
+    }
+
+    // --- members and the wire, end to end -------------------------------------------------------------
+
+    @Test fun membersCanOnlyBeAddedToASharedTree() = runBlocking {
+        val a = phone("a")
+        assertFalse(a.sync.addMember("kiran"))
+        a.sync.share("t")
+        assertTrue(a.sync.addMember("kiran"))
+        assertFalse("already a member", a.sync.addMember("kiran"))
+        assertTrue(a.sync.isMember("kiran"))
+        a.sync.removeMember("kiran")
+        assertFalse(a.sync.isMember("kiran"))
+    }
+
+    /** A relay that hands each envelope to the other phone's real handler, after a real trip through JSON. */
+    private inner class Link(val from: Phone, val to: Phone, val fromAsSeenByTo: TrustedContact, val toPersonId: String) : SyncPublisher {
+        val handler = TreeSyncHandler(to.sync)
+        var up = true
+        override suspend fun publish(envelope: SyncEnvelope, personIds: Collection<String>): Boolean {
+            if (!up || toPersonId !in personIds) return false
+            val onTheWire = SyncEnvelope.parse(envelope.toJson())!!
+            handler.onEnvelope(onTheWire, fromAsSeenByTo, UnsignedEvent("c".repeat(64), 1, 30078, emptyList(), ""))
+            return true
+        }
+    }
+
+    @Test fun phonesKeepEachOthersTreesInStepThroughTheRealWire() = runBlocking {
+        val a = phone("a"); val b = phone("b")
+        val aAsSeenByB = TrustedContact("anna", "a".repeat(64), pairedAt = 1, pairingMethod = PairingMethod.DIRECT)
+        val bAsSeenByA = TrustedContact("ben", "b".repeat(64), pairedAt = 1, pairingMethod = PairingMethod.DIRECT)
+        val aToB = Link(a, b, aAsSeenByB, toPersonId = "ben")
+        val bToA = Link(b, a, bAsSeenByA, toPersonId = "anna")
+        val aPublisher = TreeSyncPublisher(a.sync, aToB)
+        val bPublisher = TreeSyncPublisher(b.sync, bToA)
+
+        // Anna has a tree and shares it with Ben, who starts with an empty tree of the same id.
+        a.person("anna", "Anna"); a.person("dad", "Dad")
+        a.repo.addRelative("anna", "dad", RelativeKind.PARENT)
+        a.sync.share("t"); b.sync.share("t")
+        b.sync.addMember("anna")
+        assertTrue(shareTreeWith(bAsSeenByA, a.sync, aPublisher))
+        assertEquals("Ben now has Anna's whole tree", a.tree(), b.tree())
+
+        // Ben adds someone; the change reaches Anna with no one calling anything but reconcile and flush.
+        b.tick(1_000)
+        b.repo.addNewRelative("dad", Person(id = "gran", name = "Gran"), RelativeKind.PARENT)
+        b.sync.reconcile()
+        assertTrue(bPublisher.flush() > 0)
+        assertEquals(b.tree(), a.tree())
+        assertEquals(0, bPublisher.flush())
+
+        // Anna edits while the link is down: nothing is lost, and it goes when the link is back.
+        aToB.up = false
+        a.tick(1_000)
+        a.repo.updatePerson(a.repo.person("anna")!!.copy(birthDate = "1990"))
+        a.sync.reconcile()
+        assertEquals(0, aPublisher.flush())
+        assertTrue(a.tree() != b.tree())
+        aToB.up = true
+        assertTrue(aPublisher.flush() > 0)
+        assertEquals(a.tree(), b.tree())
+    }
+
+    @Test fun someoneNotAMemberCannotWriteIntoTheTree() = runBlocking {
+        val a = phone("a"); val b = phone("b")
+        a.sync.share("t"); b.sync.share("t")
+        // Ben was never added by Anna, so his edit is refused.
+        val bAsSeenByA = TrustedContact("ben", "b".repeat(64), pairedAt = 1, pairingMethod = PairingMethod.DIRECT)
+        b.person("sneaky", "Sneaky"); b.sync.reconcile()
+        val link = Link(b, a, bAsSeenByA, toPersonId = "anna")
+        b.sync.addMember("anna")
+        assertTrue(TreeSyncPublisher(b.sync, link).flush() > 0)
+        assertTrue("nothing got in", a.tree().people.isEmpty())
     }
 }

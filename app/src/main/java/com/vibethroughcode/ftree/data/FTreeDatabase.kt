@@ -19,6 +19,8 @@ import com.vibethroughcode.ftree.kutumb.db.PersonLocationEntity
 import com.vibethroughcode.ftree.kutumb.db.RedemptionEntity
 import com.vibethroughcode.ftree.kutumb.db.TrustedContactEntity
 import com.vibethroughcode.ftree.kutumb.treesync.TreeSyncDao
+import com.vibethroughcode.ftree.kutumb.treesync.TreeSyncMemberDao
+import com.vibethroughcode.ftree.kutumb.treesync.TreeSyncMemberEntity
 import com.vibethroughcode.ftree.kutumb.treesync.TreeSyncMetaEntity
 import com.vibethroughcode.ftree.kutumb.treesync.TreeSyncOpEntity
 
@@ -28,7 +30,7 @@ import com.vibethroughcode.ftree.kutumb.treesync.TreeSyncOpEntity
         LocalIdentityEntity::class, TrustedContactEntity::class, IdentityRotationEntity::class,
         PersonLocationEntity::class, FactEntity::class, FactAnswerEntity::class, FactResolutionEntity::class,
         LedgerEntity::class, OutboxEntity::class, RedemptionEntity::class, MessageEntity::class,
-        TreeSyncMetaEntity::class, TreeSyncOpEntity::class,
+        TreeSyncMetaEntity::class, TreeSyncOpEntity::class, TreeSyncMemberEntity::class,
     ],
     version = 4,
     exportSchema = true,
@@ -41,6 +43,7 @@ abstract class FTreeDatabase : RoomDatabase() {
     abstract fun personOriginDao(): PersonOriginDao
     abstract fun kutumbDao(): KutumbDao
     abstract fun treeSyncDao(): TreeSyncDao
+    abstract fun treeSyncMemberDao(): TreeSyncMemberDao
 
     companion object {
         private const val NAME = "f-tree.db"

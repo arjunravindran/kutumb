@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 4,
-    "identityHash": "eaa1aea25618fc9c1d03ba535aec978d",
+    "identityHash": "87c3d3b54d46b0ef7d0db80010664d6d",
     "entities": [
       {
         "tableName": "people",
@@ -934,11 +934,35 @@
             "createSql": "CREATE INDEX IF NOT EXISTS `index_tree_sync_ops_local_publishedAt` ON `${TABLE_NAME}` (`local`, `publishedAt`)"
           }
         ]
+      },
+      {
+        "tableName": "tree_sync_members",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`personId` TEXT NOT NULL, `addedAt` INTEGER NOT NULL, PRIMARY KEY(`personId`))",
+        "fields": [
+          {
+            "fieldPath": "personId",
+            "columnName": "personId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "addedAt",
+            "columnName": "addedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "personId"
+          ]
+        }
       }
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'eaa1aea25618fc9c1d03ba535aec978d')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '87c3d3b54d46b0ef7d0db80010664d6d')"
     ]
   }
 }

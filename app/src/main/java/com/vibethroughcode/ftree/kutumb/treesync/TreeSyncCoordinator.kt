@@ -37,10 +37,11 @@ class TreeSyncCoordinator(
     private val photos: PhotoStore? = null,
     private val wallClock: () -> Long = { System.currentTimeMillis() },
     private val newId: () -> String = { UUID.randomUUID().toString() },
-) {
+) : TreeSyncSink, TreeSyncSource, TreeSyncMembers {
     private val dao = db.treeSyncDao()
     private val people = db.personDao()
     private val relationships = db.relationshipDao()
+    private val memberDao = db.treeSyncMemberDao()
     private val mutex = Mutex()
 
     private class Loaded(val replica: TreeReplica, val clock: HybridClock, val recorder: EditRecorder)
@@ -50,7 +51,7 @@ class TreeSyncCoordinator(
     suspend fun isShared(): Boolean = dao.meta() != null
 
     /** The id every phone sharing this tree agrees on, or null if it is not shared. */
-    suspend fun sharedId(): String? = dao.meta()?.sharedId
+    override suspend fun sharedId(): String? = dao.meta()?.sharedId
 
     /**
      * Starts sharing this tree, taking in everyone and every relationship already in it. Safe to call
@@ -64,6 +65,22 @@ class TreeSyncCoordinator(
         reconcileLocked()
         true
     }
+
+    override suspend fun members(): List<String> = memberDao.memberIds()
+
+    override suspend fun isMember(personId: String): Boolean = personId in memberDao.memberIds()
+
+    /**
+     * Shares the tree with somebody. Returns false if the tree is not shared or they already were a
+     * member. Whether the person is *eligible* (paired in person) is decided by [shareTreeWith], which is
+     * what callers use; this only records the fact.
+     */
+    override suspend fun addMember(personId: String): Boolean = mutex.withLock {
+        if (dao.meta() == null) return@withLock false
+        memberDao.add(TreeSyncMemberEntity(personId, wallClock())) != -1L
+    }
+
+    override suspend fun removeMember(personId: String) = mutex.withLock { memberDao.remove(personId) }
 
     /** Records whatever the user has changed since last time. Returns how many operations that made. */
     suspend fun reconcile(): Int = mutex.withLock { reconcileLocked() }
@@ -94,7 +111,7 @@ class TreeSyncCoordinator(
      * Takes in operations from other phones: remembers them, applies them, and rewrites the tables to
      * show the result. Operations already held change nothing. Does nothing for a tree that is not shared.
      */
-    suspend fun receive(ops: List<TreeOp>): Received = mutex.withLock {
+    override suspend fun receive(ops: List<TreeOp>): Received = mutex.withLock {
         val s = load() ?: return@withLock Received(0, 0, 0)
         try {
             db.withTransaction {
@@ -124,24 +141,27 @@ class TreeSyncCoordinator(
     }
 
     /** Operations this phone made that have not been sent anywhere yet. */
-    suspend fun unpublished(): List<TreeOp> = dao.unpublishedLocalOps().mapNotNull { TreeOpCodec.fromJson(it.json) }
+    override suspend fun unpublished(): List<TreeOp> = dao.unpublishedLocalOps().mapNotNull { TreeOpCodec.fromJson(it.json) }
 
-    suspend fun markPublished(ids: List<String>, at: Long = wallClock()) {
+    override suspend fun markPublished(ids: List<String>) = markPublished(ids, wallClock())
+
+    suspend fun markPublished(ids: List<String>, at: Long) {
         ids.chunked(500).forEach { dao.markPublished(it, at) }
     }
 
     /** Every operation held, local and received, oldest first: what a phone that is catching up needs. */
-    suspend fun allOps(): List<TreeOp> = (dao.appliedOps() + dao.deferredOps()).mapNotNull { TreeOpCodec.fromJson(it.json) }
+    override suspend fun allOps(): List<TreeOp> = (dao.appliedOps() + dao.deferredOps()).mapNotNull { TreeOpCodec.fromJson(it.json) }
 
     /** What the family should look at: edits to someone who was deleted, relationships held back. */
     suspend fun inbox(): List<InboxItem> = mutex.withLock { load()?.replica?.view()?.inbox.orEmpty() }
 
     /**
      * Records the user's changes whenever the people or relationship tables change, including ones made
-     * by an import or the seeder. Changes are coalesced, so a burst of edits is one pass. Call [Handle.close]
+     * by an import or the seeder. Changes are coalesced, so a burst of edits is one pass, and [afterPass] runs
+     * after each (and once at start), which is where the new operations are sent. Call [Handle.close]
      * to stop. The first pass runs straight away, which picks up anything left unrecorded by a crash.
      */
-    fun start(scope: CoroutineScope, settleMs: Long = 250): Handle {
+    fun start(scope: CoroutineScope, settleMs: Long = 250, afterPass: suspend () -> Unit = {}): Handle {
         val pending = Channel<Unit>(Channel.CONFLATED)
         val observer = object : InvalidationTracker.Observer(arrayOf("people", "relationships")) {
             override fun onInvalidated(tables: Set<String>) { pending.trySend(Unit) }
@@ -152,6 +172,7 @@ class TreeSyncCoordinator(
             for (signal in pending) {
                 delay(settleMs)
                 runCatching { reconcile() }
+                runCatching { afterPass() } // e.g. send what was just recorded; a failure waits for the next pass
             }
         }
         return Handle {

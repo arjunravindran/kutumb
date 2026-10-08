@@ -242,6 +242,7 @@ class KutumbDatabaseTest {
         migrated.query("SELECT COUNT(*) FROM messages").use { it.moveToFirst(); assertEquals(1, it.getInt(0)) }
         migrated.query("SELECT COUNT(*) FROM tree_sync_meta").use { it.moveToFirst(); assertEquals("not shared", 0, it.getInt(0)) }
         migrated.query("SELECT COUNT(*) FROM tree_sync_ops").use { it.moveToFirst(); assertEquals(0, it.getInt(0)) }
+        migrated.query("SELECT COUNT(*) FROM tree_sync_members").use { it.moveToFirst(); assertEquals(0, it.getInt(0)) }
         migrated.close()
     }
 

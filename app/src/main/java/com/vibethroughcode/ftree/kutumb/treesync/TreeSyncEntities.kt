@@ -72,3 +72,27 @@ interface TreeSyncDao {
     @Query("SELECT COUNT(*) FROM tree_sync_ops")
     suspend fun opCount(): Int
 }
+
+/**
+ * The people this shared tree is shared with: the ones who may send changes to it and receive them.
+ * Keyed by person rather than by key, so a member who gets a new phone (a key rotation) stays a member.
+ * Only people paired in person (a direct pairing) can be added, and that is checked again on every
+ * message, because a pairing can be replaced.
+ */
+@Entity(tableName = "tree_sync_members")
+data class TreeSyncMemberEntity(
+    @PrimaryKey val personId: String,
+    val addedAt: Long,
+)
+
+@Dao
+interface TreeSyncMemberDao {
+    @Query("SELECT personId FROM tree_sync_members ORDER BY addedAt, personId")
+    suspend fun memberIds(): List<String>
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun add(member: TreeSyncMemberEntity): Long
+
+    @Query("DELETE FROM tree_sync_members WHERE personId = :personId")
+    suspend fun remove(personId: String)
+}
