@@ -1,6 +1,6 @@
 # Tree sync: design (draft, 2026-10-08)
 
-Status: **phases 1 and 2 are built and tested (the pure core, and the Room persistence under it); the wire, share and UI phases are not started.** Nothing in the running app uses it yet. The core is in
+Status: **phases 1, 2 and 3 are built and tested (the pure core, the Room persistence, and the send/receive wire); snapshot sharing, catch-up, photos and the UI are not started.** The running app has the code wired in but nothing can switch it on yet, because no screen shares a tree. The core is in
 `kutumb-core/.../kutumb/treesync/`: `Hlc.kt` (clock), `TreeOp.kt` (operations and validation),
 `TreeReplica.kt` (merge and view), `TreeOpCodec.kt` (the wire payload), `EditBridge.kt` (edits to operations, view to database steps). 48 JVM tests, including random
 shuffled-and-duplicated operation streams that must converge, and two deliberate breakages of the merge
@@ -162,7 +162,7 @@ counted without spoiling the rest of the batch (`TreeOpCodec.parsePayload`).
 - Delivery is **idempotent because the merge is** (re-applying an operation changes nothing). The `id`
   exists for the log, acknowledgements and catch-up ("everything after this"), not for correctness.
 - Operations are batched, because relays rate-limit and each wrap costs a signature.
-- Only paired, tree-member keys are accepted for a tree id; everything else is dropped as today's handlers do.
+- Only members paired in person are accepted for a tree id (see Membership); everything else is dropped as today's handlers do.
 - `SyncOutbox` already retries; the outbox rows gain the tree id.
 
 ### Catch-up and bootstrap
@@ -175,11 +175,24 @@ counted without spoiling the rest of the batch (`TreeOpCodec.parsePayload`).
   or, if too much has been compacted, a fresh snapshot. This is how a new member and a long-offline member
   converge without the relays remembering anything.
 
-### Membership
+### Membership (built)
 
-A shared tree has a member list (keys). Add a member by pairing in person, then "Share this tree". Removing
-a member stops publishing to them and stops accepting their operations; **they keep the copy they have**,
-which cannot be taken back. v1 has no roles and no group re-keying.
+A shared tree has a member list, stored as `tree_sync_members(personId, addedAt)`. It is keyed by **person**,
+not key, so a member who gets a new phone (a key rotation) stays a member. Rules, all enforced in code and
+covered by tests:
+
+- Only a contact **paired in person** (`PairingMethod.DIRECT`) can be added (`shareTreeWith`), and the same
+  check runs again on **every inbound message** in `TreeSyncHandler`, because a pairing can be replaced. A
+  contact who was only vouched for is never heard, even if a row somehow names them.
+- An inbound edit must name **this** tree's shared id, come from a **member**, and be a `tree-edit`; anything
+  else is dropped silently. Messages for a tree that is not shared are dropped.
+- Adding a member sends them the **whole operation history** at once (`sendEverythingTo`). Operations they
+  already hold change nothing, so repeating it is safe. *For a large tree this is many messages over the relays;
+  the nearby snapshot in phase 4 is the planned way to start a big tree, and this stays as the fallback.*
+- Removing a member stops publishing to them and stops accepting their operations; **they keep the copy they
+  have**, which cannot be taken back. v1 has no roles and no group re-keying.
+- The tree id travels inside the payload, so which tree a message is for no longer depends on which container
+  happened to receive it.
 
 ## Schema (db v3 → v4, built)
 
@@ -221,9 +234,12 @@ databases through the real `FamilyRepository`.
 2. **Database and recording:** migration v4, the operation log, `TreeSyncCoordinator` (share, reconcile,
    receive, restart from the log, observer). **Done**, verified on the emulator; nothing in the app starts it
    yet, because no tree can be shared until phase 4.
-3. **Wire:** send `tree-edit` batches from the log (`unpublished`) to paired members over the existing
-   relay path, and hand inbound ones to `receive`. Add the tree id to the sync routing. *Next.*
-4. **Share and catch-up:** the share flow (snapshot with the same ids), members, `sync-request`, compaction rules.
+3. **Wire:** `TreeSyncPublisher` sends the log's unsent operations to members in batches of 100 through the existing
+   relay path and outbox, `TreeSyncHandler` hands inbound ones to `receive`, and the container starts both only
+   when a tree is shared. **Done**, tested with fakes (trust rules) and with two real databases joined by a fake
+   relay that uses the real JSON format. Still not reachable from the UI.
+4. **Share and catch-up:** the share flow (snapshot with the same ids over the nearby transfer), `sync-request` for a
+   phone that has been away, compaction rules. *Next.*
 5. **Photos:** resized, chunked, encrypted events, or a nearby-only path. Depends on relay size limits.
 6. **UI:** "Share this tree", members, sync status ("3 changes waiting"), the review inbox.
 
