@@ -26,6 +26,7 @@ Not built: **phase 4** (start a big shared tree from a nearby snapshot with the 
 
 ## Verified (actual runs)
 
+- **Two real phones, real relay (2026-10-08/09):** Pixel 7 (Android 17) and Galaxy S22+ (Android 14), debug build, sync on, relay `wss://nos.lol`. Both seeded with the same sample family (`--es mode family --ez stable true --es shared t1`), paired in person (they hold each other as DIRECT contacts), each added the other under Settings > Your trees > Sharing. A rename on the Samsung ("Meena" to "Meena Devi") reached the Pixel through nos.lol, and a database comparison showed identical people and relationships on both. The relay dropdown, the Sharing screen and the Nearby/QR pairing screens all worked on hardware.
 - JVM: `testDebugUnitTest :kutumb-core:test :app:lintDebug` pass (925 tests when last run in full).
 - Emulator (pinned with `ANDROID_SERIAL`): the 3-to-4 migration, 13 coordinator tests with two real databases joined by a fake relay, and the whole instrumented suite **before** the container wiring (270 of 271; the one failure, `PhotoViewerTest.tappingThePictureItselfPutsItAway`, passes alone: a known load flake).
 - Site JS tests (906), desktop JS tests that CI runs (454), the Python/Node site checks.
@@ -33,8 +34,8 @@ Not built: **phase 4** (start a big shared tree from a nearby snapshot with the 
 
 ## NOT verified
 
+- Tree sync has had **one** real-device run (below). Not yet tried on devices: deleting a person, edits made on both phones at once, a phone that was offline while edits happened, restarting the app mid-sync, a tree with photographs, more than two phones.
 - **The whole instrumented suite has not been re-run since `AppContainer` gained the tree-sync wiring** (a run was killed for low memory). The wiring is gated on a tree being shared, but run it: `ANDROID_SERIAL=emulator-5554 ./gradlew connectedDebugAndroidTest`.
-- Nothing here has run on a physical phone or against real relays; tree sync has only been run with a fake relay.
 - The web viewer's persistence, install and offline behaviour have not been tried on an iPad. Open question: whether Safari greys out `.ftree` files in the file picker.
 - The self-hosted fonts and the pages have not been looked at in a browser by the assistant.
 - The Kutumb build has not been installed on a device since the rename; the R8 release build has not been run since the rename (CLAUDE.md says to test it before publishing). The Play build was not rebuilt.
@@ -42,6 +43,8 @@ Not built: **phase 4** (start a big shared tree from a nearby snapshot with the 
 
 ## Gotchas
 
+- **Real-phone testing over adb:** the Pixel's screen times out after 30 s and then screenshots come back black, so send `KEYCODE_WAKEUP` before each step. Never press Back repeatedly: it leaves the app and lands in whatever was open before. The app does not log pairing steps; the stored state is the evidence (`run-as com.vibethroughcode.kutumb.debug cat databases/f-tree.db` plus the `-wal` and `-shm` files, read with sqlite3).
+- **What the first real run showed:** (a) a message from a phone that has not yet been added as a member is dropped by design, so add each other on **both** phones before editing; (b) after adding a member the Sharing screen keeps saying "N changes waiting" until the next pass sends the backlog, because sending a new member the whole history does not mark operations as sent; (c) when the relay is slow to reach (the Pixel measured 250 to 1100 ms to nos.lol while the Samsung measured about 230 ms) the websocket connect fails and is retried once a minute, and it took about nine minutes for a change to arrive; (d) `connect failed` is logged without the underlying error.
 - **Never run `connectedDebugAndroidTest` with a phone attached unless `ANDROID_SERIAL` names the emulator**, e.g. `ANDROID_SERIAL=emulator-5554 ./gradlew connectedDebugAndroidTest`. Start it with `emulator -avd Medium_Phone_API_35 -no-snapshot -no-audio -memory 3072`.
 - Gradle can report success when the device runner failed: read the result XML under `app/build/outputs/androidTest-results/connected/debug/`. `gradlew.bat` splits arguments at commas, so run one test class at a time.
 - On Windows, **do not cut a Gradle run short with `Select-Object -First N`** (it can stop Gradle mid-run and leave odd results).
