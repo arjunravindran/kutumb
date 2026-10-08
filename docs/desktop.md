@@ -435,8 +435,8 @@ a general-purpose `fs`.
 
 `refuseTheNetwork` cancels every `http`, `https` and websocket request in the session. Not a
 promise in a policy — the request is refused, so the claim holds whatever the page's markup asks
-for now or later, and the one request the viewer does make (Google Fonts, right for a web page and
-wrong for this) is logged and dropped.
+for now or later. The viewer used to make one request (to Google Fonts); it makes none now, because
+the web page serves its typefaces from its own `site/fonts/` folder, which the package carries too.
 
 Literata and JetBrains Mono are therefore read from disk: the same two files the Android app ships,
 carried in as a resource and injected as `@font-face`. Without them the app falls back to the

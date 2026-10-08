@@ -5,11 +5,11 @@
  * afterwards while a fresh copy is fetched behind them (stale-while-revalidate), so an update
  * arrives on the visit after it is published. Nothing here ever sees a family file: that is read
  * in the page from a file picker and goes nowhere, and this worker only handles GET requests for
- * the viewer's own assets and the two font hosts it already uses.
+ * the viewer's own assets and the site's typefaces (the `../fonts/` folder next to it).
  *
  * Bump VERSION only to throw away old caches; a changed file needs no bump.
  */
-const VERSION = 'v1';
+const VERSION = 'v2';
 const CACHE = `kutumb-viewer-${VERSION}`;
 
 const SHELL = [
@@ -36,9 +36,15 @@ const SHELL = [
   'icons/icon-512.png',
   'icons/apple-touch-icon.png',
   '../favicon.svg',
+  '../fonts/fonts.css',
+  '../fonts/literata-latin-normal.woff2',
+  '../fonts/literata-latin-italic.woff2',
+  '../fonts/jetbrains-mono-latin-normal.woff2',
+  // The Latin Extended files are only fetched for a name that needs them, so they are cached when first seen.
 ];
 
-const FONT_HOSTS = ['fonts.googleapis.com', 'fonts.gstatic.com'];
+/** Where the typefaces are served from: same origin, a sibling of the viewer's folder. */
+const FONTS_PATH = new URL('../fonts/', self.location).pathname;
 
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(SHELL)).then(() => self.skipWaiting()));
@@ -56,9 +62,9 @@ self.addEventListener('fetch', (event) => {
   const req = event.request;
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
-  const ours = url.origin === self.location.origin && url.pathname.startsWith(new URL('./', self.location).pathname);
-  const fonts = FONT_HOSTS.includes(url.hostname);
-  if (!ours && !fonts) return;
+  const sameOrigin = url.origin === self.location.origin;
+  const ours = sameOrigin && (url.pathname.startsWith(new URL('./', self.location).pathname) || url.pathname.startsWith(FONTS_PATH));
+  if (!ours) return;
 
   event.respondWith((async () => {
     const cache = await caches.open(CACHE);
