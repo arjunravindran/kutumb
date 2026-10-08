@@ -26,8 +26,11 @@ class SampleData(
      * today, so "Coming up" and the morning reminder have something to show on whatever day they
      * are being looked at: a birthday today, a yearless one tomorrow, and the departed remembered.
      */
-    suspend fun family(birthdays: Boolean = false) {
+    suspend fun family(birthdays: Boolean = false, stableIds: Boolean = false) {
         clear()
+        // With [stableIds] the n-th person always gets the id "sample-n", so two phones seeded separately hold
+        // the SAME family. Otherwise every phone mints its own random ids and a shared tree would hold everyone twice.
+        var made = 0
         val today = LocalDate.now()
         fun on(daysAway: Long, year: Int?): String {
             val day = today.plusDays(daysAway)
@@ -44,6 +47,7 @@ class SampleData(
             died: String? = null,
         ): String {
             val person = Person(
+                id = if (stableIds) "sample-${made++}" else java.util.UUID.randomUUID().toString(),
                 name = name,
                 gender = gender,
                 birthDate = born,

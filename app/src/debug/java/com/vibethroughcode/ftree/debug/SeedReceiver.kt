@@ -28,6 +28,8 @@ class SeedReceiver : BroadcastReceiver() {
         val app = context.applicationContext as FTreeApplication
         val mode = intent.getStringExtra("mode") ?: "family"
         val size = intent.getIntExtra("size", 500)
+        val stable = intent.getBooleanExtra("stable", false)
+        val shared = intent.getStringExtra("shared")
         val pending = goAsync()
 
         CoroutineScope(Dispatchers.IO).launch {
@@ -36,8 +38,13 @@ class SeedReceiver : BroadcastReceiver() {
                 when (mode) {
                     "clear" -> seeder.clear()
                     "large" -> seeder.large(size)
-                    "birthdays" -> seeder.family(birthdays = true)
-                    else -> seeder.family()
+                    "birthdays" -> seeder.family(birthdays = true, stableIds = stable)
+                    else -> seeder.family(stableIds = stable)
+                }
+                // Marks the seeded tree as shared under a known id, so a second phone seeded the same way joins it.
+                if (shared != null) {
+                    app.container.treeSync.share(shared)
+                    app.container.startTreeSyncIfShared()
                 }
                 Log.i("SeedReceiver", "seeded: $mode")
             } catch (e: Exception) {
