@@ -8,7 +8,22 @@ name: Android CI
 on:
   push:
     branches: [main, master]
+    paths-ignore:
+      - 'docs/**'
+      - '**/*.md'
+      - 'store/**'
+      - '.github/ISSUE_TEMPLATE/**'
   pull_request:
+    paths-ignore:
+      - 'docs/**'
+      - '**/*.md'
+      - 'store/**'
+      - '.github/ISSUE_TEMPLATE/**'
+
+# A newer push makes an older run pointless, and the emulator job below is by far the longest thing here.
+concurrency:
+  group: android-ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   static-checks:
