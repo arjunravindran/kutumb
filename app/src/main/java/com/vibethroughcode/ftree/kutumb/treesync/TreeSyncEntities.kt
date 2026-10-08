@@ -69,6 +69,9 @@ interface TreeSyncDao {
     @Query("UPDATE tree_sync_ops SET publishedAt = :at WHERE opId IN (:ids)")
     suspend fun markPublished(ids: List<String>, at: Long)
 
+    @Query("SELECT COUNT(*) FROM tree_sync_ops WHERE local = 1 AND publishedAt IS NULL")
+    suspend fun unpublishedLocalCount(): Int
+
     @Query("SELECT COUNT(*) FROM tree_sync_ops")
     suspend fun opCount(): Int
 }

@@ -544,6 +544,16 @@
     <string name="trees_error_long">Keep it to 40 characters</string>
     <string name="trees_error_taken">You already have a tree with that name</string>
     <string name="trees_error_other">That did not work</string>
+    <string name="sharing_button">Sharing</string>
+    <string name="sharing_title">Sharing %1$s</string>
+    <string name="sharing_off_body">Share this tree with relatives you have paired with in person. Once it is shared, a change one of you makes appears on the other phones. Nothing is shared with anyone until you choose them below, and it goes through the relays you picked under Family sync, encrypted.</string>
+    <string name="sharing_turn_on">Share this tree</string>
+    <string name="sharing_on_body">This tree is shared. Switch on the people who may see it and change it. A new person is sent the whole tree. Anyone you switch off stops receiving changes, but keeps the copy they already have.</string>
+    <string name="sharing_nobody">Nobody to share with yet. Only people you paired with in person can be added; pair with a relative first.</string>
+    <string name="sharing_waiting">%1$d changes waiting to be sent</string>
+    <string name="sharing_sync_off">Family sync is off, so nothing is sent yet. Changes are saved here and go when you switch it on.</string>
+    <string name="sharing_done">Done</string>
+    <string name="sharing_loading">One moment…</string>
     <string name="settings_section_sync">Family sync over the internet</string>
     <string name="settings_sync_toggle">Sync with family over the internet</string>
     <string name="settings_sync_explainer">Off by default. When on, this phone connects to the relay servers you name below and exchanges end-to-end encrypted messages with the people you have paired with. Relays see that messages pass through, never what they say. Nothing is sent until you turn this on and add a relay. You can pick from a short list or type your own. While it is on, the phone also wakes up about every fifteen minutes, even with the app closed, to collect and send what is waiting.</string>

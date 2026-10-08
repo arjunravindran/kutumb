@@ -74,6 +74,8 @@ class FTreeApplication : Application() {
         if (container.reminderPreferences.enabled.value) container.reminders.ensure()
         // Sync is opt-in: with the switch off this reads one preference and opens nothing.
         if (container.syncPreferences.enabled.value) container.syncService
+        // A shared tree records its changes whether or not sync is on; sending waits for sync. An unshared one is one query.
+        container.startTreeSyncIfShared()
         adoptTreeKey(container)
     }
 

@@ -50,6 +50,7 @@ fun TreesSettings() {
     var creating by remember { mutableStateOf(false) }
     var renaming by remember { mutableStateOf<TreeInfo?>(null) }
     var deleting by remember { mutableStateOf<TreeInfo?>(null) }
+    var sharing by remember { mutableStateOf<TreeInfo?>(null) }
     val activeId = app.container.tree.id
 
     Column {
@@ -78,6 +79,12 @@ fun TreesSettings() {
                 if (tree.id != activeId) {
                     TextButton(onClick = { if (app.switchTo(tree.id)) app.relaunch() }) { Text(stringResource(R.string.trees_open)) }
                 }
+                // Sharing is stored in the tree's own database, so it can only be managed for the tree that is open.
+                if (tree.id == activeId) {
+                    TextButton(onClick = { sharing = tree }, modifier = Modifier.testTag(SharingButtonTag)) {
+                        Text(stringResource(R.string.sharing_button))
+                    }
+                }
                 TextButton(onClick = { renaming = tree }) { Text(stringResource(R.string.trees_rename)) }
                 if (tree.id != activeId) {
                     TextButton(onClick = { deleting = tree }) { Text(stringResource(R.string.trees_delete)) }
@@ -88,6 +95,8 @@ fun TreesSettings() {
             Text(stringResource(R.string.trees_new))
         }
     }
+
+    sharing?.let { tree -> TreeSharingDialog(tree.name) { sharing = null } }
 
     if (creating) {
         NameDialog(

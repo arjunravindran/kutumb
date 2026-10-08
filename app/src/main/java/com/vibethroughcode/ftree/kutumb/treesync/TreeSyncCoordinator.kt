@@ -37,7 +37,7 @@ class TreeSyncCoordinator(
     private val photos: PhotoStore? = null,
     private val wallClock: () -> Long = { System.currentTimeMillis() },
     private val newId: () -> String = { UUID.randomUUID().toString() },
-) : TreeSyncSink, TreeSyncSource, TreeSyncMembers {
+) : TreeSyncSink, TreeSyncSource, TreeSyncMembers, TreeSyncSwitch {
     private val dao = db.treeSyncDao()
     private val people = db.personDao()
     private val relationships = db.relationshipDao()
@@ -81,6 +81,8 @@ class TreeSyncCoordinator(
     }
 
     override suspend fun removeMember(personId: String) = mutex.withLock { memberDao.remove(personId) }
+
+    override suspend fun startSharing(): Boolean = share()
 
     /** Records whatever the user has changed since last time. Returns how many operations that made. */
     suspend fun reconcile(): Int = mutex.withLock { reconcileLocked() }
@@ -142,6 +144,9 @@ class TreeSyncCoordinator(
 
     /** Operations this phone made that have not been sent anywhere yet. */
     override suspend fun unpublished(): List<TreeOp> = dao.unpublishedLocalOps().mapNotNull { TreeOpCodec.fromJson(it.json) }
+
+    /** How many of this phone's own changes have not been handed to the transport yet. */
+    override suspend fun pendingCount(): Int = dao.unpublishedLocalCount()
 
     override suspend fun markPublished(ids: List<String>) = markPublished(ids, wallClock())
 

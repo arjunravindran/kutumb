@@ -143,7 +143,7 @@ class AppContainer(
             clock = System::currentTimeMillis,
         ).also {
             it.start()
-            startTreeSync()
+            startTreeSyncIfShared()
         }
     }
 
@@ -156,11 +156,20 @@ class AppContainer(
     val treeSyncPublisher: TreeSyncPublisher by lazy { TreeSyncPublisher(treeSync, syncPublisher) }
 
     private var treeSyncHandle: TreeSyncCoordinator.Handle? = null
+    private val treeSyncStarted = java.util.concurrent.atomic.AtomicBoolean(false)
 
-    private fun startTreeSync() {
+    /**
+     * Starts recording this tree's changes and sending them, if the tree is shared. Safe to call again: it
+     * starts at most once. Called at launch (whether or not sync is on, because recording a change is local
+     * and sending it waits for sync) and again when sharing is switched on.
+     */
+    fun startTreeSyncIfShared() {
+        if (!treeSyncStarted.compareAndSet(false, true)) return
         syncScope.launch {
             if (treeSync.isShared()) {
                 treeSyncHandle = treeSync.start(syncScope, afterPass = { treeSyncPublisher.flush() })
+            } else {
+                treeSyncStarted.set(false)
             }
         }
     }

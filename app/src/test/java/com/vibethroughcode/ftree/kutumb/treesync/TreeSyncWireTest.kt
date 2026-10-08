@@ -32,6 +32,7 @@ class TreeSyncWireTest {
         override suspend fun isMember(personId: String) = personId in members
         override suspend fun receive(ops: List<TreeOp>): Received { received += ops; return Received(ops.size, 0, 0) }
         override suspend fun members() = members.toList()
+        override suspend fun pendingCount() = pending.size
         override suspend fun unpublished() = pending.toList()
         override suspend fun allOps() = history.toList()
         override suspend fun markPublished(ids: List<String>) { published += ids; pending.removeAll { it.id in ids } }

@@ -19,6 +19,7 @@ interface TreeSyncSink {
 interface TreeSyncSource {
     suspend fun sharedId(): String?
     suspend fun members(): List<String>
+    suspend fun pendingCount(): Int
     suspend fun unpublished(): List<TreeOp>
     suspend fun allOps(): List<TreeOp>
     suspend fun markPublished(ids: List<String>)
