@@ -30,6 +30,7 @@ const SHELL = [
   'search.js',
   'sort-key.js',
   'write.js',
+  'remember.js',
   'manifest.webmanifest',
   'icons/icon-192.png',
   'icons/icon-512.png',

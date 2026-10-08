@@ -15,6 +15,7 @@ import {
 import { layoutArchive } from './layout.js';
 import { Chart } from './chart.js';
 import { searchPeople as findPeople } from './search.js';
+import { forgetTree, recallTree, rememberTree, rememberingIsOn, setRemembering } from './remember.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -109,7 +110,12 @@ function showOpenerError(message) {
   box.hidden = false;
 }
 
-async function openFile(file) {
+/**
+ * Opens a tree in the page. [remember] is whether to keep a copy on this device so the viewer reopens
+ * on it; false for the sample, for a tree being reopened from that copy, and in the desktop app (which
+ * has its own way). The person can also turn remembering off, in which case nothing is kept either.
+ */
+async function openFile(file, { remember = true } = {}) {
   $('opener-error').hidden = true;
   showBusy(true);
   // Yield once so the spinner actually paints before a large file blocks the thread.
@@ -142,6 +148,7 @@ async function openFile(file) {
     renderIndex();
     closePanels();
     frameOnLoad();
+    if (remember && !desktop && rememberingIsOn()) keepCopy(file, state.fileName);
   } catch (error) {
     const message = error instanceof ArchiveError
       ? error.message
@@ -151,6 +158,11 @@ async function openFile(file) {
   } finally {
     showBusy(false);
   }
+}
+
+/** Keeps the file on this device, quietly: failing to is not a reason to tell anyone anything. */
+async function keepCopy(file, name) {
+  try { await rememberTree(name, await file.arrayBuffer()); } catch { /* nothing is remembered */ }
 }
 
 /**
@@ -644,7 +656,12 @@ function wireChrome() {
     if (file) openFile(file);
     e.target.value = '';
   });
-  $('close-file').addEventListener('click', closeFile);
+  // Closing also forgets the copy kept on this device, so what is on screen and what is stored never disagree.
+  $('close-file').addEventListener('click', () => { forgetTree(); closeFile(); });
+
+  const remember = $('remember');
+  remember.checked = rememberingIsOn();
+  remember.addEventListener('change', () => setRemembering(remember.checked));
 
   $('sample').addEventListener('click', async () => {
     showBusy(true);
@@ -652,7 +669,7 @@ function wireChrome() {
       const response = await fetch('sample-family.ftree');
       if (!response.ok) throw new Error(`${response.status}`);
       const blob = await response.blob();
-      await openFile(new File([blob], 'sample-family.ftree'));
+      await openFile(new File([blob], 'sample-family.ftree'), { remember: false });
     } catch {
       showOpenerError('The sample file could not be loaded. Check your connection, or open your own export.');
     } finally {
@@ -875,6 +892,13 @@ wireSearch();
 wireRelate();
 wireKeys();
 applyPrefs();
+
+// On the web, start where the person left off. The desktop app does this itself in wireDesktop.
+if (!desktop && rememberingIsOn()) {
+  recallTree().then((saved) => {
+    if (saved && viewer.dataset.state !== 'loaded') openFile(new File([saved.bytes], saved.name), { remember: false });
+  });
+}
 
 // Canvas text is measured against the real faces, so the first paint waits for them.
 document.fonts?.ready.then(() => chart.invalidate());

@@ -56,7 +56,7 @@
 
     <div class="bar-file" data-when="loaded">
       <span class="file-name" id="file-name"></span>
-      <button type="button" class="link-btn" id="close-file">Close</button>
+      <button type="button" class="link-btn" id="close-file" title="Close this tree and forget the copy kept on this device">Close</button>
     </div>
 
     <div class="bar-spacer"></div>
@@ -140,6 +140,7 @@
           <p class="drop-or">or</p>
           <button type="button" class="btn primary" id="choose">Choose a file</button>
           <button type="button" class="btn quiet" id="sample">Open the sample family</button>
+          <label class="remember"><input type="checkbox" id="remember" checked> Keep my tree on this device</label>
         </div>
 
         <p class="assurance">
@@ -147,7 +148,9 @@
           <span>
             <b>The file never leaves this device.</b> It is unzipped and drawn by the page you are
             looking at — there is no upload, no server, and nothing to sign into. Turn off your
-            network and it still works.
+            network and it still works. With the box above ticked, this browser also keeps a copy
+            of your tree in its own storage so it opens straight away next time; <b>Close</b>
+            removes it, and unticking the box does too.
           </span>
         </p>
 
