@@ -42,3 +42,17 @@ val MIGRATION_2_3 = object : Migration(2, 3) {
         db.execSQL("CREATE INDEX IF NOT EXISTS `index_messages_threadPersonId` ON `messages` (`threadPersonId`)")
     }
 }
+
+/**
+ * Version 4 adds the tables behind tree sync: a one-row marker that says the tree is shared, and the log
+ * of operations. Like versions 2 and 3 it only creates, so nothing in the tree, the family network or the
+ * import history is touched and an update in place keeps everything; a tree that is never shared keeps
+ * both tables empty. The statements are the ones Room generated into `schemas/.../4.json`.
+ */
+val MIGRATION_3_4 = object : Migration(3, 4) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("CREATE TABLE IF NOT EXISTS `tree_sync_meta` (`id` INTEGER NOT NULL, `sharedId` TEXT NOT NULL, `deviceId` TEXT NOT NULL, `lastHlc` TEXT NOT NULL, PRIMARY KEY(`id`))")
+        db.execSQL("CREATE TABLE IF NOT EXISTS `tree_sync_ops` (`opId` TEXT NOT NULL, `json` TEXT NOT NULL, `local` INTEGER NOT NULL, `applied` INTEGER NOT NULL, `publishedAt` INTEGER, PRIMARY KEY(`opId`))")
+        db.execSQL("CREATE INDEX IF NOT EXISTS `index_tree_sync_ops_local_publishedAt` ON `tree_sync_ops` (`local`, `publishedAt`)")
+    }
+}

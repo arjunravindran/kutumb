@@ -90,4 +90,11 @@ class TreeOpCodecTest {
         val text = Json.write(TreeOpCodec.encode(TreeOp.PersonAdd("1", at, "p")))
         assertTrue(text.contains("\"hlc\":\"1700000000000.2.phone-a\""))
     }
+
+    @Test fun anOperationSurvivesBeingStoredAsText() {
+        for (op in everyKind) assertEquals(op, TreeOpCodec.fromJson(TreeOpCodec.toJson(op)))
+        assertNull(TreeOpCodec.fromJson("not json"))
+        assertNull(TreeOpCodec.fromJson("[1,2]"))
+        assertNull(TreeOpCodec.fromJson("{\"op\":\"person.merge\"}"))
+    }
 }

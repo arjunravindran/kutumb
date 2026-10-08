@@ -35,6 +35,13 @@ object TreeOpCodec {
         return m
     }
 
+    /** One operation as the text stored in the operation log. */
+    fun toJson(op: TreeOp): String = com.vibethroughcode.ftree.kutumb.sync.Json.write(encode(op))
+
+    /** Null for text that is not a well-formed operation of a kind this build knows. */
+    fun fromJson(text: String): TreeOp? =
+        (com.vibethroughcode.ftree.kutumb.sync.Json.parseOrNull(text) as? Map<*, *>)?.let(::decode)
+
     /** Null when the payload is not a tree-edit at all (no tree id, no list of operations, too many). */
     fun parsePayload(payload: Map<String, Any?>): Decoded? {
         val tree = (payload["tree"] as? String)?.takeIf { it.isNotBlank() && it.length <= TreeOpRules.MAX_ID } ?: return null

@@ -1,6 +1,6 @@
 # Tree sync: design (draft, 2026-10-08)
 
-Status: **phase 1 (the pure core and its bridge to the database) is built and tested; the Room, wire and UI phases are not started.** The core is in
+Status: **phases 1 and 2 are built and tested (the pure core, and the Room persistence under it); the wire, share and UI phases are not started.** Nothing in the running app uses it yet. The core is in
 `kutumb-core/.../kutumb/treesync/`: `Hlc.kt` (clock), `TreeOp.kt` (operations and validation),
 `TreeReplica.kt` (merge and view), `TreeOpCodec.kt` (the wire payload), `EditBridge.kt` (edits to operations, view to database steps). 48 JVM tests, including random
 shuffled-and-duplicated operation streams that must converge, and two deliberate breakages of the merge
@@ -181,31 +181,49 @@ A shared tree has a member list (keys). Add a member by pairing in person, then 
 a member stops publishing to them and stops accepting their operations; **they keep the copy they have**,
 which cannot be taken back. v1 has no roles and no group re-keying.
 
-## Schema (db v3 → v4)
+## Schema (db v3 → v4, built)
 
-New tables, nothing destructive:
+Two new tables, created by `MIGRATION_3_4` (create-only, so nothing existing is touched; the SQL is the one
+Room generated into `app/schemas/.../4.json`, and `KutumbDatabaseTest` checks a v3 database with people,
+relationships and messages comes through whole):
 
-- `shared_trees(treeId, sharedId, createdAt)`, `tree_members(sharedId, pubkey, addedAt)`
-- `sync_ops(opId PK, sharedId, hlc, deviceId, kind, payload)`, the operation log (nothing is marked held:
-  that is computed by the view)
-- `field_clocks(personId, field, hlc)` and `tombstones(entity, id, hlc)`, so the merge can compare without
-  replaying the whole log
-- `sync_state(sharedId, deviceId, highWater)`
+- `tree_sync_meta(id = 1, sharedId, deviceId, lastHlc)`: **present only if the tree is shared**. Each tree
+  has its own database, so one row is enough. Its absence is what "not shared" means; an unshared tree
+  carries two empty tables and every sync method returns at once.
+- `tree_sync_ops(opId PK, json, local, applied, publishedAt)`: the append-only log of every operation made
+  or received. `applied = 0` holds an operation stamped too far ahead of the clock, to be tried again;
+  `publishedAt` is null until a local operation has been sent.
 
-Every local write already goes through `FamilyRepository`; that is where operations are **recorded**.
-Anything that writes the database another way (import, the debug seeder) must be routed through, or marked
-as a snapshot event, so no change is silent. Finding every such path is the first task of phase 2.
+The first draft also had tables for field clocks, tombstones, members and a high-water mark. They are gone:
+the registers are **rebuilt from the log** when a tree is first used, so the log is the single source of
+truth and nothing can drift from it. (Rebuilding is a replay, linear in the log; compaction is deferred.)
+Members and per-device marks come back in the share and catch-up phases if they turn out to be needed.
+
+### How writes are noticed: the reconciler, not hooks
+
+The first draft hooked `FamilyRepository`'s write methods. The built version does not: `Reconciler` compares
+the tables with the shared tree and records the difference. That covers every way the tables change (edit,
+delete, "keep as unknown", import, the debug seeder, and the first share of an existing tree) with no hook to
+forget, and it is idempotent, so a crash between a write and its recording is repaired by the next pass.
+`TreeSyncCoordinator.start(scope)` registers a Room invalidation observer on `people` and `relationships`
+and runs a pass after changes settle (and once at start-up). Photographs are not synced.
+
+`TreeSyncCoordinator` (app module) is the only class that reads or writes the sync tables:
+`share`, `reconcile`, `receive` (log, apply, then rewrite the tables with `Projection`, in one transaction),
+`unpublished` / `markPublished`, `allOps`, `inbox`. Instrumented tests drive two phones' worth of real Room
+databases through the real `FamilyRepository`.
 
 ## Phases
 
-1. **Pure core** (`kutumb-core`): hybrid clock, operation types, the merge/reduce function, validation verdicts.
-   JVM tests: convergence under random reorderings and duplicates, delete-vs-edit, edge cases above. *No
-   Android, no database.*
-2. **Database and recording:** migration v4, record every local edit as an operation, field clocks,
-   tombstones instead of hard deletes for shared trees. Instrumented tests.
-3. **Wire:** envelope v2, send from the outbox, `TreeSyncHandler` applies inbound (idempotent), the review
-   inbox table.
-4. **Share and catch-up:** the share flow (snapshot with ids), `sync-request`, compaction rules.
+1. **Pure core** (`kutumb-core`): hybrid clock, operation types, the merge/reduce function, validation
+   verdicts, the edit recorder, the projection and the reconciler. **Done.** JVM tests: convergence under
+   random reorderings and duplicates, delete-vs-edit, a three-phone simulation with skewed clocks.
+2. **Database and recording:** migration v4, the operation log, `TreeSyncCoordinator` (share, reconcile,
+   receive, restart from the log, observer). **Done**, verified on the emulator; nothing in the app starts it
+   yet, because no tree can be shared until phase 4.
+3. **Wire:** send `tree-edit` batches from the log (`unpublished`) to paired members over the existing
+   relay path, and hand inbound ones to `receive`. Add the tree id to the sync routing. *Next.*
+4. **Share and catch-up:** the share flow (snapshot with the same ids), members, `sync-request`, compaction rules.
 5. **Photos:** resized, chunked, encrypted events, or a nearby-only path. Depends on relay size limits.
 6. **UI:** "Share this tree", members, sync status ("3 changes waiting"), the review inbox.
 

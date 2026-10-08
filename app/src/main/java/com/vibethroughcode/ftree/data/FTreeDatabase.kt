@@ -18,6 +18,9 @@ import com.vibethroughcode.ftree.kutumb.db.OutboxEntity
 import com.vibethroughcode.ftree.kutumb.db.PersonLocationEntity
 import com.vibethroughcode.ftree.kutumb.db.RedemptionEntity
 import com.vibethroughcode.ftree.kutumb.db.TrustedContactEntity
+import com.vibethroughcode.ftree.kutumb.treesync.TreeSyncDao
+import com.vibethroughcode.ftree.kutumb.treesync.TreeSyncMetaEntity
+import com.vibethroughcode.ftree.kutumb.treesync.TreeSyncOpEntity
 
 @Database(
     entities = [
@@ -25,8 +28,9 @@ import com.vibethroughcode.ftree.kutumb.db.TrustedContactEntity
         LocalIdentityEntity::class, TrustedContactEntity::class, IdentityRotationEntity::class,
         PersonLocationEntity::class, FactEntity::class, FactAnswerEntity::class, FactResolutionEntity::class,
         LedgerEntity::class, OutboxEntity::class, RedemptionEntity::class, MessageEntity::class,
+        TreeSyncMetaEntity::class, TreeSyncOpEntity::class,
     ],
-    version = 3,
+    version = 4,
     exportSchema = true,
 )
 @TypeConverters(Converters::class)
@@ -36,6 +40,7 @@ abstract class FTreeDatabase : RoomDatabase() {
     abstract fun relationshipDao(): RelationshipDao
     abstract fun personOriginDao(): PersonOriginDao
     abstract fun kutumbDao(): KutumbDao
+    abstract fun treeSyncDao(): TreeSyncDao
 
     companion object {
         private const val NAME = "f-tree.db"
@@ -54,7 +59,7 @@ abstract class FTreeDatabase : RoomDatabase() {
         /** [name] is the file; each tree has its own (see `TreeCatalog`), and the default is the original. */
         fun build(context: Context, name: String = NAME): FTreeDatabase =
             Room.databaseBuilder(context.applicationContext, FTreeDatabase::class.java, name)
-                .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
+                .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
                 .addCallback(enforceForeignKeys)
                 .build()
     }

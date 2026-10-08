@@ -9,6 +9,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.vibethroughcode.ftree.data.FTreeDatabase
 import com.vibethroughcode.ftree.data.MIGRATION_1_2
 import com.vibethroughcode.ftree.data.MIGRATION_2_3
+import com.vibethroughcode.ftree.data.MIGRATION_3_4
 import com.vibethroughcode.ftree.data.Person
 import com.vibethroughcode.ftree.kutumb.db.AndroidKeyVault
 import com.vibethroughcode.ftree.kutumb.db.KeyVault
@@ -222,6 +223,25 @@ class KutumbDatabaseTest {
         }
         migrated.execSQL("INSERT INTO messages (id, threadPersonId, senderId, body, sentAt, deliveryStatus, isRead) VALUES ('m', 'p', 'p', 'hi', 1, 'RECEIVED', 0)")
         migrated.query("SELECT COUNT(*) FROM messages").use { it.moveToFirst(); assertEquals(1, it.getInt(0)) }
+        migrated.close()
+    }
+
+    @Test
+    fun updatingFromVersionThreeKeepsEverythingAndAddsTheSyncTablesEmpty() {
+        val name = "migration-test-3-4"
+        migrations.createDatabase(name, 3).apply {
+            execSQL("INSERT INTO people (id, name, gender, deceased, createdAt, updatedAt) VALUES ('p', 'Asha', 'UNSPECIFIED', 0, 1, 1)")
+            execSQL("INSERT INTO people (id, name, gender, deceased, createdAt, updatedAt) VALUES ('q', 'Kiran', 'UNSPECIFIED', 0, 1, 1)")
+            execSQL("INSERT INTO relationships (id, fromPersonId, toPersonId, type, createdAt) VALUES ('r', 'p', 'q', 'PARENT', 1)")
+            execSQL("INSERT INTO messages (id, threadPersonId, senderId, body, sentAt, deliveryStatus, isRead) VALUES ('m', 'p', 'p', 'hi', 1, 'RECEIVED', 0)")
+            close()
+        }
+        val migrated = migrations.runMigrationsAndValidate(name, 4, true, MIGRATION_3_4)
+        migrated.query("SELECT COUNT(*) FROM people").use { it.moveToFirst(); assertEquals(2, it.getInt(0)) }
+        migrated.query("SELECT COUNT(*) FROM relationships").use { it.moveToFirst(); assertEquals(1, it.getInt(0)) }
+        migrated.query("SELECT COUNT(*) FROM messages").use { it.moveToFirst(); assertEquals(1, it.getInt(0)) }
+        migrated.query("SELECT COUNT(*) FROM tree_sync_meta").use { it.moveToFirst(); assertEquals("not shared", 0, it.getInt(0)) }
+        migrated.query("SELECT COUNT(*) FROM tree_sync_ops").use { it.moveToFirst(); assertEquals(0, it.getInt(0)) }
         migrated.close()
     }
 
