@@ -1,8 +1,8 @@
 # Tree sync: design (draft, 2026-10-08)
 
-Status: **phase 1 (the pure core) is built and tested; phases 2–6 are not started.** The core is in
+Status: **phase 1 (the pure core and its bridge to the database) is built and tested; the Room, wire and UI phases are not started.** The core is in
 `kutumb-core/.../kutumb/treesync/`: `Hlc.kt` (clock), `TreeOp.kt` (operations and validation),
-`TreeReplica.kt` (merge and view), `TreeOpCodec.kt` (the wire payload). 40 JVM tests, including random
+`TreeReplica.kt` (merge and view), `TreeOpCodec.kt` (the wire payload), `EditBridge.kt` (edits to operations, view to database steps). 48 JVM tests, including random
 shuffled-and-duplicated operation streams that must converge, and two deliberate breakages of the merge
 that the tests were checked to catch.
 
@@ -115,6 +115,32 @@ again later. `apply` returns `Applied`, `NoChange`, `Deferred` or `Invalid(reaso
 Not yet a rule: "a second biological mother". The core does not know the app's local relationship
 limits; if the app refuses something locally, the matching view rule must be added here so other
 phones agree.
+
+### The bridge to the database (also pure, `EditBridge.kt`)
+
+Between the registers and Room sit two pure pieces, so the risky logic is tested without a device:
+
+- **`EditRecorder`** turns what the user did into operations. `updatePerson` hands over a whole row, so it
+  is diffed against the row as it was **before** the edit (read in the same transaction) and only the
+  fields that changed are sent. "Keep as unknown" is exactly a diff against an empty person. Each
+  operation gets its own clock reading.
+- **`Projection.plan(replica, db)`** turns the view into the list of insert / update / delete steps that make
+  the `people` and `relationships` tables match, in an order that is safe to run as written. It only ever
+  deletes what the replica **knows about**: a person or edge the replica has never heard of (a relative not
+  shared yet) is left alone.
+
+Rules the Room glue must follow, each pinned by the simulation in `EditBridgeTest` (three phones with
+skewed clocks making random edits and exchanging scrambled, repeated, partial batches):
+
+1. **Fold every received reading into the local clock** (`HybridClock.observe`) before the next local
+   edit. Without it a phone's own edits can sort *before* what it has already seen and silently lose.
+2. **Run the projection after every received batch**, in one transaction, with recording switched off, so
+   applying someone else's change is never sent back out as your own.
+3. **A local edit can change more than that edit.** If a loop of parents had an edge held back, removing
+   another edge of the loop releases it, and the database gains that edge. This is the view doing its job,
+   and the UI should be ready for it; the test allows exactly that and nothing more.
+4. **Relationship row ids are local.** The sync identity of an edge is `(type, from, to)`; two phones will
+   hold different `relationships.id` values for the same edge.
 
 ## Wire
 

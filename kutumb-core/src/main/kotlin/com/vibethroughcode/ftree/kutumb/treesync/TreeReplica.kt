@@ -116,6 +116,12 @@ class TreeReplica(private val maxFutureMs: Long = HybridClock.DEFAULT_MAX_FUTURE
         }
     }
 
+    /** People this replica has a verdict on (shown or deleted), as opposed to ones only mentioned in passing. */
+    fun knownPeople(): Set<String> = people.filter { it.value.alive != null }.keys.toSet()
+
+    /** Edges this replica has a verdict on, present or removed. */
+    fun knownEdges(): Set<EdgeKey> = edges.filter { it.value.presence != null }.keys.toSet()
+
     fun snapshot(): Snapshot = Snapshot(
         people = people.mapValues { (_, p) -> PersonSnap(p.alive, HashMap(p.fields)) },
         edges = edges.mapValues { (_, e) -> EdgeSnap(e.presence, e.subtype) },
