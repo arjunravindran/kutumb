@@ -122,6 +122,9 @@ class TreeReplica(private val maxFutureMs: Long = HybridClock.DEFAULT_MAX_FUTURE
     /** Edges this replica has a verdict on, present or removed. */
     fun knownEdges(): Set<EdgeKey> = edges.filter { it.value.presence != null }.keys.toSet()
 
+    /** True when the registers say this edge exists, whether or not the view currently shows it. */
+    fun edgeRecordedAsPresent(edge: EdgeKey): Boolean = edges[edge]?.presence?.value == true
+
     fun snapshot(): Snapshot = Snapshot(
         people = people.mapValues { (_, p) -> PersonSnap(p.alive, HashMap(p.fields)) },
         edges = edges.mapValues { (_, e) -> EdgeSnap(e.presence, e.subtype) },

@@ -135,3 +135,59 @@ object Projection {
         return insertPeople + updatePeople + insertEdges + subtypeEdges + deleteEdges + deletePeople
     }
 }
+
+/**
+ * Notices what the database holds that the shared tree does not, and says so as operations.
+ *
+ * This is the other direction of [Projection]: projection makes the database match the tree after other
+ * phones' changes arrive; the reconciler makes the tree match the database after **this** phone's user
+ * changed it. Because it compares states rather than watching calls, every way of writing the database
+ * is covered with no hook to forget: an edit, a delete, a reset to unknown, an import, a seed, and the
+ * first share of a tree that already exists (where every person is new to the registers).
+ *
+ * It is idempotent (run twice, the second finds nothing) and safe to run whenever, including at start-up
+ * after a crash between a write and its recording.
+ *
+ * What it deliberately does not do:
+ * - **Delete a person's edges when the person goes.** Removing a person leaves their relationships in
+ *   the tree; they are not shown while the person is gone, and return if the person is restored.
+ * - **Resurrect or overrule what the registers say about someone already deleted.** If the database still
+ *   holds a person the tree has deleted, the next projection removes them; they are not re-added.
+ */
+object Reconciler {
+    fun ops(replica: TreeReplica, db: DbTree, recorder: EditRecorder): List<TreeOp> {
+        val view = replica.view()
+        val shown = view.people.associate { it.id to PersonData.fromFields(it.fields) }
+        val shownEdges = view.edges.associate { it.edge to it.subtype }
+        val knownPeople = replica.knownPeople()
+        val knownEdges = replica.knownEdges()
+        val out = ArrayList<TreeOp>()
+
+        for ((id, data) in db.people.entries.sortedBy { it.key }) {
+            val was = shown[id]
+            when {
+                id !in knownPeople -> out += recorder.personAdded(id, data)
+                was != null && was != data -> out += recorder.personChanged(id, was, data)
+            }
+        }
+        for (id in shown.keys.sorted()) {
+            if (id !in db.people) out += recorder.personDeleted(id)
+        }
+
+        val order = compareBy<EdgeKey>({ it.type }, { it.from }, { it.to })
+        for ((edge, subtype) in db.edges.entries.sortedWith(compareBy(order) { it.key })) {
+            when {
+                edge !in knownEdges -> out += recorder.edgeAdded(edge, subtype)
+                edge in shownEdges -> if (shownEdges[edge] != subtype) out += recorder.edgeSubtypeChanged(edge, subtype)
+                // Known, not shown, and not recorded as present: it was removed and the user has put it back.
+                // Recorded as present but not shown means held back (a loop, a missing person): leave it.
+                !replica.edgeRecordedAsPresent(edge) -> out += recorder.edgeAdded(edge, subtype)
+            }
+        }
+        for (edge in shownEdges.keys.sortedWith(order)) {
+            // An edge that vanished because one of its people did is the person's doing, not a removal.
+            if (edge !in db.edges && edge.from in db.people && edge.to in db.people) out += recorder.edgeRemoved(edge)
+        }
+        return out
+    }
+}

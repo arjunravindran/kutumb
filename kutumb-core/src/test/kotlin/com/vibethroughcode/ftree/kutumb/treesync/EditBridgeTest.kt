@@ -115,16 +115,16 @@ class EditBridgeTest {
             wall += pick(50)
             val ids = db.people.keys.sorted()
             when (pick(9)) {
-                0, 1 -> { val id = "$device-p${personCounter++}"; val d = randomData(); local(recorder.personAdded(id, d)) { it.copy(people = it.people + (id to d)) } }
+                0, 1 -> { val id = "$device-p${personCounter++}"; val d = randomData(); local { it.copy(people = it.people + (id to d)) } }
                 2, 3 -> choose(ids)?.let { id ->
                     val before = db.people.getValue(id); val after = randomData()
-                    local(recorder.personChanged(id, before, after)) { it.copy(people = it.people + (id to after)) }
+                    local { it.copy(people = it.people + (id to after)) }
                 }
                 4 -> choose(ids)?.let { id ->
-                    local(recorder.personCleared(id, db.people.getValue(id))) { it.copy(people = it.people + (id to PersonData.EMPTY)) }
+                    local { it.copy(people = it.people + (id to PersonData.EMPTY)) }
                 }
                 5 -> choose(ids)?.let { id ->
-                    local(recorder.personDeleted(id)) { d ->
+                    local { d ->
                         DbTree(d.people - id, d.edges.filterKeys { it.from != id && it.to != id })
                     }
                 }
@@ -135,12 +135,12 @@ class EditBridgeTest {
                         val sub = listOf("BIOLOGICAL", null)[pick(2)]
                         val duplicate = key in db.edges
                         val loop = key.type == EdgeKey.PARENT && reaches(key.to, key.from)
-                        if (!duplicate && !loop) local(recorder.edgeAdded(key, sub)) { it.copy(edges = it.edges + (key to sub)) }
+                        if (!duplicate && !loop) local { it.copy(edges = it.edges + (key to sub)) }
                     }
                 }
                 else -> choose(db.edges.keys.sortedWith(compareBy({ it.type }, { it.from }, { it.to })))?.let { key ->
-                    if (pick(2) == 0) local(recorder.edgeRemoved(key)) { it.copy(edges = it.edges - key) }
-                    else { val sub = listOf("HALF", "FULL", null)[pick(3)]; local(recorder.edgeSubtypeChanged(key, sub)) { it.copy(edges = it.edges + (key to sub)) } }
+                    if (pick(2) == 0) local { it.copy(edges = it.edges - key) }
+                    else { val sub = listOf("HALF", "FULL", null)[pick(3)]; local { it.copy(edges = it.edges + (key to sub)) } }
                 }
             }
         }
@@ -157,13 +157,15 @@ class EditBridgeTest {
 
         private fun heldLoop() = replica.view().inbox.any { it is InboxItem.RelationshipHeld && it.reason == HeldReason.CYCLE }
 
-        private fun local(ops: List<TreeOp>, direct: (DbTree) -> DbTree) {
+        /** The user changes the database; the reconciler works out the operations, as the app will. */
+        private fun local(direct: (DbTree) -> DbTree) {
             val hadHeldLoop = heldLoop()
-            for (op in ops) check(replica.apply(op, wall + skewMs) == Verdict.Applied) { "own operation not applied: $op" }
             db = direct(db)
+            val ops = Reconciler.ops(replica, db, recorder)
+            for (op in ops) check(replica.apply(op, wall + skewMs) == Verdict.Applied) { "own operation not applied: $op" }
             outbox += ops
-            // The operations must reproduce exactly what the user did to the database. The one allowed
-            // extra: breaking a loop of parents lets the edge that was held back in it return.
+            // Recording must reproduce exactly what the user did. The one allowed extra: breaking a loop
+            // of parents lets the edge that was held back in it return.
             val extra = Projection.plan(replica, db)
             if (extra.isNotEmpty()) {
                 check(hadHeldLoop) { "ops do not reproduce the edit: $extra" }
@@ -171,6 +173,7 @@ class EditBridgeTest {
                 db = applySteps(db, extra)
             }
             check(Projection.plan(replica, db).isEmpty())
+            check(Reconciler.ops(replica, db, recorder).isEmpty()) { "reconciling is not idempotent" }
         }
 
         fun receive(ops: List<TreeOp>) {
@@ -219,5 +222,79 @@ class EditBridgeTest {
             }
             assertTrue("the run did nothing (seed $seed)", reference.db.people.isNotEmpty() || everything.isNotEmpty())
         }
+    }
+
+    // --- the reconciler -------------------------------------------------------------------------------
+
+    private class Rig(val replica: TreeReplica, val recorder: EditRecorder)
+
+    private fun adopt(db: DbTree, device: String = "a"): Rig {
+        val replica = TreeReplica()
+        var n = 0
+        val recorder = EditRecorder(HybridClock(device, { now }), { "$device-$n".also { n++ } })
+        Reconciler.ops(replica, db, recorder).forEach { check(replica.apply(it, now) == Verdict.Applied) }
+        return Rig(replica, recorder)
+    }
+
+    @Test fun sharingATreeThatAlreadyExistsAdoptsEveryPersonAndEdge() {
+        val spouse = EdgeKey.of(EdgeKey.SPOUSE, "b", "a")
+        val db = DbTree(
+            people = mapOf("a" to PersonData(name = "Raj", gender = "MALE"), "b" to PersonData(name = "Asha", gender = "FEMALE", birthDate = "1940"), "c" to PersonData.EMPTY),
+            edges = mapOf(EdgeKey.of(EdgeKey.PARENT, "a", "c") to "BIOLOGICAL", spouse to "MARRIED"),
+        )
+        val replica = adopt(db).replica
+        assertTrue("projecting the adopted tree must change nothing", Projection.plan(replica, db).isEmpty())
+        assertEquals(setOf("a", "b", "c"), replica.view().people.map { it.id }.toSet())
+        assertEquals(2, replica.view().edges.size)
+    }
+
+    @Test fun reconcilingAnUnchangedDatabaseSaysNothing() {
+        val db = DbTree(mapOf("a" to PersonData(name = "Raj")), emptyMap())
+        val rig = adopt(db)
+        assertTrue(Reconciler.ops(rig.replica, db, rig.recorder).isEmpty())
+    }
+
+    @Test fun anEditDeleteAndRemovalAreEachNoticed() {
+        val parent = EdgeKey.of(EdgeKey.PARENT, "a", "b")
+        val start = DbTree(mapOf("a" to PersonData(name = "Raj"), "b" to PersonData(name = "Kiran"), "c" to PersonData(name = "Asha")), mapOf(parent to null))
+        val rig = adopt(start)
+        val after = DbTree(mapOf("a" to PersonData(name = "Rajesh"), "b" to PersonData(name = "Kiran")), emptyMap())
+        val ops = Reconciler.ops(rig.replica, after, rig.recorder)
+        assertEquals(listOf("EdgeRemove", "PersonDelete", "PersonSet"), ops.map { it::class.simpleName!! }.sorted())
+        ops.forEach { rig.replica.apply(it, now) }
+        assertEquals(listOf("a", "b"), rig.replica.view().people.map { it.id })
+        assertTrue(rig.replica.view().edges.isEmpty())
+    }
+
+    @Test fun deletingAPersonLeavesTheirRelationshipsToComeBackWithThem() {
+        val parent = EdgeKey.of(EdgeKey.PARENT, "a", "b")
+        val start = DbTree(mapOf("a" to PersonData(name = "Raj"), "b" to PersonData(name = "Kiran")), mapOf(parent to null))
+        val rig = adopt(start)
+        // The database cascades the edge away with the person.
+        val ops = Reconciler.ops(rig.replica, DbTree(mapOf("a" to PersonData(name = "Raj")), emptyMap()), rig.recorder)
+        assertEquals(listOf("PersonDelete"), ops.map { it::class.simpleName })
+        ops.forEach { rig.replica.apply(it, now) }
+        assertTrue(rig.replica.view().edges.isEmpty())
+        rig.replica.apply(TreeOp.PersonRestore("r", Hlc(now + 1_000, 0, "a"), "b"), now + 5_000)
+        assertEquals("the relationship returns with the person", 1, rig.replica.view().edges.size)
+    }
+
+    @Test fun anEdgeRemovedAndThenPutBackIsRecordedAgain() {
+        val e = EdgeKey.of(EdgeKey.SPOUSE, "a", "b")
+        val people = mapOf("a" to PersonData(name = "Raj"), "b" to PersonData(name = "Asha"))
+        val rig = adopt(DbTree(people, mapOf(e to "MARRIED")))
+        Reconciler.ops(rig.replica, DbTree(people, emptyMap()), rig.recorder).forEach { rig.replica.apply(it, now) }
+        assertTrue(rig.replica.view().edges.isEmpty())
+        val back = Reconciler.ops(rig.replica, DbTree(people, mapOf(e to "MARRIED")), rig.recorder)
+        assertEquals(listOf("EdgeAdd"), back.map { it::class.simpleName })
+        back.forEach { rig.replica.apply(it, now) }
+        assertEquals(1, rig.replica.view().edges.size)
+    }
+
+    @Test fun somethingTheTreeHasDeletedIsNotReAddedJustBecauseTheDatabaseStillHoldsIt() {
+        val replica = replicaOf(TreeOp.PersonAdd("1", t, "a"), TreeOp.PersonDelete("2", Hlc(20, 0, "b"), "a"))
+        val db = DbTree(mapOf("a" to PersonData(name = "Stale")), emptyMap())
+        assertTrue(Reconciler.ops(replica, db, recorder("a")).isEmpty())
+        assertEquals(listOf<ProjectionStep>(ProjectionStep.DeletePerson("a")), Projection.plan(replica, db))
     }
 }
