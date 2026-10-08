@@ -10,7 +10,7 @@ Kutumb is a standalone repo, no longer a GitHub fork: github.com/arjunravindran/
 - **The website** is live at https://kutumb.arjun.contact (Cloudflare Pages: project `kutumb`, production branch `main`, no build command, output directory `site`; every push to `main` redeploys). Privacy policy: https://kutumb.arjun.contact/privacy/. Fonts (Literata, JetBrains Mono, OFL) are served from `site/fonts/`, not Google.
 - **The web viewer** (`site/playground/`) is an installable PWA (manifest, icons, service worker). It is **view-only**: it never imports the `.ftree` writer. It keeps the last tree you opened in the browser's own storage (IndexedDB) so an installed copy reopens on it; **Close** or unticking "Keep my tree on this device" deletes it. `remember.js` and its tests cover this.
 - **The desktop app** (`desktop/`, Electron) loads the same viewer code.
-- **Tree sync** (new, **not reachable from any screen yet**): see below.
+- **Tree sync** (new): see below. Reachable from **Settings > Your trees > Sharing** on the open tree.
 
 ## Tree sync: where it stands
 
@@ -20,7 +20,9 @@ Design: `docs/kutumb/TREE-SYNC.md` (read it before touching this). Built and tes
 2. **Room** (schema v4, `MIGRATION_3_4`, create-only): `tree_sync_meta` (present only if shared), `tree_sync_ops` (append-only log), `tree_sync_members`. `TreeSyncCoordinator` rebuilds the replica from the log, records changes (a Room invalidation observer, so imports and seeds are covered), and applies received operations in one transaction. v4 was never released, so the members table was added in place.
 3. **Wire**: `TreeSyncHandler` accepts edits only from contacts **paired in person**, for **this** shared tree, who are **members**; `TreeSyncPublisher` sends in batches of 100 through the existing outbox; `shareTreeWith` adds a member and sends the whole history. `AppContainer` starts it only when a tree is shared.
 
-Not built: **phase 4** (start a shared tree from a nearby snapshot with the same ids; catch-up for a phone that has been away), **phase 5** (photos), **phase 6** (the screens). Decision on the screen: **Settings > Your trees** gets a per-tree "Sharing" row (switch it on, then choose which paired contacts are members). The Network tab does not get a share control.
+4. **Sharing screen** (`ui/settings/TreeSharingDialog.kt`, rules in `kutumb/treesync/TreeSharing.kt`): a Sharing button on the open tree's row in Settings > Your trees. It switches sharing on, lists contacts paired in person with a switch each (on = member and is sent the tree), shows "N changes waiting" and a note when sync is off. Only the open tree can be managed (sharing lives in its own database). Tested on the JVM and on the emulator against a throwaway tree.
+
+Not built: **phase 4** (start a big shared tree from a nearby snapshot with the same ids, instead of sending the whole history over the relays; catch-up for a phone that has been away), **phase 5** (photos), a way to **stop sharing** a tree altogether (members can be removed one by one), and the review inbox screen (`TreeSyncCoordinator.inbox()` exists).
 
 ## Verified (actual runs)
 
@@ -65,6 +67,6 @@ Google Play distribution (F-Droid is not a target). Android to Android only for 
 ## Suggested next steps
 
 1. Re-run the whole instrumented suite on the emulator, then `./gradlew build` and a release (R8) build.
-2. Tree sync phase 4 (nearby snapshot with the same ids, catch-up), then the "Sharing" row under Settings > Your trees.
+2. Tree sync phase 4 (nearby snapshot with the same ids, catch-up), the review inbox screen, and a way to stop sharing.
 3. Try the PWA on an iPad and the Kutumb debug build on a phone.
 4. Regenerate the feature graphic PNG; review `release.yml`; decide when to tag `v1.0.0`.
