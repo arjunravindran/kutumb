@@ -1,8 +1,18 @@
 # Tree sync: design (draft, 2026-10-08)
 
-Status: **design only, nothing built.** CLAUDE.md asks for an issue or discussion before changes to the
-database schema or the wire; this document is that discussion. It changes the schema (db v3 → v4) and
-adds to the sync wire.
+Status: **phase 1 (the pure core) is built and tested; phases 2–6 are not started.** The core is in
+`kutumb-core/.../kutumb/treesync/`: `Hlc.kt` (clock), `TreeOp.kt` (operations and validation),
+`TreeReplica.kt` (merge and view), `TreeOpCodec.kt` (the wire payload). 40 JVM tests, including random
+shuffled-and-duplicated operation streams that must converge, and two deliberate breakages of the merge
+that the tests were checked to catch.
+
+CLAUDE.md asks for an issue or discussion before changes to the database schema or the wire; this
+document is that discussion. It changes the schema (db v3 → v4) and adds to the sync wire.
+
+Two things changed from the first draft while building phase 1, both for the same reason (see
+[Guardrails](#guardrails-worked-out-in-the-view-not-at-apply-time)): rules that need the whole tree
+are computed in a **view**, not decided when an operation arrives; and `person.merge` is **deferred**
+to a later phase.
 
 ## What this is for
 
@@ -59,40 +69,72 @@ Total order: `(time, counter, deviceId)`.
 | `person.set` | sets **one field** of a person (name, gender, birth/death date, deceased, notes) | last write wins **per field** by clock |
 | `person.delete` | tombstones a person | wins over edits older than itself; later edits go to the review inbox |
 | `person.restore` | clears a tombstone | wins if its clock is later than the delete |
-| `rel.add` | adds an edge `(from, to, type, subtype)` | set semantics, deduplicated by the existing unique key |
-| `rel.remove` | tombstones an edge | removal wins over an add with an earlier clock; a later add re-creates it |
-| `rel.set` | changes an edge's subtype | last write wins by clock |
+| `edge.add` | adds an edge `(type, from, to)` with an optional subtype | an edge is identified by its kind and its two people, so two phones adding the same edge add one |
+| `edge.remove` | removes an edge | removal wins over an add with an earlier clock; a later add brings it back |
+| `edge.subtype` | changes only the edge's subtype | last write wins by clock |
 
 Rules that follow:
 
-- **Tombstones are kept** (compacted only when every member has acknowledged them). Deleting a person
-  tombstones its edges too, so a late `rel.add` to a deleted person is held, not applied.
+- **State is a set of registers.** Whether each person exists, each of their fields, whether each edge
+  exists and its subtype are each a value stamped with a clock reading; an operation can only replace
+  a register with a later reading. That is what makes order and repetition irrelevant. Exact ties
+  between two readings (which a correct phone never produces) are broken by comparing values, so even
+  those resolve identically everywhere.
+- **Tombstones are kept** (compacted only when every member has acknowledged them). A person's edges
+  are not tombstoned with them; an edge whose endpoint is deleted is simply not shown, and returns if
+  the person is restored.
 - **No automatic de-duplication.** If two phones each add "Raj" at once, the tree gets two Rajs. The
-  existing duplicate matching proposes a merge; a merge becomes an operation `person.merge(from → into)`
-  that rewrites edges and records an alias, so later operations on the old id still land.
-- **Symmetric edges** keep the canonical id order already used for `SPOUSE`/`SIBLING`.
+  existing duplicate matching proposes a merge. *Deferred:* recording that merge as an operation
+  (`person.merge(from → into)`, rewriting edges and keeping an alias so later operations on the old id
+  still land) needs its own design and is not in the core yet.
+- **Symmetric edges** keep the canonical id order already used for `SPOUSE`/`SIBLING`; building an
+  `EdgeKey` out of order is an error, and `EdgeKey.of` sorts.
 
-### Guardrails (apply-time validation)
+### Guardrails: worked out in the view, not at apply time
 
-An operation that would break an invariant is **held in the review inbox, not applied**, and never dropped:
-a parent loop (A is an ancestor of A), an edge to a missing or deleted person, a second biological mother
-(whatever the app already refuses locally), or a field value that fails validation (a partial date that is
-not a date). The inbox shows what the other person tried to do and offers apply-anyway or dismiss. The pure
-core returns a verdict per operation: `Applied`, `Duplicate`, `Held(reason)`.
+The first draft said an operation that would break an invariant is held when it arrives. That cannot
+converge: whether it breaks something depends on what else the phone has heard so far, so two phones
+would hold different things. Instead every operation is applied to the registers unconditionally, and
+the **view** (a pure function of the registers, sorted so equal states compare equal) decides what is
+shown:
+
+- A person is shown if their existence register says so. Edits stamped **after** a delete are listed
+  in the inbox as `EditAfterDelete`; restoring the person brings them back with those edits.
+- An edge is shown if it exists and both people are shown. A deleted endpoint hides it quietly. An
+  endpoint this phone has never heard of hides it and lists it as `RelationshipHeld(MISSING_PERSON)`,
+  and it appears by itself when that person's operation arrives.
+- If the shown parent edges contain a loop, the **newest** edge in the loop is hidden and listed as
+  `RelationshipHeld(CYCLE)`, repeating until none remain. The search runs over sorted ids so every
+  phone breaks the same loops the same way.
+
+Operations that are **malformed** (blank ids, a relationship to oneself, a gender that is not a gender,
+a date that is not a date, an oversized name) are refused with a reason and leave no trace. Operations
+stamped more than a day ahead of the phone's clock are `Deferred`, not applied: keep them and offer them
+again later. `apply` returns `Applied`, `NoChange`, `Deferred` or `Invalid(reason)`.
+
+Not yet a rule: "a second biological mother". The core does not know the app's local relationship
+limits; if the app refuses something locally, the matching view rule must be added here so other
+phones agree.
 
 ## Wire
 
-Reuses the envelope and the NIP-17 gift-wrap path; the envelope version is bumped so older apps skip
-messages they cannot read (they already do for unknown versions).
+Uses the existing envelope and the NIP-17 gift-wrap path, with **no version bump**: `tree-edit` is
+already a known type in envelope v1, and builds without tree sync accept and ignore it (a test pins that),
+so mixed fleets keep working. Within the payload, an operation a build does not recognise is skipped and
+counted without spoiling the rest of the batch (`TreeOpCodec.parsePayload`).
 
 ```
-{"v":2,"type":"tree-edit","payload":{
+{"v":1,"type":"tree-edit","payload":{
    "tree":  "<shared tree id>",
-   "ops":   [ {"id":"<op id>","hlc":"<time>.<counter>.<device>","op":"person.set", ...}, ... ]
+   "ops":   [ {"id":"<op id>","hlc":"<time>.<counter>.<device>","op":"person.set",
+               "person":"<id>","field":"name","value":"Asha"}, ... ]
 }}
 ```
 
-- `id` makes delivery **idempotent**; the receiver keeps the ids it has applied.
+- The clock reading travels as a **text** stamp, not a number, so no reader can round a millisecond clock.
+- Operation kinds: `person.add|set|delete|restore`, `edge.add|remove|subtype`. A message carries at most 500.
+- Delivery is **idempotent because the merge is** (re-applying an operation changes nothing). The `id`
+  exists for the log, acknowledgements and catch-up ("everything after this"), not for correctness.
 - Operations are batched, because relays rate-limit and each wrap costs a signature.
 - Only paired, tree-member keys are accepted for a tree id; everything else is dropped as today's handlers do.
 - `SyncOutbox` already retries; the outbox rows gain the tree id.
@@ -118,7 +160,8 @@ which cannot be taken back. v1 has no roles and no group re-keying.
 New tables, nothing destructive:
 
 - `shared_trees(treeId, sharedId, createdAt)`, `tree_members(sharedId, pubkey, addedAt)`
-- `sync_ops(opId PK, sharedId, hlc, deviceId, kind, payload, applied, heldReason)` , the operation log
+- `sync_ops(opId PK, sharedId, hlc, deviceId, kind, payload)`, the operation log (nothing is marked held:
+  that is computed by the view)
 - `field_clocks(personId, field, hlc)` and `tombstones(entity, id, hlc)`, so the merge can compare without
   replaying the whole log
 - `sync_state(sharedId, deviceId, highWater)`
