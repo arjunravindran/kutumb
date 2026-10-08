@@ -409,6 +409,16 @@ class NearbyRepository(
         _pair.value = NearbyPairState.Connecting(name)
 
         scope.launch(Dispatchers.IO) {
+            // The slot must be free before anyone is told this attempt failed: a retry that follows straight
+            // after the Failed state would otherwise find it still taken and be ignored. Once-only, because by the
+            // time the finally runs a new attempt may own the slot.
+            var released = false
+            fun release() {
+                if (released) return
+                released = true
+                sending = null
+                engaged.set(false)
+            }
             val transfer = NearbySendTransfer(
                 identity = this@NearbyRepository.identity,
                 outgoing = null,
@@ -426,6 +436,7 @@ class NearbyRepository(
 
                     override fun onFailed(problem: NearbyProblem, importProblem: ImportProblem?) {
                         // endPairing() already reset the state; a cancelled session must not overwrite it.
+                        release()
                         if (pairingIdentity != null) _pair.value = NearbyPairState.Failed(problem)
                     }
                 },
@@ -436,13 +447,13 @@ class NearbyRepository(
                 val channel = try {
                     transport.connect(address, port, NearbyProtocol.CONNECT_TIMEOUT_MS)
                 } catch (_: Exception) {
+                    release()
                     _pair.value = NearbyPairState.Failed(NearbyProblem.NETWORK)
                     return@launch
                 }
                 transfer.run(channel)
             } finally {
-                sending = null
-                engaged.set(false)
+                release()
             }
         }
     }
