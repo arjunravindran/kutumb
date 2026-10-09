@@ -570,10 +570,14 @@ private fun NavHostController.openMore() {
     }
 }
 
+/*
+ * Nothing is saved or restored: More holds screens of its own (Network, Facts, Settings), and a restored
+ * stack would put the reader back on one of them when they tap Tree. What a tab shows is kept in its
+ * view model, so leaving it costs nothing but its scroll position.
+ */
 private fun NavHostController.switchTo(route: Any) {
     navigate(route) {
-        popUpTo(graph.findStartDestination().id) { saveState = true }
+        popUpTo(graph.findStartDestination().id)
         launchSingleTop = true
-        restoreState = true
     }
 }
