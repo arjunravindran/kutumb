@@ -20,9 +20,16 @@ it opens one plain screen: the tree's name, who shared it, how many people are i
 **Open it** and **Not now**. Open it creates a new tree on his phone, and the people appear as they arrive.
 He never sees the words "sync", "relay", "replica" or "snapshot".
 
-Joining always makes a **new** tree on the joiner's phone; it never merges into one he already has. If Ravi
-already typed some of the same relatives into his own tree, he ends up with two trees and can keep either.
-Merging two trees is the separate `person.merge` problem (HANDOFF B6) and is not attempted here.
+Joining **never merges silently**. If Ravi's own tree is empty or holds only himself, joining fills that
+tree (nothing to decide). Otherwise it makes a **new** tree beside his, and nothing of his is touched.
+
+**Then, for someone with a larger tree of their own (owner's idea, 2026-10-09):** the shared tree offers
+*"Add the people from your other tree?"*. It runs his tree through the **existing import review**: people
+who match someone in the shared tree (name, dates, relatives in common) take the shared tree's id, and
+the rest are added as new people. Ravi confirms or rejects each match, as he would for a file. Sync then
+spreads the result like any other edit, and he decides whether to keep or delete his old tree. This needs
+no `person.merge` and no alias: a match is resolved *before* anything enters the shared tree, so there is
+only ever one id for a person. It is a second step, built after joining works.
 
 ## How it works (smallest version)
 
@@ -58,8 +65,10 @@ has shared. `Not now` just drops the invitation; Asha can invite again.
   coordinator test with two real databases joined by the existing fake relay (Asha shares, Ravi accepts,
   both trees match), and one instrumented test for the invitation screen.
 
-## Questions for the owner
+## Decisions and open questions
 
-1. Is "joining always makes a new tree, never merges" acceptable for v1?
-2. Is the relay path enough for the first release, with the nearby snapshot left until it is shown to be needed?
-3. Should Ravi be asked before the tree is created (as above), or should it open straight away?
+1. **Decided:** joining does not merge. Empty tree: filled directly. Otherwise a new tree, plus the later
+   "add the people from your other tree" offer above.
+2. Open (proposed default): the relay path alone is enough for the first release; the nearby snapshot waits
+   until large trees prove too slow.
+3. Open (proposed default): Ravi is asked ("Open it" / "Not now") before the tree is created.
