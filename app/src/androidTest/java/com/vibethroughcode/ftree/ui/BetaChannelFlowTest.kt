@@ -1,5 +1,6 @@
 package com.vibethroughcode.ftree.ui
 
+import com.vibethroughcode.ftree.ui.more.MoreSettingsTag
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsOff
@@ -47,7 +48,8 @@ class BetaChannelFlowTest {
     fun start() {
         preferences.setBetaChannel(false)
         preferences.setEnabled(false)
-        rule.onNodeWithTag(NavSettingsTag).performClick()
+        rule.onNodeWithTag(NavMoreTag).performClick()
+        rule.onNodeWithTag(MoreSettingsTag).performClick()
     }
 
     @After

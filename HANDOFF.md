@@ -6,7 +6,7 @@ Kutumb is a standalone repo, no longer a GitHub fork: github.com/arjunravindran/
 
 ## What exists
 
-- **The app** (Android): family tree, chart and compact views, kinship names (English, Hindi), nearby sharing, family book PDF, birthdays, trust/pairing, facts game, messages, sync over Nostr relays (opt-in, empty relay list by default), Circles.
+- **The app** (Android): family tree, chart and compact views, kinship names (English, Hindi), nearby sharing, family book PDF, birthdays, trust/pairing, facts game, messages, sync over Nostr relays (opt-in; once on, it uses nos.lol unless the person chose others under Advanced), Circles.
 - **The website** is live at https://kutumb.arjun.contact (Cloudflare Pages: project `kutumb`, production branch `main`, no build command, output directory `site`; every push to `main` redeploys). Privacy policy: https://kutumb.arjun.contact/privacy/. Fonts (Literata, JetBrains Mono, OFL) are served from `site/fonts/`, not Google.
 - **The web viewer** (`site/playground/`) is an installable PWA (manifest, icons, service worker). It is **view-only**: it never imports the `.ftree` writer. It keeps the last tree you opened in the browser's own storage (IndexedDB) so an installed copy reopens on it; **Close** or unticking "Keep my tree on this device" deletes it. `remember.js` and its tests cover this.
 - **The desktop app** (`desktop/`, Electron) loads the same viewer code.
@@ -50,7 +50,7 @@ The full list, with what to do about each, is under **C. Verification gaps** in 
 
 ## Decisions (don't re-ask)
 
-Google Play distribution (F-Droid is not a target). Android to Android only for the app; **iPad gets the view-only PWA, with no native iOS app for now** (revisit after the PWA has been used). Sync is opt-in with an empty relay list. No recovery path for someone with no relative nearby and no key backup. One database per tree; kinds Family and Circle; one identity key per phone. A change made while sync is off is not queued. Tree sync: everyone paired in person and added may edit; a delete beats a concurrent edit but is undoable; a second phone starts from a snapshot with the same ids; photos are not in v1. Kutumb is a separate app from f-tree, with f-tree and its MIT licence acknowledged. Ship it as 1.0.0 (`versionName` 1.0.0, `versionCode` 34 already).
+Google Play distribution (F-Droid is not a target). Android to Android only for the app; **iPad gets the view-only PWA, with no native iOS app for now** (revisit after the PWA has been used). Sync is opt-in (off by default) with `wss://nos.lol` as the default relay once on (decided 2026-10-09 so older users need not pick one; relay choice is under Advanced). The bottom bar has three places: Tree, People, More (Network, Facts, Settings live under More; decided 2026-10-09 for readers over sixty). No recovery path for someone with no relative nearby and no key backup. One database per tree; kinds Family and Circle; one identity key per phone. A change made while sync is off is not queued. Tree sync: everyone paired in person and added may edit; a delete beats a concurrent edit but is undoable; a second phone starts from a snapshot with the same ids; photos are not in v1. Kutumb is a separate app from f-tree, with f-tree and its MIT licence acknowledged. Ship it as 1.0.0 (`versionName` 1.0.0, `versionCode` 34 already).
 
 ## What's left
 

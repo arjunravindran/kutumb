@@ -175,7 +175,7 @@ Still to do: wire `SyncEngine` + `WebSocketRelay.connector()` into `AppContainer
 
 ### Step 6, continued: opt-in sync service
 
-- **`SyncPreferences`**: sync is **off** and the relay list is **empty** by default (your call: opt-in). No relay is built in. Only `wss://` addresses with a dotted host are accepted (plaintext, credentials, fragments, spaces refused), max 5.
+- **`SyncPreferences`**: sync is **off** by default (opt-in). From 2026-10-09 a phone that never chose relays uses `wss://nos.lol` once sync is on (`SyncPreferences.DEFAULT_RELAYS`); a saved choice, even an empty one, always wins. Only `wss://` addresses with a dotted host are accepted (plaintext, credentials, fragments, spaces refused), max 5.
 - **`SyncService`**: runs a `SyncEngine` only while the switch is on, relays are named and this phone has an identity; any of those going away stops the engine and closes every socket; changing relays or identity restarts it. While running it re-subscribes (which reconnects dropped relays) and flushes the outbox every 60 s at most, sooner when a retry is due or `poke()`/`publish()` is called. Tests (`SyncServiceTest`, 6; `SyncPreferencesTest`, 1) cover off-by-default opening no connection, needing setup, subscribing/publishing, switching off, retrying a relay that was down, and changing relays.
 - **Wiring:** `AppContainer.syncService` is lazy and starts on construction; `FTreeApplication` touches it only if the switch is on, and `SettingsViewModel` builds it only after the switch is turned on. New Settings section "Family sync over the internet" (switch, relay field, status line). Relays are typed comma-separated.
 - **Not done, so sync currently moves nothing useful:**

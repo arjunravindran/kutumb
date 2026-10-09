@@ -1,5 +1,6 @@
 package com.vibethroughcode.ftree.ui
 
+import com.vibethroughcode.ftree.ui.more.MoreNetworkTag
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
@@ -60,7 +61,8 @@ class NetworkContactsTest {
             devika = repo.addPerson(Person(name = "Devika Nair"))
             asha = repo.addPerson(Person(name = "Asha Menon"))
         }
-        rule.onNodeWithTag(NavNetworkTag).performClick()
+        rule.onNodeWithTag(NavMoreTag).performClick()
+        rule.onNodeWithTag(MoreNetworkTag).performClick()
     }
 
     private fun contact(person: Person, method: PairingMethod, voucher: Person? = null) = TrustedContact(

@@ -1,5 +1,6 @@
 package com.vibethroughcode.ftree.ui
 
+import com.vibethroughcode.ftree.ui.more.MoreNetworkTag
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
@@ -60,7 +61,8 @@ class NetworkPathTest {
             kutumb.saveLocation(PersonLocation(me.id, LocationLabel.CURRENT, 51.5074, -0.1278, LocationSource.MANUAL, 1))
             kutumb.saveLocation(PersonLocation(devika.id, LocationLabel.CURRENT, 48.8566, 2.3522, LocationSource.MANUAL, 1))
         }
-        rule.onNodeWithTag(NavNetworkTag).performClick()
+        rule.onNodeWithTag(NavMoreTag).performClick()
+        rule.onNodeWithTag(MoreNetworkTag).performClick()
         rule.waitUntil(5_000) { rule.onAllNodesWithTag(networkRowTag(devika.id)).fetchSemanticsNodes().isNotEmpty() }
         rule.onNodeWithTag(networkRowTag(devika.id)).performClick()
         rule.waitUntil(5_000) { rule.onAllNodesWithTag(PathChainTag).fetchSemanticsNodes().isNotEmpty() }

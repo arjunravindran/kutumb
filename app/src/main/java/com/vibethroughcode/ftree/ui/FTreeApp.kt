@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.AccountTree
 import androidx.compose.material.icons.filled.Group
@@ -68,6 +69,7 @@ import com.vibethroughcode.ftree.ui.network.PathScreen
 import com.vibethroughcode.ftree.ui.nearby.QrPanel
 import com.vibethroughcode.ftree.ui.nearby.ScanAction
 import com.vibethroughcode.ftree.ui.nearby.NearbyViewModel
+import com.vibethroughcode.ftree.ui.more.MoreScreen
 import com.vibethroughcode.ftree.ui.people.PeopleScreen
 import com.vibethroughcode.ftree.ui.person.PersonDetailScreen
 import com.vibethroughcode.ftree.ui.person.PersonEditScreen
@@ -109,6 +111,7 @@ const val NavPeopleTag = "nav-people"
 const val NavNetworkTag = "nav-network"
 const val NavFactsTag = "nav-facts"
 const val NavSettingsTag = "nav-settings"
+const val NavMoreTag = "nav-more"
 
 /** The places the app is, rather than the places it can go. */
 private data class Destination(
@@ -122,10 +125,11 @@ private data class Destination(
 private val destinations = listOf(
     Destination(TreeRoute(), TreeRoute::class, Icons.Default.AccountTree, R.string.nav_tree, NavTreeTag),
     Destination(PeopleRoute, PeopleRoute::class, Icons.AutoMirrored.Filled.List, R.string.nav_people, NavPeopleTag),
-    Destination(NetworkRoute, NetworkRoute::class, Icons.Default.Group, R.string.nav_network, NavNetworkTag),
-    Destination(FactsRoute, FactsRoute::class, Icons.Default.Quiz, R.string.nav_facts, NavFactsTag),
-    Destination(SettingsRoute, SettingsRoute::class, Icons.Default.Settings, R.string.nav_settings, NavSettingsTag),
+    Destination(MoreRoute, MoreRoute::class, Icons.Default.MoreHoriz, R.string.nav_more, NavMoreTag),
 )
+
+/** The places reached from More. They keep the bottom bar, with More shown as selected. */
+private val morePlaces = listOf(NetworkRoute::class, FactsRoute::class, SettingsRoute::class)
 
 /**
  * The app shell.
@@ -256,9 +260,9 @@ fun FTreeApp(
 
     val backStackEntry by navController.currentBackStackEntryAsState()
     val destination = backStackEntry?.destination
-    val onTopLevel = destinations.any { destination?.hasRoute(it.type) == true }
-    // The facts game asks about family (whose mother, born where), which a circle of friends has none of.
-    val shownDestinations = if (isCircle) destinations.filter { it.type != FactsRoute::class } else destinations
+    val onMorePlace = morePlaces.any { destination?.hasRoute(it) == true }
+    val onTopLevel = onMorePlace || destinations.any { destination?.hasRoute(it.type) == true }
+    val shownDestinations = destinations
 
     /*
      * The three places move to the side when the window is short.
@@ -277,10 +281,10 @@ fun FTreeApp(
                 if (onTopLevel && !useRail) {
                     NavigationBar {
                         shownDestinations.forEach { item ->
-                            val selected = destination?.hasRoute(item.type) == true
+                            val selected = destination?.hasRoute(item.type) == true || (item.type == MoreRoute::class && onMorePlace)
                             NavigationBarItem(
                                 selected = selected,
-                                onClick = { navController.switchTo(item.route) },
+                                onClick = { if (item.type == MoreRoute::class) navController.openMore() else navController.switchTo(item.route) },
                                 icon = { Icon(item.icon, contentDescription = null) },
                                 label = { Text(stringResource(item.label)) },
                                 modifier = Modifier.testTag(item.tag),
@@ -296,10 +300,10 @@ fun FTreeApp(
                 // landscape phone, which is the opposite of the point of moving off the bottom edge.
                 NavigationRail(modifier = Modifier.fillMaxHeight().width(112.dp)) {
                         shownDestinations.forEach { item ->
-                            val selected = destination?.hasRoute(item.type) == true
+                            val selected = destination?.hasRoute(item.type) == true || (item.type == MoreRoute::class && onMorePlace)
                             NavigationRailItem(
                                 selected = selected,
-                                onClick = { navController.switchTo(item.route) },
+                                onClick = { if (item.type == MoreRoute::class) navController.openMore() else navController.switchTo(item.route) },
                                 icon = { Icon(item.icon, contentDescription = null) },
                                 label = { Text(stringResource(item.label)) },
                                 modifier = Modifier.testTag(item.tag),
@@ -353,6 +357,16 @@ fun FTreeApp(
                                 focusReminders = true
                                 navController.switchTo(SettingsRoute)
                             },
+                        )
+                    }
+
+                    composable<MoreRoute> {
+                        MoreScreen(
+                            // The facts game asks about family (whose mother, born where), which a circle has none of.
+                            showFacts = !isCircle,
+                            onNetwork = { navController.navigate(NetworkRoute) },
+                            onFacts = { navController.navigate(FactsRoute) },
+                            onSettings = { navController.navigate(SettingsRoute) },
                         )
                     }
 
@@ -545,6 +559,15 @@ fun FTreeApp(
  */
 private suspend fun awaitGraph(navController: NavHostController) {
     navController.currentBackStackEntryFlow.first()
+}
+
+/** More always opens on its own list, even when a place reached from it is showing. */
+private fun NavHostController.openMore() {
+    if (currentDestination?.hasRoute(MoreRoute::class) == true) return
+    navigate(MoreRoute) {
+        popUpTo(graph.findStartDestination().id)
+        launchSingleTop = true
+    }
 }
 
 private fun NavHostController.switchTo(route: Any) {

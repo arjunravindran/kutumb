@@ -1,5 +1,6 @@
 package com.vibethroughcode.ftree.ui
 
+import com.vibethroughcode.ftree.ui.more.MoreFactsTag
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
@@ -60,11 +61,12 @@ class NetworkResolveTest {
         // The question may already have come up by itself, if the app finished opening after the
         // seeding above; otherwise it is one tap from the Facts tab.
         rule.waitUntil(10_000) {
-            rule.onAllNodesWithTag(NavFactsTag).fetchSemanticsNodes().isNotEmpty() ||
+            rule.onAllNodesWithTag(NavMoreTag).fetchSemanticsNodes().isNotEmpty() ||
                 rule.onAllNodesWithTag(resolveAnswerTag("a1")).fetchSemanticsNodes().isNotEmpty()
         }
         if (rule.onAllNodesWithTag(resolveAnswerTag("a1")).fetchSemanticsNodes().isEmpty()) {
-            rule.onNodeWithTag(NavFactsTag).performClick()
+            rule.onNodeWithTag(NavMoreTag).performClick()
+            rule.onNodeWithTag(MoreFactsTag).performClick()
             rule.waitUntil(5_000) { rule.onAllNodesWithTag(FactsPendingTag).fetchSemanticsNodes().isNotEmpty() }
             rule.onNodeWithTag(FactsPendingTag).performClick()
         }

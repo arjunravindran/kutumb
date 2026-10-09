@@ -110,6 +110,7 @@ const val SettingsNearbyToggleTag = "settings-nearby-toggle"
 const val SettingsSyncToggleTag = "settings-sync-toggle"
 const val SettingsSyncRelaysTag = "settings-sync-relays"
 const val SettingsSyncRelayPickerTag = "settings-sync-relay-picker"
+const val SettingsSyncAdvancedTag = "settings-sync-advanced"
 const val SettingsNearbySendTag = "settings-nearby-send"
 const val SettingsNearbyReceiveTag = "settings-nearby-receive"
 const val SettingsNearbyRenameTag = "settings-nearby-rename"
@@ -383,8 +384,8 @@ fun SettingsScreen(
             TreesSettings()
 
             /*
-             * Off until switched on, and no relay is built in: the only servers this talks to are
-             * ones the person typed. Messages are end-to-end encrypted before they leave the phone.
+             * Off until switched on. Once on it uses the default relay unless the person chose others,
+             * which they can do under Advanced. Messages are end-to-end encrypted before they leave the phone.
              */
             Column {
                 SectionRule(stringResource(R.string.settings_section_sync))
@@ -399,8 +400,16 @@ fun SettingsScreen(
 
                 AnimatedVisibility(visible = syncEnabled) {
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        var advanced by remember { mutableStateOf(false) }
+                        TextButton(
+                            onClick = { advanced = !advanced },
+                            modifier = Modifier.testTag(SettingsSyncAdvancedTag),
+                        ) {
+                            Text(stringResource(if (advanced) R.string.settings_sync_advanced_hide else R.string.settings_sync_advanced_show))
+                        }
                         var relayText by remember(syncRelays) { mutableStateOf(syncRelays.joinToString(", ")) }
                         var refused by remember { mutableStateOf(emptyList<String>()) }
+                        if (advanced) {
                         OutlinedTextField(
                             value = relayText,
                             onValueChange = { relayText = it.take(1000) },
@@ -441,6 +450,7 @@ fun SettingsScreen(
                         }
                         TextButton(onClick = { refused = viewModel.setSyncRelays(relayText) }) {
                             Text(stringResource(R.string.settings_sync_relays_save))
+                        }
                         }
                         Text(
                             stringResource(

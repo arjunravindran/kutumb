@@ -2,6 +2,10 @@
 <resources>
     <!-- Family network: who this phone trusts, and how it came to. -->
     <string name="nav_network">Network</string>
+    <string name="nav_more">More</string>
+    <string name="more_network_body">Relatives you have met in person, and messages to them</string>
+    <string name="more_facts_body">A quiz about your family</string>
+    <string name="more_settings_body">Reminders, sharing, saving a copy of your tree</string>
     <string name="network_title">Family network</string>
     <string name="network_pair">Pair with someone nearby</string>
     <string name="network_status_direct">Paired in person</string>

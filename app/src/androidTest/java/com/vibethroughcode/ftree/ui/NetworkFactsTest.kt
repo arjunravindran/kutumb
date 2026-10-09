@@ -1,5 +1,6 @@
 package com.vibethroughcode.ftree.ui
 
+import com.vibethroughcode.ftree.ui.more.MoreFactsTag
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
@@ -61,7 +62,8 @@ class NetworkFactsTest {
     }
 
     private fun openFacts() {
-        rule.onNodeWithTag(NavFactsTag).performClick()
+        rule.onNodeWithTag(NavMoreTag).performClick()
+        rule.onNodeWithTag(MoreFactsTag).performClick()
     }
 
     @Test

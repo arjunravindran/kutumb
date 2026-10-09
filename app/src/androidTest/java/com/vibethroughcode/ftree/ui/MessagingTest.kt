@@ -1,5 +1,6 @@
 package com.vibethroughcode.ftree.ui
 
+import com.vibethroughcode.ftree.ui.more.MoreNetworkTag
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
@@ -67,7 +68,8 @@ class MessagingTest {
                 TrustedContact(asha.id, Bip340Scheme.generateKeyPair().publicKey, pairedAt = 1, pairingMethod = PairingMethod.VOUCHED, vouchedByPersonId = devika.id),
             )
         }
-        rule.onNodeWithTag(NavNetworkTag).performClick()
+        rule.onNodeWithTag(NavMoreTag).performClick()
+        rule.onNodeWithTag(MoreNetworkTag).performClick()
         rule.waitUntil(5_000) { rule.onAllNodesWithTag(NetworkListTag).fetchSemanticsNodes().isNotEmpty() }
     }
 

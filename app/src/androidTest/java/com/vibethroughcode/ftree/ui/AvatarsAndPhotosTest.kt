@@ -1,5 +1,6 @@
 package com.vibethroughcode.ftree.ui
 
+import com.vibethroughcode.ftree.ui.more.MoreSettingsTag
 import android.graphics.Bitmap
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsOff
@@ -66,7 +67,8 @@ class AvatarsAndPhotosTest {
         app.container.chartPreferences.setPhotosInChart(true)
         seed()
 
-        rule.onNodeWithTag(NavSettingsTag).performClick()
+        rule.onNodeWithTag(NavMoreTag).performClick()
+        rule.onNodeWithTag(MoreSettingsTag).performClick()
         rule.waitUntil(5_000) {
             rule.onAllNodesWithTag(SettingsPhotosToggleTag).fetchSemanticsNodes().isNotEmpty()
         }
@@ -95,7 +97,8 @@ class AvatarsAndPhotosTest {
         app.container.chartPreferences.setPhotosInChart(false)
         seed()
 
-        rule.onNodeWithTag(NavSettingsTag).performClick()
+        rule.onNodeWithTag(NavMoreTag).performClick()
+        rule.onNodeWithTag(MoreSettingsTag).performClick()
         rule.waitUntil(5_000) {
             rule.onAllNodesWithTag(SettingsPhotosToggleTag).fetchSemanticsNodes().isNotEmpty()
         }

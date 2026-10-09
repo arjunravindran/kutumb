@@ -66,6 +66,10 @@ data object PairRoute
 @Serializable
 data object SettingsRoute
 
+/** The third place in the bottom bar: a short list leading to the network, the facts quiz and settings. */
+@Serializable
+data object MoreRoute
+
 /** Connecting someone in a Circle to [anchorPersonId]. */
 @Serializable
 data class AddConnectionRoute(val anchorPersonId: String)

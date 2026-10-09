@@ -1,5 +1,6 @@
 package com.vibethroughcode.ftree.ui
 
+import com.vibethroughcode.ftree.ui.more.MoreNetworkTag
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextContains
@@ -84,7 +85,8 @@ class NetworkPairingTest {
             devika = app.container.familyRepository.addPerson(Person(name = "Devika Nair"))
             kutumb.setIdentity(LocalIdentity(me.id, Bip340Scheme.generateKeyPair()))
         }
-        rule.onNodeWithTag(NavNetworkTag).performClick()
+        rule.onNodeWithTag(NavMoreTag).performClick()
+        rule.onNodeWithTag(MoreNetworkTag).performClick()
         rule.waitUntil(5_000) { rule.onAllNodesWithTag(NetworkPairTag).fetchSemanticsNodes().isNotEmpty() }
         rule.onNodeWithTag(NetworkPairTag).performClick()
     }

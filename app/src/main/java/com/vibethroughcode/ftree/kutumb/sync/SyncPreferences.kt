@@ -10,9 +10,10 @@ import java.net.URI
 /**
  * Whether this phone may talk to Nostr relays at all, and which ones.
  *
- * Both default to nothing: sync is off, and there is no built-in relay list, so a fresh install
- * (or an update) contacts no server on the internet until a person turns it on and names relays.
- * [SyncService] checks the switch itself, so the guarantee does not depend on the screen.
+ * Sync is off by default, so a fresh install (or an update) contacts no server on the internet until a
+ * person turns it on. [SyncService] checks the switch itself, so the guarantee does not depend on the
+ * screen. Once it is on, a person who has never chosen relays uses [DEFAULT_RELAYS], so that turning
+ * sync on is the only step; choosing their own (even none) is kept as they left it.
  */
 class SyncPreferences(private val prefs: SharedPreferences) {
 
@@ -29,7 +30,8 @@ class SyncPreferences(private val prefs: SharedPreferences) {
     }
 
     private val _relays = MutableStateFlow(
-        prefs.getString(KEY_RELAYS, null)?.lines()?.mapNotNull(::normalizeRelay)?.distinct()?.take(MAX_RELAYS).orEmpty(),
+        prefs.getString(KEY_RELAYS, null)?.lines()?.mapNotNull(::normalizeRelay)?.distinct()?.take(MAX_RELAYS)
+            ?: DEFAULT_RELAYS,
     )
     val relays: StateFlow<List<String>> = _relays.asStateFlow()
 
@@ -45,6 +47,9 @@ class SyncPreferences(private val prefs: SharedPreferences) {
 
     companion object {
         const val MAX_RELAYS = 5
+
+        /** Used until a person chooses their own. `nos.lol` is the one that has carried real messages between phones. */
+        val DEFAULT_RELAYS = listOf("wss://nos.lol")
 
         /**
          * Public relays offered in Settings as a convenience. None is used until a person picks

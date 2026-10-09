@@ -1,5 +1,7 @@
 package com.vibethroughcode.ftree.ui
 
+import com.vibethroughcode.ftree.ui.more.MoreFactsTag
+import com.vibethroughcode.ftree.ui.more.MoreNetworkTag
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.geometry.Offset
@@ -114,8 +116,9 @@ class CircleFlowTest {
         compose.waitUntil(5_000) { compose.onAllNodesWithText("COLLEAGUE").fetchSemanticsNodes().isNotEmpty() }
 
         // The facts game asks about family, which a circle does not have; pairing still applies.
-        compose.onNodeWithTag(NavNetworkTag).assertIsDisplayed()
-        compose.onAllNodesWithTag(NavFactsTag).assertCountEquals(0)
+        compose.onNodeWithTag(NavMoreTag).performClick()
+        compose.onNodeWithTag(MoreNetworkTag).assertIsDisplayed()
+        compose.onAllNodesWithTag(MoreFactsTag).assertCountEquals(0)
     }
 
     @Test fun theGraphDrawsTheSameCircleAndTappingAPersonMovesToThem() {
