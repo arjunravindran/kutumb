@@ -7,6 +7,8 @@ enum class SyncType(val wire: String) {
     RESOLUTION("resolution"),
     ROTATION("rotation"),
     TREE_EDIT("tree-edit"),
+    TREE_INVITE("tree-invite"),
+    TREE_JOIN("tree-join"),
     MESSAGE("message"),
     ;
 
