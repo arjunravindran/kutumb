@@ -54,9 +54,9 @@ class DateFieldTest {
             .targetContext.applicationContext as FTreeApplication
         app.container.database.clearAllTables()
         rule.waitUntil(5_000) {
-            rule.onAllNodesWithText("Add your first person").fetchSemanticsNodes().isNotEmpty()
+            rule.onAllNodesWithText("Add myself").fetchSemanticsNodes().isNotEmpty()
         }
-        rule.onNodeWithText("Add your first person").performClick()
+        rule.onNodeWithText("Add myself").performClick()
         rule.waitForIdle()
     }
 

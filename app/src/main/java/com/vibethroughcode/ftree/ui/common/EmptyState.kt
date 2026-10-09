@@ -3,6 +3,7 @@ package com.vibethroughcode.ftree.ui.common
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.Button
@@ -40,16 +41,16 @@ fun EmptyState(
         )
         Text(
             text = body,
-            style = MaterialTheme.typography.bodyMedium,
+            style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
-            modifier = Modifier.padding(top = 12.dp).widthIn(max = 320.dp),
+            modifier = Modifier.padding(top = 12.dp).widthIn(max = 360.dp),
         )
         Button(
             onClick = onAction,
-            modifier = Modifier.padding(top = 28.dp),
+            modifier = Modifier.padding(top = 28.dp).heightIn(min = 56.dp),
         ) {
-            Text(actionLabel)
+            Text(actionLabel, style = MaterialTheme.typography.titleMedium)
         }
     }
 }

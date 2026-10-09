@@ -50,7 +50,7 @@ class RelationshipFlowTest {
         rule.waitUntil(5_000) {
             rule.onAllNodesWithText("Build your family tree").fetchSemanticsNodes().isNotEmpty()
         }
-        rule.onNodeWithText("Add your first person").performClick()
+        rule.onNodeWithText("Add myself").performClick()
         rule.waitForIdle()
         rule.onNodeWithTag(EditNameFieldTag).performTextInput("Ankit")
         rule.onNodeWithTag(EditSaveTag).performScrollTo().performClick()

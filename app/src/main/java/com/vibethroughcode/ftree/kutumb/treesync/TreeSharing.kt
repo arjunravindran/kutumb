@@ -56,7 +56,13 @@ class TreeSharing(
      */
     suspend fun setMember(contact: TrustedContact, member: Boolean): Boolean {
         if (tree.sharedId() == null) return false
-        if (member) return shareTreeWith(contact, members, publisher)
+        if (member) {
+            if (!shareTreeWith(contact, members, publisher)) return false
+            // Sending a new member the whole history does not mark operations as sent, so the "waiting"
+            // count would stay up until the next pass. Flush now; a duplicate delivery is harmless.
+            publisher.flush()
+            return true
+        }
         if (contact.personId !in tree.members()) return false
         members.removeMember(contact.personId)
         return true

@@ -78,7 +78,7 @@ class TreeFlowTest {
     fun tappingSomebodyOnTheChartOpensTheirActions() {
         // One person only: the chart fits, so it is centred and the single node sits under the
         // middle of the canvas, which makes the tap deterministic.
-        rule.onNodeWithText("Add your first person").performClick()
+        rule.onNodeWithText("Add myself").performClick()
         rule.waitForIdle()
         rule.onNodeWithTag(EditNameFieldTag).performTextInput("Ankit Kumar")
         rule.onNodeWithTag(EditSaveTag).performScrollTo().performClick()

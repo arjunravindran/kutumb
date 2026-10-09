@@ -276,7 +276,7 @@ class SyncEngine(
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
-            note("connect failed: $url", e)
+            note("connect failed: $url (${e.javaClass.simpleName}: ${e.message})", e)
             return null
         }
         note("connected: $url inbound=${url in inboundUrls}")

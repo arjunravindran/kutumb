@@ -58,12 +58,14 @@ val FTreeTypography = Typography().let { default ->
         titleLarge = name(20, 28, FontWeight.W600),
         titleMedium = name(17, 24, FontWeight.W600),
         titleSmall = name(15, 20, FontWeight.W500),
-        bodyLarge = default.bodyLarge,
-        bodyMedium = default.bodyMedium,
-        bodySmall = default.bodySmall,
-        labelLarge = default.labelLarge,
-        labelMedium = default.labelMedium,
-        labelSmall = default.labelSmall,
+        // Larger than Material's defaults (16/14/12 body, 14/12/11 label): many readers are over sixty,
+        // and the smallest text should be comfortable without them changing the phone's font size.
+        bodyLarge = default.bodyLarge.copy(fontSize = 18.sp, lineHeight = 26.sp),
+        bodyMedium = default.bodyMedium.copy(fontSize = 16.sp, lineHeight = 24.sp),
+        bodySmall = default.bodySmall.copy(fontSize = 14.sp, lineHeight = 20.sp),
+        labelLarge = default.labelLarge.copy(fontSize = 16.sp, lineHeight = 22.sp),
+        labelMedium = default.labelMedium.copy(fontSize = 14.sp, lineHeight = 20.sp),
+        labelSmall = default.labelSmall.copy(fontSize = 13.sp, lineHeight = 18.sp),
     )
 }
 
@@ -78,19 +80,19 @@ object FTreeText {
     val record = TextStyle(
         fontFamily = Mono,
         fontWeight = FontWeight.W400,
-        fontSize = 13.sp,
-        lineHeight = 18.sp,
+        fontSize = 15.sp,
+        lineHeight = 21.sp,
         letterSpacing = 0.sp,
     )
 
-    val recordSmall = record.copy(fontSize = 11.sp, lineHeight = 15.sp)
+    val recordSmall = record.copy(fontSize = 13.sp, lineHeight = 18.sp)
 
     val sectionLabel = TextStyle(
         fontFamily = Mono,
         fontWeight = FontWeight.W500,
-        fontSize = 11.sp,
-        lineHeight = 16.sp,
-        letterSpacing = 1.6.sp,
+        fontSize = 13.sp,
+        lineHeight = 18.sp,
+        letterSpacing = 1.2.sp,
     )
 
     /** Node labels in the chart, where space is tight and clipping must be predictable. */

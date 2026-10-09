@@ -61,7 +61,7 @@ class PersonFlowTest {
     }
 
     private fun addFirstPerson(name: String? = null, born: String? = null) {
-        rule.onNodeWithText("Add your first person").performClick()
+        rule.onNodeWithText("Add myself").performClick()
         rule.waitForIdle()
         fillAndSave(name, born)
     }
@@ -80,7 +80,7 @@ class PersonFlowTest {
     @Test
     fun anEmptyTreeInvitesTheFirstPerson() {
         rule.onNodeWithText("Build your family tree").assertIsDisplayed()
-        rule.onNodeWithText("Add your first person").assertIsDisplayed()
+        rule.onNodeWithText("Add myself").assertIsDisplayed()
     }
 
     @Test
@@ -112,7 +112,7 @@ class PersonFlowTest {
 
     @Test
     fun anImpossibleDateBlocksSaving() {
-        rule.onNodeWithText("Add your first person").performClick()
+        rule.onNodeWithText("Add myself").performClick()
         rule.waitForIdle()
         // The field takes digits only (#90), so the way to type something that is not a date is a
         // month that does not exist - said at once, because the month slot is complete.

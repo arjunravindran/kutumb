@@ -41,8 +41,8 @@
 
     <!-- Empty state -->
     <string name="empty_title">Build your family tree</string>
-    <string name="empty_body">Start with yourself, or with the oldest relative you know. You can add the rest around them, and record the people whose names you never learned.</string>
-    <string name="empty_action">Add your first person</string>
+    <string name="empty_body">Start with yourself: tap the button and type your name. Then add your parents, your children, your brothers and sisters. If you do not know someone\'s name, leave it blank.</string>
+    <string name="empty_action">Add myself</string>
 
     <!-- Person -->
     <string name="person_unknown">Unknown</string>
