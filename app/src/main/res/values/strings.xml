@@ -41,7 +41,10 @@
 
     <!-- Empty state -->
     <string name="empty_title">Build your family tree</string>
-    <string name="empty_body">Start with yourself: tap the button and type your name. Then add your parents, your children, your brothers and sisters. If you do not know someone\'s name, leave it blank.</string>
+    <string name="empty_body">Kutumb keeps your whole family in one place, on your phone. Nothing is sent anywhere unless you choose.</string>
+    <string name="empty_step_1">Tap the button below and type your name.</string>
+    <string name="empty_step_2">Add your parents, brothers and sisters, husband or wife, and children. If you do not know a name, leave it blank.</string>
+    <string name="empty_step_3">Tap anyone to see how they are related to you.</string>
     <string name="empty_action">Add myself</string>
 
     <!-- Person -->

@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -24,11 +26,14 @@ fun EmptyState(
     onAction: () -> Unit,
     modifier: Modifier = Modifier,
     illustration: @Composable (() -> Unit)? = null,
+    /** Short numbered instructions shown under the body, for a first screen that has to teach by itself. */
+    steps: List<String> = emptyList(),
 ) {
     Column(
         modifier = modifier
             .fillMaxSize()
-            .padding(horizontal = 32.dp),
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 32.dp, vertical = 24.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
@@ -46,6 +51,19 @@ fun EmptyState(
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(top = 12.dp).widthIn(max = 360.dp),
         )
+        if (steps.isNotEmpty()) {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+                modifier = Modifier.padding(top = 20.dp).widthIn(max = 360.dp),
+            ) {
+                steps.forEachIndexed { index, step ->
+                    Text(
+                        text = "${index + 1}.  $step",
+                        style = MaterialTheme.typography.bodyLarge,
+                    )
+                }
+            }
+        }
         Button(
             onClick = onAction,
             modifier = Modifier.padding(top = 28.dp).heightIn(min = 56.dp),

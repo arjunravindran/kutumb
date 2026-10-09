@@ -384,7 +384,8 @@ fun TreeScreen(
                 treeIsEmpty -> EmptyState(
                     title = stringResource(R.string.empty_title),
                     body = stringResource(R.string.empty_body),
-                    actionLabel = stringResource(R.string.empty_action),
+                                        steps = listOf(R.string.empty_step_1, R.string.empty_step_2, R.string.empty_step_3).map { stringResource(it) },
+actionLabel = stringResource(R.string.empty_action),
                     onAction = onAddPerson,
                     illustration = { TreeGlyph() },
                 )
