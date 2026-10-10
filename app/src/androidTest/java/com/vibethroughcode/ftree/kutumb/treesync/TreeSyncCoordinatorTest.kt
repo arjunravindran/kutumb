@@ -14,6 +14,7 @@ import com.vibethroughcode.ftree.data.PhotoStore
 import com.vibethroughcode.ftree.data.RelativeKind
 import com.vibethroughcode.ftree.kutumb.Bip340Scheme
 import com.vibethroughcode.ftree.kutumb.InMemoryKutumbRepository
+import com.vibethroughcode.ftree.kutumb.LocalIdentity
 import com.vibethroughcode.ftree.kutumb.sync.CompositeSyncHandler
 import com.vibethroughcode.ftree.kutumb.sync.NoSyncPublisher
 import com.vibethroughcode.ftree.kutumb.sync.SyncEnvelope
@@ -407,6 +408,48 @@ class TreeSyncCoordinatorTest {
         assertTrue(TreeSyncPublisher(raviNew.sync, toAsha).flush() > 0)
         assertEquals(raviNew.tree(), asha.tree())
         assertEquals("Ravi K", asha.repo.person("ravi-p")!!.name)
+    }
+
+    /**
+     * A newcomer who has typed themselves and the person they met into a tree of their own is not given a second
+     * tree: that one is emptied and becomes the shared tree, so they end with Asha's tree and nothing beside it.
+     */
+    @Test fun aNewcomerWithAlmostNothingIsFilledInPlace() = runBlocking {
+        val asha = phone("asha"); val ravi = phone("ravi")
+        val ashaKey = Bip340Scheme.generateKeyPair(); val raviKey = Bip340Scheme.generateKeyPair()
+        asha.person("asha", "Asha"); asha.person("ravi-p", "Ravi"); asha.person("dad", "Dad")
+        asha.repo.addRelative("asha", "dad", RelativeKind.PARENT)
+        assertTrue(asha.sync.share("shared-1"))
+        assertTrue(asha.sync.addMember("ravi-p"))
+        val raviAsSeenByAsha = TrustedContact("ravi-p", raviKey.publicKey, pairedAt = 1, pairingMethod = PairingMethod.DIRECT)
+        val ashaAsSeenByRavi = TrustedContact("asha", ashaKey.publicKey, pairedAt = 1, pairingMethod = PairingMethod.DIRECT)
+
+        // His own tree: himself and Asha, typed by hand, under ids of his own, and her paired there.
+        ravi.person("me-local", "Ravi"); ravi.person("asha-local", "Asha")
+        val kutumb = InMemoryKutumbRepository()
+        kutumb.setIdentity(LocalIdentity("me-local", raviKey))
+        kutumb.saveContact(TrustedContact("asha-local", ashaKey.publicKey, pairedAt = 1, pairingMethod = PairingMethod.DIRECT))
+        assertTrue(JoinPlan.fillsInPlace(ravi.sync.isShared(), ravi.tree().people.size, ravi.db.relationshipDao().allRelationships().size))
+
+        val invite = PendingInvite("shared-1", "Ravindran family", 3, "asha", "ravi-p", ashaKey.publicKey, "Asha", "old", 9L)
+        ravi.db.clearAllTables()
+        kutumb.clearAll()
+        prepareJoinedTree(ravi.sync, kutumb, invite, raviKey, now = 5L)
+        assertTrue(ravi.tree().people.isEmpty())
+
+        val toRavi = Link(asha, ravi, ashaAsSeenByRavi, toPersonId = "ravi-p", handler = TreeSyncHandler(ravi.sync))
+        val toAsha = Link(
+            ravi, asha, raviAsSeenByAsha, toPersonId = "asha",
+            handler = CompositeSyncHandler(
+                TreeSyncHandler(asha.sync),
+                TreeInviteHandler(asha.sync, TreeInvitations(MemoryStore()), TreeSyncPublisher(asha.sync, toRavi), "asha-tree", { null }, { 10L }),
+            ),
+        )
+        assertTrue(toAsha.publish(TreeInviteCodec.join(TreeJoin(invite.tree)), listOf("asha")))
+        assertEquals(asha.tree(), ravi.tree())
+        assertEquals(setOf("asha", "ravi-p", "dad"), ravi.tree().people.keys)
+        assertEquals("ravi-p", kutumb.observeIdentity().first()!!.personId)
+        assertEquals(listOf("asha"), kutumb.observeContacts().first().map { it.personId })
     }
 
     @Test fun someoneNotAMemberCannotWriteIntoTheTree() = runBlocking {

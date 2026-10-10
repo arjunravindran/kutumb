@@ -12,6 +12,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.vibethroughcode.ftree.FTreeApplication
 import com.vibethroughcode.ftree.MainActivity
 import com.vibethroughcode.ftree.data.TreeCatalog
+import com.vibethroughcode.ftree.ui.welcome.WelcomeInvitedGoTag
+import com.vibethroughcode.ftree.ui.welcome.WelcomeInvitedTag
 import com.vibethroughcode.ftree.ui.welcome.WelcomePreferences
 import com.vibethroughcode.ftree.ui.welcome.WelcomeStartTag
 import com.vibethroughcode.ftree.ui.welcome.WelcomeTag
@@ -78,5 +80,18 @@ class WelcomeFlowTest {
         launch()
         compose.waitUntil(8_000) { count(NavMoreTag) == 1 }
         assertTrue(count(WelcomeTag) == 0)
+    }
+
+    @Test fun someoneInvitedIsToldTheStepsThenContinuesToTheTree() {
+        welcome.showAgain()
+        launch()
+        compose.waitUntil(8_000) { count(WelcomeTag) == 1 }
+        compose.onNodeWithTag(WelcomeInvitedTag).performClick()
+        compose.onNodeWithText("Joining a relative", substring = true).assertIsDisplayed()
+        compose.onNodeWithText("Pair in person", substring = true).assertIsDisplayed()
+
+        compose.onNodeWithTag(WelcomeInvitedGoTag).performClick()
+        compose.waitUntil(5_000) { count(WelcomeTag) == 0 }
+        assertEquals(true, welcome.stored())
     }
 }

@@ -348,6 +348,15 @@
     <string name="welcome_share_title">Share with relatives you meet</string>
     <string name="welcome_share_body">When you meet a relative, you can add each other and keep your trees up to date together.</string>
     <string name="welcome_start">Get started</string>
+    <string name="welcome_invited">Someone invited me</string>
+    <string name="welcome_invited_title">Joining a relative’s tree</string>
+    <string name="welcome_invited_lead">You will get their tree, so there is no need to type it in. A few steps first, while you are together:</string>
+    <string name="welcome_invited_1">Add yourself, and the relative who invited you.</string>
+    <string name="welcome_invited_2">Under More, then Network, say which one is you.</string>
+    <string name="welcome_invited_3">Pair in person: scan or enter the code on both phones.</string>
+    <string name="welcome_invited_4">Turn on Family sync in Settings. Your relative then shares the tree with you.</string>
+    <string name="welcome_invited_5">A message appears at the top of More. Open it, and their tree becomes yours.</string>
+    <string name="welcome_invited_go">Continue</string>
     <string name="contacts_entry">Add people from my contacts</string>
     <string name="contacts_entry_body">Choose family from your phone’s contacts. Only names and birthdays are read.</string>
     <string name="contacts_ask_title">Add people from your contacts</string>

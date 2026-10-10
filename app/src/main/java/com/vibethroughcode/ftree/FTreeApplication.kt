@@ -14,6 +14,7 @@ import com.vibethroughcode.ftree.data.CatalogResult
 import com.vibethroughcode.ftree.kutumb.treesync.PendingInvite
 import com.vibethroughcode.ftree.kutumb.treesync.TreeInviteCodec
 import com.vibethroughcode.ftree.kutumb.treesync.TreeJoin
+import com.vibethroughcode.ftree.kutumb.treesync.JoinPlan
 import com.vibethroughcode.ftree.kutumb.treesync.prepareJoinedTree
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -216,6 +217,15 @@ class FTreeApplication : Application() {
         val invitations = container.invitations
         if (invitations.hasJoined(invite.tree)) return JoinResult.AlreadyJoined
         if (!syncPreferences.enabled.value) return JoinResult.SyncOff
+        val filled = withContext(Dispatchers.IO) { fillOpenTree(invite) }
+        if (filled != null) {
+            invitations.joined(invite.tree, filled.id)
+            withContext(Dispatchers.Main) { reopenActive() }
+            val asked = withContext(Dispatchers.IO) {
+                container.syncPublisher.publish(TreeInviteCodec.join(TreeJoin(invite.tree)), listOf(invite.from))
+            }
+            return JoinResult.Joined(filled, asked)
+        }
         val created = withContext(Dispatchers.IO) {
             // The key the inviter knows this phone by is the one the tree that received the invitation holds.
             val key = withTreeContainer(invite.viaTree) { it.kutumbRepository.observeIdentity().first()?.keyPair }
@@ -242,6 +252,39 @@ class FTreeApplication : Application() {
             container.syncPublisher.publish(TreeInviteCodec.join(TreeJoin(invite.tree)), listOf(invite.from))
         }
         return JoinResult.Joined(created, asked)
+    }
+
+    /**
+     * When the open tree is the one that heard the invitation and is little more than a newcomer and the person they
+     * met (see [JoinPlan]), turns it into the shared tree in place and returns it; otherwise null and nothing is
+     * touched. What the phone had in it is dropped: the inviter sends the whole tree, this phone's own person
+     * included, under the ids the inviter uses. The caller reopens the tree afterwards.
+     */
+    private suspend fun fillOpenTree(invite: PendingInvite): TreeInfo? {
+        val open = container
+        if (open.tree.id != invite.viaTree) return null
+        if (!JoinPlan.fillsInPlace(
+                shared = open.treeSync.isShared(),
+                people = open.familyRepository.allPeople().size,
+                relationships = open.database.relationshipDao().allRelationships().size,
+            )
+        ) return null
+        val key = open.kutumbRepository.observeIdentity().first()?.keyPair ?: return null
+        return try {
+            open.database.clearAllTables()
+            prepareJoinedTree(open.treeSync, open.kutumbRepository, invite, key, System.currentTimeMillis())
+            open.tree
+        } catch (e: Throwable) {
+            null
+        }
+    }
+
+    /** Builds the open tree's wiring afresh, so services started before it was shared see what it now is. */
+    private fun reopenActive() {
+        val old = container
+        old.stopServices()
+        open(catalog.active)
+        Handler(Looper.getMainLooper()).postDelayed({ old.closeDatabase() }, CLOSE_DELAY_MS)
     }
 
     /** Runs [block] against the wiring of tree [treeId]: the open one, one syncing unseen, or one opened just for this. */
