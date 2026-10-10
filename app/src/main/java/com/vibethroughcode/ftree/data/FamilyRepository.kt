@@ -217,31 +217,78 @@ class FamilyRepository(
         }
     }
 
-    /**
-     * Adds an uncle or aunt of [personId]: a brother or sister of one of their parents. Nothing new is stored
-     * for it; it is a person joined as a sibling to a parent, so the kinship rules work it out as they do for
-     * anyone. With no [parentId] the parent is not in the tree yet, so an unknown one is made first, and both
-     * go in together or neither does.
+    /*
+     * Relatives more than one link away: uncles, aunts, cousins, nephews, nieces, grandparents, grandchildren.
+     *
+     * None of these is a link of its own. Each is the ordinary links through somebody in between: an uncle is a
+     * brother or sister of a parent, a cousin a child of an uncle or aunt, and so on, so the kinship rules name
+     * them as they do anyone. The person at the far end is either made ([relative]) or already in the tree
+     * ([existingId]), so somebody added earlier with no connection can be joined up. Where the person in between
+     * is not in the tree, an unknown stand-in is made. Everything goes in together or not at all, and a link the
+     * rules refuse (somebody's own grandchild as their grandparent) undoes the lot.
      */
-    suspend fun addUncleOrAunt(personId: String, parentId: String?, relative: Person): Result<Person> = runCatching {
+
+    private suspend fun attach(anchorId: String, kind: RelativeKind, relative: Person?, existingId: String?): Person {
+        if (existingId != null) {
+            addRelative(anchorId, existingId, kind).getOrThrow()
+            return people.findById(existingId) ?: throw IllegalArgumentException("No such person")
+        }
+        return addNewRelative(anchorId, relative ?: Person(), kind).getOrThrow()
+    }
+
+    /** An uncle or aunt of [personId]: a brother or sister of the parent [parentId], or of one not in the tree (null). */
+    suspend fun addUncleOrAunt(
+        personId: String, parentId: String?, relative: Person?, existingId: String? = null,
+    ): Result<Person> = runCatching {
         db.withTransaction {
             val parent = parentId ?: addNewRelative(personId, Person(), RelativeKind.PARENT).getOrThrow().id
-            addNewRelative(parent, relative, RelativeKind.SIBLING).getOrThrow()
+            attach(parent, RelativeKind.SIBLING, relative, existingId)
         }
     }
 
     /**
-     * Adds a cousin of [personId]: a child of an uncle or aunt. With [auntUncleId] that uncle or aunt is already
-     * in the tree. Without it, one is made as an unknown sibling of the parent [parentId] (and that parent, too,
-     * if none is given), so the cousin is not left hanging. All of it goes in together or none of it does.
+     * A cousin of [personId]: a child of an uncle or aunt. With [auntUncleId] that uncle or aunt is in the tree;
+     * without, one is made as an unknown sibling of the parent [parentId] (and that parent, too, if none is given).
      */
-    suspend fun addCousin(personId: String, auntUncleId: String?, parentId: String?, relative: Person): Result<Person> = runCatching {
+    suspend fun addCousin(
+        personId: String, auntUncleId: String?, parentId: String?, relative: Person?, existingId: String? = null,
+    ): Result<Person> = runCatching {
         db.withTransaction {
             val auntUncle = auntUncleId ?: run {
                 val parent = parentId ?: addNewRelative(personId, Person(), RelativeKind.PARENT).getOrThrow().id
                 addNewRelative(parent, Person(), RelativeKind.SIBLING).getOrThrow().id
             }
-            addNewRelative(auntUncle, relative, RelativeKind.CHILD).getOrThrow()
+            attach(auntUncle, RelativeKind.CHILD, relative, existingId)
+        }
+    }
+
+    /** A nephew or niece of [personId]: a child of the brother or sister [siblingId], or of one not in the tree (null). */
+    suspend fun addNephewOrNiece(
+        personId: String, siblingId: String?, relative: Person?, existingId: String? = null,
+    ): Result<Person> = runCatching {
+        db.withTransaction {
+            val sibling = siblingId ?: addNewRelative(personId, Person(), RelativeKind.SIBLING).getOrThrow().id
+            attach(sibling, RelativeKind.CHILD, relative, existingId)
+        }
+    }
+
+    /** A grandparent of [personId]: a parent of the parent [parentId], or of one not in the tree (null). */
+    suspend fun addGrandparent(
+        personId: String, parentId: String?, relative: Person?, existingId: String? = null,
+    ): Result<Person> = runCatching {
+        db.withTransaction {
+            val parent = parentId ?: addNewRelative(personId, Person(), RelativeKind.PARENT).getOrThrow().id
+            attach(parent, RelativeKind.PARENT, relative, existingId)
+        }
+    }
+
+    /** A grandchild of [personId]: a child of the child [childId], or of one not in the tree (null). */
+    suspend fun addGrandchild(
+        personId: String, childId: String?, relative: Person?, existingId: String? = null,
+    ): Result<Person> = runCatching {
+        db.withTransaction {
+            val child = childId ?: addNewRelative(personId, Person(), RelativeKind.CHILD).getOrThrow().id
+            attach(child, RelativeKind.CHILD, relative, existingId)
         }
     }
 

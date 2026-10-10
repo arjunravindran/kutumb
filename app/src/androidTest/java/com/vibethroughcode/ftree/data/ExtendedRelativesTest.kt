@@ -94,4 +94,52 @@ class ExtendedRelativesTest {
         assertTrue(result.isFailure)
         assertEquals("no half-added people", 1, repo.allPeople().size)
     }
+
+    @Test fun somebodyAddedEarlierWithNoConnectionIsJoinedUpAsMyFathersBrother() = runBlocking {
+        val me = repo.addPerson(Person(name = "Me"))
+        val father = repo.addNewRelative(me.id, Person(name = "Father"), RelativeKind.PARENT).getOrThrow()
+        val raj = repo.addPerson(Person(name = "Raj"))
+        assertTrue("nothing joins Raj to anybody yet", repo.allRelationships().none { raj.id in listOf(it.fromPersonId, it.toPersonId) })
+
+        val joined = repo.addUncleOrAunt(me.id, father.id, relative = null, existingId = raj.id).getOrThrow()
+
+        assertEquals(raj.id, joined.id)
+        assertEquals("no extra person was made", 3, repo.allPeople().size)
+        assertTrue(
+            "Raj is a brother of my father",
+            repo.allRelationships().any { it.type == RelationshipType.SIBLING && setOf(it.fromPersonId, it.toPersonId) == setOf(father.id, raj.id) },
+        )
+    }
+
+    @Test fun aNephewIsAChildOfMyBrotherAndOneWithNoBrotherGetsAStandIn() = runBlocking {
+        val me = repo.addPerson(Person(name = "Me"))
+        val brother = repo.addNewRelative(me.id, Person(name = "Brother"), RelativeKind.SIBLING).getOrThrow()
+        val nephew = repo.addNephewOrNiece(me.id, brother.id, Person(name = "Nephew")).getOrThrow()
+        assertTrue(brother.id to nephew.id in parentEdges())
+
+        val loner = repo.addPerson(Person(name = "Loner"))
+        val niece = repo.addNephewOrNiece(loner.id, null, Person(name = "Niece")).getOrThrow()
+        val stand = repo.allPeople().filter { it.name == null }.single()
+        assertTrue(stand.id to niece.id in parentEdges())
+    }
+
+    @Test fun aGrandparentAndAGrandchildGoInThroughTheMiddleGeneration() = runBlocking {
+        val me = repo.addPerson(Person(name = "Me"))
+        val mother = repo.addNewRelative(me.id, Person(name = "Mother"), RelativeKind.PARENT).getOrThrow()
+        val nani = repo.addGrandparent(me.id, mother.id, Person(name = "Nani")).getOrThrow()
+        assertTrue(nani.id to mother.id in parentEdges())
+
+        val grandchild = repo.addGrandchild(me.id, null, Person(name = "Grandchild")).getOrThrow()
+        val child = repo.allPeople().single { it.name == null }
+        assertTrue(me.id to child.id in parentEdges() && child.id to grandchild.id in parentEdges())
+    }
+
+    @Test fun aConnectionTheRulesRefuseUndoesEverything() = runBlocking {
+        val me = repo.addPerson(Person(name = "Me"))
+        val child = repo.addNewRelative(me.id, Person(name = "Child"), RelativeKind.CHILD).getOrThrow()
+        // My own child cannot also be my grandparent.
+        val result = repo.addGrandparent(me.id, null, relative = null, existingId = child.id)
+        assertTrue(result.isFailure)
+        assertEquals("the stand-in parent was not left behind", 2, repo.allPeople().size)
+    }
 }
