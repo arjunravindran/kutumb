@@ -114,6 +114,7 @@ const val SettingsSyncAdvancedTag = "settings-sync-advanced"
 const val SettingsNearbySendTag = "settings-nearby-send"
 const val SettingsNearbyReceiveTag = "settings-nearby-receive"
 const val SettingsNearbyRenameTag = "settings-nearby-rename"
+const val SettingsFinePrintTag = "settings-fineprint"
 
 /**
  * Settings, and the only place in the app that can reach the network.
@@ -497,24 +498,43 @@ fun SettingsScreen(
                     Icon(Icons.Default.OpenInNew, contentDescription = null, modifier = Modifier.size(16.dp))
                 }
 
-                Text(
-                    stringResource(R.string.settings_permissions_title).uppercase(),
-                    style = FTreeText.sectionLabel,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(top = 16.dp),
-                )
-                Text(
-                    stringResource(R.string.settings_permissions_body),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(top = 4.dp),
-                )
-                Text(
-                    stringResource(R.string.about_fonts),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(top = 16.dp),
-                )
+                /*
+                 * The permissions paragraph and the licence notice are long and are read once, if
+                 * ever, so they sit behind a row of their own rather than lengthening the page.
+                 */
+                var showFinePrint by remember { mutableStateOf(false) }
+                TextButton(
+                    onClick = { showFinePrint = !showFinePrint },
+                    modifier = Modifier.padding(top = 4.dp).testTag(SettingsFinePrintTag),
+                ) {
+                    Text(
+                        stringResource(
+                            if (showFinePrint) R.string.settings_fineprint_hide else R.string.settings_fineprint_show,
+                        ),
+                    )
+                }
+                AnimatedVisibility(visible = showFinePrint) {
+                    Column {
+                        Text(
+                            stringResource(R.string.settings_permissions_title).uppercase(),
+                            style = FTreeText.sectionLabel,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(top = 8.dp),
+                        )
+                        Text(
+                            stringResource(R.string.settings_permissions_body),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(top = 4.dp),
+                        )
+                        Text(
+                            stringResource(R.string.about_fonts),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(top = 16.dp),
+                        )
+                    }
+                }
             }
         }
 

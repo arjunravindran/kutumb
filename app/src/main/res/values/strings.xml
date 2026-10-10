@@ -476,6 +476,8 @@
     <string name="settings_beta_dialog_export">Export your tree before you install one.</string>
     <string name="settings_beta_dialog_confirm">Offer me betas</string>
     <string name="settings_beta_dialog_cancel">Not now</string>
+    <string name="settings_fineprint_show">Permissions and licences</string>
+    <string name="settings_fineprint_hide">Hide permissions and licences</string>
     <string name="settings_permissions_title">Permissions</string>
     <string name="settings_permissions_body">Six that never ask, and two that do. Two are for going online: internet access, used to ask GitHub about releases when you turn on update checks, to fetch a book template when you ask for one, and to reach the relay server used for family sync if you turn it on \u2014 and permission to install an update. Three are for nearby sharing: to see the Wi-Fi network, to hear other devices on it, and to check a connection exists. One is for birthday reminders and family sync: to set the morning\'s reminder, and the sync schedule, again after the phone restarts. The two that ask are the camera, only if you choose to scan a code, and you can always type instead; and notifications, only when you turn birthday reminders on. Nothing about your family goes with either request, and nothing leaves the device unless you choose it: a tree sent to a device you can see on your Wi-Fi, an update check you turned on, or encrypted family messages to a relay server, once you turn family sync on.</string>
 
