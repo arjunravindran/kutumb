@@ -72,8 +72,14 @@ import com.vibethroughcode.ftree.ui.nearby.QrPanel
 import com.vibethroughcode.ftree.ui.nearby.ScanAction
 import com.vibethroughcode.ftree.ui.nearby.NearbyViewModel
 import com.vibethroughcode.ftree.kutumb.treesync.PendingInvite
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import com.vibethroughcode.ftree.ui.more.JoinInvitationDialog
 import com.vibethroughcode.ftree.ui.more.MoreScreen
+import com.vibethroughcode.ftree.ui.welcome.WelcomeAction
+import com.vibethroughcode.ftree.ui.welcome.WelcomePolicy
+import com.vibethroughcode.ftree.ui.welcome.WelcomePreferences
+import com.vibethroughcode.ftree.ui.welcome.WelcomeScreen
 import com.vibethroughcode.ftree.ui.people.PeopleScreen
 import com.vibethroughcode.ftree.ui.person.PersonDetailScreen
 import com.vibethroughcode.ftree.ui.person.PersonEditScreen
@@ -282,6 +288,26 @@ fun FTreeApp(
     val invitations by (LocalContext.current.applicationContext as FTreeApplication)
         .container.invitations.pending.collectAsStateWithLifecycle()
     var answering by remember { mutableStateOf<PendingInvite?>(null) }
+
+    // Said once, to somebody new with an empty tree. An updated install that already has people is marked as
+    // welcomed without being shown it. See WelcomePolicy.
+    val welcomeApp = LocalContext.current.applicationContext as FTreeApplication
+    val welcome = remember { WelcomePreferences(welcomeApp) }
+    var showWelcome by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        val stored = welcome.stored()
+        if (stored == true) return@LaunchedEffect
+        val people = welcomeApp.container.familyRepository.allPeople().size
+        // Written on the main thread, so the screen is sure to pick it up.
+        withContext(Dispatchers.Main) {
+            when (WelcomePolicy.decide(stored, WelcomePreferences.runningUnderTest(), people)) {
+                WelcomeAction.SHOW -> showWelcome = true
+                WelcomeAction.MARK_SEEN -> welcome.markSeen()
+                WelcomeAction.NOTHING -> Unit
+            }
+        }
+    }
+    if (showWelcome) WelcomeScreen(onStart = { welcome.markSeen(); showWelcome = false })
     answering?.let { invite ->
         // The invitation may have been answered somewhere else meanwhile; only one still waiting is asked about.
         if (invitations.any { it.tree == invite.tree }) JoinInvitationDialog(invite, onDismiss = { answering = null })
