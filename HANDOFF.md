@@ -22,7 +22,7 @@ Design: `docs/kutumb/TREE-SYNC.md` (read it before touching this). Built and tes
 3. **Wire**: `TreeSyncHandler` accepts edits only from contacts **paired in person**, for **this** shared tree, who are **members**; `TreeSyncPublisher` sends in batches of 100 through the existing outbox; `shareTreeWith` adds a member and sends the whole history. `AppContainer` starts it only when a tree is shared.
 4. **Sharing screen** (`ui/settings/TreeSharingDialog.kt`, rules in `kutumb/treesync/TreeSharing.kt`): a Sharing button on the open tree's row in Settings > Your trees. It switches sharing on, lists contacts paired in person with a switch each (on = member and is sent the tree), shows "N changes waiting" and a note when sync is off. Only the open tree can be managed (sharing lives in its own database). Tested on the JVM and on the emulator against a throwaway tree.
 
-**Local commits not pushed (8):** `e4c4358` flush after adding a member and log why a relay connect failed; `cb84c51` first-screen steps; `7bf0b45` three tabs and default relay; `5b4fce0` permissions text; `02ccb50` and `7b23033` the join proposal; `4090633` tab-switching fix; `2f233b1` the `tree-invite` / `tree-join` codec. Nothing has been pushed (see A1).
+**Pushed 2026-10-09:** the cleaned history was force-pushed to `main` (`e7f3102` to `4237ddb`), the repo is public, and three later commits followed: the Settings fold-away row, the plain-words permissions text, and plain words for export, import and sharing. Nothing local is unpushed except what is committed after `e1802ca`.
 
 Not built: **phase 4** (start a big shared tree from a nearby snapshot with the same ids, instead of sending the whole history over the relays; catch-up for a phone that has been away), **phase 5** (photos), a way to **stop sharing** a tree altogether (members can be removed one by one), and the review inbox screen (`TreeSyncCoordinator.inbox()` exists).
 
@@ -38,8 +38,8 @@ Not built: **phase 4** (start a big shared tree from a nearby snapshot with the 
 
 ## NOT verified
 
-- **A clean full instrumented run since the tab change.** The last full run (21 minutes) ended `BUILD FAILED` with two `NetworkPairingTest` failures (an activity stuck "PAUSED" at teardown, and one with no message) and counted only 202 of about 276 tests, so it may have been cut short. `NetworkPairingTest` passes alone. Treat them as load flakes until a full run says otherwise.
-- **Tree sync inside the R8 build:** the release build was only launched; the seeder is debug-only, so the new `TreeSync*` entities and the enums stored by name (`HeldReason`, `PersonField`) were not exercised under R8.
+- **Full instrumented run (2026-10-09, emulator):** 276 tests counted, 275 pass. `NetworkTreeLinkTest.aTrustedPersonsSheetLeadsToTheirRelationshipScreen` timed out once waiting for a sheet and passes alone (2 of 2), so treat it as a load flake. That run was before the Settings text changes; `TreeSharingFlowTest` and `WholeTreeAndUpdatesTest` were re-run after them and pass.
+- **Tree sync inside the R8 build:** not run, but read through: `PersonField` crosses the wire by its explicit `wire` string, the operation log is JSON from a hand-written codec (no kotlinx-serialization), and `HeldReason` is used only in the pure core and is never stored, so no keep rule is needed for either. The Room entities are plain columns. The seeder is debug-only, so a release run could not exercise sync anyway.
 - **Nothing was looked at on the real phones this session**, and the new text sizes were seen only on the emulator.
 
 The full list, with what to do about each, is under **C. Verification gaps** in "What's left". In short: tree sync has had one real-device run and nothing beyond a single rename; the whole instrumented suite has not been re-run since the tree-sync wiring; the web viewer has not been tried on an iPad; the self-hosted fonts have not been looked at in a browser; the R8 release build and the Play build have not been run since the rename; and several older behaviours (the "Coming up" widget, a message arriving with the app closed, recovery, Doze over days) remain unseen. The debug build **has** been installed and run on a Pixel 7 and a Galaxy S22+ (2026-10-08).
@@ -74,8 +74,8 @@ Grouped by what each item is waiting on. Within a group, roughly in the order to
 
 ### A. Waiting on the owner (nothing the assistant can do alone)
 
-1. **Publish the cleaned git history.** The serials and business notes were removed from all 14 commits that carried them (local branch `kutumb`), but the force-push was refused by the permission check, so **GitHub still has the old history**. Run it yourself: `git push --force-with-lease=main:e7f310289746226aeca8d6947a1c94103eaa96fe origin kutumb:main` (it carries every local commit; the lease makes it fail safely if `main` moved). Then delete the local safety branch (`git branch -D backup-before-history-rewrite`; it still holds the old history). GitHub may keep old commits reachable by URL for a while; contact GitHub Support to purge them before going public if that matters. Until this is done, **do not push anything else** (a normal push is rejected).
-2. **Make the repo public** (Settings > Danger Zone) once item 1 is done. The tip is already clean: no secrets, keystores, serial numbers or business notes in tracked files. Public repos also get free Actions minutes.
+1. ~~**Publish the cleaned git history.**~~ *Done 2026-10-09; the safety branch is deleted.* GitHub may keep old commits reachable by URL for a while; contact GitHub Support to purge them if that matters.
+2. ~~**Make the repo public.**~~ *Done 2026-10-09.*
 3. **Read the next GitHub Actions run** (https://github.com/arjunravindran/kutumb/actions) and paste any red step's log. The assistant cannot read Actions logs. One real failure was fixed that way; the emulator job in `android-ci.yml` and the desktop packaging jobs are the ones not reproduced locally.
 4. **Try the web viewer on the iPad**: install from https://kutumb.arjun.contact/playground/, open a `.ftree`, close the app and reopen it, and see whether Safari greys out `.ftree` files in the picker (if it does, widen the `accept` list). Also glance at the live pages to check the self-hosted fonts.
 5. **Free memory before the next emulator run.** A full instrumented run was killed once for low memory.
@@ -107,7 +107,7 @@ Design and status: `docs/kutumb/TREE-SYNC.md`. What works today is in "Tree sync
 
 ### C. Verification gaps (run these before trusting it)
 
-- **Settings is far too long and dense for the intended readers** (one scroll, a very long permissions paragraph, the licence text, many switches). Split it into a few short sections with plain headings, and move the permissions and licence text behind an "About" row. Not started. Other plain-language work still open: wording of the Sharing and import/export screens ("paired in person", ".ftree file"), and a short first-run welcome if the three steps on the empty screen prove not enough.
+- **Settings:** the permissions paragraph and the licence text now sit behind a closed **Permissions and licences** row, the permissions are one short line each, and the export, import and sharing wording is in plain words (2026-10-09). Still to do: the rest of the page is one long scroll of sections. Collapsing them would hide controls the instrumented tests tap by tag, and a new sub-screen needs an issue first (CLAUDE.md), so decide that before splitting further. Other plain-language work still open: a short first-run welcome if the three steps on the empty screen prove not enough.
 
 - **Tree sync on real phones, beyond one rename:** deleting a person on one phone (the other should lose them, and an edit made after the delete should land in the inbox), edits to the same person on both phones at once, a phone that was offline while edits happened, restarting the app mid-sync, adding a child or a relationship, a third phone, and a tree with photographs.
 - **The whole instrumented suite** has not been re-run since `AppContainer` gained the tree-sync wiring: `ANDROID_SERIAL=emulator-5554 ./gradlew connectedDebugAndroidTest` (about 14 minutes). Then `./gradlew build` and a **release (R8) build** (CLAUDE.md: R8 once broke the app, and the rename and the new Room entities have not been through it). `app/proguard-rules.pro` may need keep rules for the new `TreeSync*` entities and for enums that are stored or sent by name (`HeldReason`, `PersonField`).
@@ -132,8 +132,8 @@ Design and status: `docs/kutumb/TREE-SYNC.md`. What works today is in "Tree sync
 
 ## Suggested order
 
-1. Run the force-push (A1), then make the repo public (A2) when ready. Eight local commits wait behind it.
-2. Get one clean full instrumented run (free memory first; see Gotchas) and a release build that exercises tree sync (a keep-rule check for `TreeSync*` entities and `HeldReason` / `PersonField`).
+1. ~~Run the force-push, then make the repo public~~ (done).
+2. ~~Get one clean full instrumented run~~ (done, one flake; see Verified). A release build that exercises sync is not possible without a release seeder.
 3. Look at the app on a phone (A7), then run the real-phone checks in C (delete, concurrent edits, offline, restart).
 4. Build the join step's app side (B1), then the larger-tree offer, stop sharing (B4) and the review inbox (B5).
 5. Simplify Settings (C, first item).
