@@ -389,9 +389,9 @@
     <string name="update_failed_install_not_permitted">Android has not been given permission to install apps from Kutumb.</string>
 
     <string name="settings_export">Export your tree</string>
-    <string name="settings_export_body">Writes everyone, every connection and every photo to a single .ftree file.</string>
+    <string name="settings_export_body">Saves everyone, every connection and every photo in one file. Keep it as a backup, or send it to a relative.</string>
     <string name="settings_import">Import a tree</string>
-    <string name="settings_import_body">Merges another .ftree into yours. Nothing of yours is replaced, and a backup is written first.</string>
+    <string name="settings_import_body">Adds the people from a file you were sent to your tree. Nothing of yours is replaced, and a backup is saved first.</string>
     <string name="settings_version">Version %1$s</string>
     <string name="settings_source">Source and releases</string>
 
@@ -551,10 +551,10 @@
     <string name="trees_error_other">That did not work</string>
     <string name="sharing_button">Sharing</string>
     <string name="sharing_title">Sharing %1$s</string>
-    <string name="sharing_off_body">Share this tree with relatives you have paired with in person. Once it is shared, a change one of you makes appears on the other phones. Nothing is shared with anyone until you choose them below, and it goes through the relays you picked under Family sync, encrypted.</string>
+    <string name="sharing_off_body">Share this tree with relatives you have met in person and added under Network. Once it is shared, a change any of you makes appears on the others\' phones. Nobody gets it until you choose them below. It travels over the internet, scrambled so only you and they can read it.</string>
     <string name="sharing_turn_on">Share this tree</string>
     <string name="sharing_on_body">This tree is shared. Switch on the people who may see it and change it. A new person is sent the whole tree. Anyone you switch off stops receiving changes, but keeps the copy they already have.</string>
-    <string name="sharing_nobody">Nobody to share with yet. Only people you paired with in person can be added; pair with a relative first.</string>
+    <string name="sharing_nobody">Nobody to share with yet. Meet a relative in person and add them under Network (in More) first.</string>
     <string name="sharing_waiting">%1$d changes waiting to be sent</string>
     <string name="sharing_sync_off">Family sync is off, so nothing is sent yet. Changes are saved here and go when you switch it on.</string>
     <string name="sharing_done">Done</string>
