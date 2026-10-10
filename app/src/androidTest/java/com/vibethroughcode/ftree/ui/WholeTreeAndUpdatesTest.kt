@@ -1,5 +1,6 @@
 package com.vibethroughcode.ftree.ui
 
+import com.vibethroughcode.ftree.ui.settings.SettingsPage
 import com.vibethroughcode.ftree.ui.more.MoreSettingsTag
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsOff
@@ -171,6 +172,7 @@ class WholeTreeAndUpdatesTest {
 
         rule.onNodeWithTag(NavMoreTag).performClick()
         rule.onNodeWithTag(MoreSettingsTag).performClick()
+        rule.onNodeWithTag(SettingsPage.UPDATES.tag).performClick()
         rule.onNodeWithText("Check for updates").assertIsDisplayed()
         rule.onNodeWithTag(SettingsUpdatesToggleTag).assertIsOff()
 
@@ -189,6 +191,7 @@ class WholeTreeAndUpdatesTest {
     fun transferMovedToSettingsAndIsReachableThere() {
         rule.onNodeWithTag(NavMoreTag).performClick()
         rule.onNodeWithTag(MoreSettingsTag).performClick()
+        rule.onNodeWithTag(SettingsPage.DATA.tag).performClick()
         rule.onNodeWithText("Export your tree").performScrollTo().assertIsDisplayed()
         rule.onNodeWithText("Import a tree").performScrollTo().assertIsDisplayed()
     }

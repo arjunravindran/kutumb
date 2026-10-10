@@ -1,5 +1,6 @@
 package com.vibethroughcode.ftree.ui
 
+import com.vibethroughcode.ftree.ui.settings.SettingsPage
 import com.vibethroughcode.ftree.ui.more.MoreSettingsTag
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasAnyAncestor
@@ -98,6 +99,7 @@ class HindiRelationTest {
     private fun chooseLanguage(tag: String) {
         rule.onNodeWithTag(NavMoreTag).performClick()
         rule.onNodeWithTag(MoreSettingsTag).performClick()
+        rule.onNodeWithTag(SettingsPage.NAMES.tag).performClick()
         rule.waitUntil(5_000) { rule.onAllNodesWithTag(tag).fetchSemanticsNodes().isNotEmpty() }
         rule.onNodeWithTag(tag).performClick()
         rule.onNodeWithTag(NavTreeTag).performClick()

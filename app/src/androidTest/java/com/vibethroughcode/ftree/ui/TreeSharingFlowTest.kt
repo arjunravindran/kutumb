@@ -1,5 +1,6 @@
 package com.vibethroughcode.ftree.ui
 
+import com.vibethroughcode.ftree.ui.settings.SettingsPage
 import com.vibethroughcode.ftree.ui.more.MoreSettingsTag
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
@@ -65,6 +66,7 @@ class TreeSharingFlowTest {
         compose.waitUntil(8_000) { compose.onAllNodesWithTag(NavMoreTag).fetchSemanticsNodes().isNotEmpty() }
         compose.onNodeWithTag(NavMoreTag).performClick()
         compose.onNodeWithTag(MoreSettingsTag).performClick()
+        compose.onNodeWithTag(SettingsPage.TREES.tag).performClick()
         compose.onNodeWithTag(SharingButtonTag).performScrollTo().performClick()
     }
 

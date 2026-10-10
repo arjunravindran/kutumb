@@ -1,5 +1,6 @@
 package com.vibethroughcode.ftree.ui
 
+import com.vibethroughcode.ftree.ui.settings.SettingsPage
 import com.vibethroughcode.ftree.ui.more.MoreSettingsTag
 import android.graphics.Bitmap
 import androidx.compose.ui.test.assertIsDisplayed
@@ -69,6 +70,7 @@ class AvatarsAndPhotosTest {
 
         rule.onNodeWithTag(NavMoreTag).performClick()
         rule.onNodeWithTag(MoreSettingsTag).performClick()
+        rule.onNodeWithTag(SettingsPage.NAMES.tag).performClick()
         rule.waitUntil(5_000) {
             rule.onAllNodesWithTag(SettingsPhotosToggleTag).fetchSemanticsNodes().isNotEmpty()
         }
@@ -99,6 +101,7 @@ class AvatarsAndPhotosTest {
 
         rule.onNodeWithTag(NavMoreTag).performClick()
         rule.onNodeWithTag(MoreSettingsTag).performClick()
+        rule.onNodeWithTag(SettingsPage.NAMES.tag).performClick()
         rule.waitUntil(5_000) {
             rule.onAllNodesWithTag(SettingsPhotosToggleTag).fetchSemanticsNodes().isNotEmpty()
         }

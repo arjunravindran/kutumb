@@ -6,6 +6,7 @@ import androidx.compose.ui.test.getBoundsInRoot
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -15,6 +16,7 @@ import com.vibethroughcode.ftree.FTreeApplication
 import com.vibethroughcode.ftree.data.Person
 import com.vibethroughcode.ftree.ui.people.PeopleCountTag
 import com.vibethroughcode.ftree.ui.people.PeopleScreen
+import com.vibethroughcode.ftree.ui.settings.SettingsPage
 import com.vibethroughcode.ftree.ui.settings.SettingsScreen
 import com.vibethroughcode.ftree.ui.theme.FTreeTheme
 import kotlinx.coroutines.runBlocking
@@ -125,6 +127,7 @@ class WideWindowLayoutTest {
             }
         }
 
+        rule.onNodeWithTag(SettingsPage.NAMES.tag).performClick()
         val words = rule.onNodeWithText("FAMILY WORDS").getBoundsInRoot()
         val chart = rule.onNodeWithText("CHART").getBoundsInRoot()
 

@@ -2,7 +2,9 @@ package com.vibethroughcode.ftree.ui.settings
 
 import android.content.Intent
 import android.net.Uri
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Box
@@ -11,6 +13,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -19,6 +22,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.CallReceived
 import androidx.compose.material.icons.filled.CloudDownload
 import androidx.compose.material.icons.filled.Download
@@ -33,6 +38,8 @@ import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
@@ -47,9 +54,11 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -89,6 +98,7 @@ const val SettingsExportTag = "settings-export"
 const val SettingsImportTag = "settings-import"
 const val SettingsBetaToggleTag = "settings-beta-toggle"
 const val SettingsTemplatesToggleTag = "settings-templates-toggle"
+const val SettingsBackTag = "settings-back"
 
 /**
  * The one sentence a catalogue check earns (#214).
@@ -117,7 +127,26 @@ const val SettingsNearbyRenameTag = "settings-nearby-rename"
 const val SettingsFinePrintTag = "settings-fineprint"
 
 /**
+ * The places Settings is divided into. The first screen is a plain list of these, as big rows like the
+ * ones under More, because one page of about ten sections is too much for the readers this is made for.
+ * Each page is the same controls as before, moved, with the same tags.
+ */
+enum class SettingsPage(val title: Int, val body: Int, val tag: String) {
+    NAMES(R.string.settings_hub_names, R.string.settings_hub_names_body, "settings-page-names"),
+    REMINDERS(R.string.settings_hub_reminders, R.string.settings_hub_reminders_body, "settings-page-reminders"),
+    UPDATES(R.string.settings_hub_updates, R.string.settings_hub_updates_body, "settings-page-updates"),
+    DATA(R.string.settings_hub_data, R.string.settings_hub_data_body, "settings-page-data"),
+    NEARBY(R.string.settings_hub_nearby, R.string.settings_hub_nearby_body, "settings-page-nearby"),
+    TREES(R.string.settings_hub_trees, R.string.settings_hub_trees_body, "settings-page-trees"),
+    SYNC(R.string.settings_hub_sync, R.string.settings_hub_sync_body, "settings-page-sync"),
+    ABOUT(R.string.settings_hub_about, R.string.settings_hub_about_body, "settings-page-about"),
+}
+
+/**
  * Settings, and the only place in the app that can reach the network.
+ *
+ * It opens on a list of [SettingsPage]s and shows one page at a time; Back, or the arrow, returns to the
+ * list. That is state inside this screen, not a navigation destination, so nothing outside it changes.
  *
  * The updater is written to be read as much as used: the switch says plainly that it is the one
  * networked thing here, and that an update installs *over* this copy so the family is carried
@@ -153,18 +182,27 @@ fun SettingsScreen(
     val trustedDevices by viewModel.trustedDevices.collectAsStateWithLifecycle()
     var renaming by remember { mutableStateOf(false) }
 
+    var page by rememberSaveable { mutableStateOf<SettingsPage?>(null) }
+    // The birthday bell on People sends the reader straight to the reminders.
+    LaunchedEffect(focusReminders) { if (focusReminders) page = SettingsPage.REMINDERS }
+    BackHandler(enabled = page != null) { page = null }
+    val shown = page
+
     Scaffold(
         modifier = modifier,
         topBar = {
-            CenterAlignedTopAppBar(title = { Text(stringResource(R.string.settings_title)) })
+            CenterAlignedTopAppBar(
+                title = { Text(stringResource(shown?.title ?: R.string.settings_title)) },
+                navigationIcon = {
+                    if (shown != null) {
+                        IconButton(onClick = { page = null }, modifier = Modifier.testTag(SettingsBackTag)) {
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.settings_back))
+                        }
+                    }
+                },
+            )
         },
     ) { padding ->
-    /*
-     * Settings are not one long thing; they are seven short ones, and on a window wide enough for
-     * two they stand beside each other rather than leave half of it empty and make the reader
-     * scroll past the emptiness. The scroll stays outside the columns, so however many there are
-     * the page is still one thing that scrolls.
-     */
     Column(
         modifier = Modifier
             .fillMaxHeight()
@@ -172,49 +210,61 @@ fun SettingsScreen(
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 24.dp),
     ) {
-        ReadingColumns {
-            Column {
-                SectionRule(stringResource(R.string.settings_section_words))
+        when (shown) {
+            null -> SettingsHub(onOpen = { page = it })
 
-                Text(
-                    stringResource(R.string.settings_words_body),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(top = 4.dp, bottom = 12.dp),
-                )
-                SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
-                    SegmentedButton(
-                        selected = kinshipLanguage == KinshipLanguage.ENGLISH,
-                        onClick = { viewModel.setKinshipLanguage(KinshipLanguage.ENGLISH) },
-                        shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2),
-                        modifier = Modifier.testTag(SettingsWordsEnglishTag),
-                    ) { Text(stringResource(R.string.settings_words_english)) }
+            SettingsPage.NAMES -> {
+                /*
+                 * Two short sections that stand beside each other on a window wide enough for two, rather
+                 * than leave half of it empty. The scroll stays outside the columns.
+                 */
+                ReadingColumns {
+                    Column {
+                        SectionRule(stringResource(R.string.settings_section_words))
 
-                    SegmentedButton(
-                        selected = kinshipLanguage == KinshipLanguage.HINDI,
-                        onClick = { viewModel.setKinshipLanguage(KinshipLanguage.HINDI) },
-                        shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2),
-                        modifier = Modifier.testTag(SettingsWordsHindiTag),
-                    ) { Text(stringResource(R.string.settings_words_hindi)) }
+                        Text(
+                            stringResource(R.string.settings_words_body),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(top = 4.dp, bottom = 12.dp),
+                        )
+                        SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
+                            SegmentedButton(
+                                selected = kinshipLanguage == KinshipLanguage.ENGLISH,
+                                onClick = { viewModel.setKinshipLanguage(KinshipLanguage.ENGLISH) },
+                                shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2),
+                                modifier = Modifier.testTag(SettingsWordsEnglishTag),
+                            ) { Text(stringResource(R.string.settings_words_english)) }
+
+                            SegmentedButton(
+                                selected = kinshipLanguage == KinshipLanguage.HINDI,
+                                onClick = { viewModel.setKinshipLanguage(KinshipLanguage.HINDI) },
+                                shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2),
+                                modifier = Modifier.testTag(SettingsWordsHindiTag),
+                            ) { Text(stringResource(R.string.settings_words_hindi)) }
+                        }
+                    }
+
+                    Column {
+                        SectionRule(stringResource(R.string.settings_section_chart))
+
+                        SettingsSwitch(
+                            title = stringResource(R.string.settings_photos_toggle),
+                            body = stringResource(R.string.settings_photos_explainer),
+                            checked = photosInChart,
+                            onCheckedChange = viewModel::setPhotosInChart,
+                            tag = SettingsPhotosToggleTag,
+                        )
+                    }
                 }
             }
 
-            Column {
-                SectionRule(stringResource(R.string.settings_section_chart))
-
-                SettingsSwitch(
-                    title = stringResource(R.string.settings_photos_toggle),
-                    body = stringResource(R.string.settings_photos_explainer),
-                    checked = photosInChart,
-                    onCheckedChange = viewModel::setPhotosInChart,
-                    tag = SettingsPhotosToggleTag,
-                )
+            SettingsPage.REMINDERS -> Column(Modifier.widthIn(max = READABLE_MEASURE)) {
+                ReminderSettings(viewModel, focus = focusReminders, onFocused = onRemindersFocused)
             }
 
-            ReminderSettings(viewModel, focus = focusReminders, onFocused = onRemindersFocused)
-
             // Absent from the Play build: Google Play does not allow an app to update itself.
-            if (BuildConfig.SELF_UPDATE) Column {
+            SettingsPage.UPDATES -> Column(Modifier.widthIn(max = READABLE_MEASURE)) {
                 SectionRule(stringResource(R.string.settings_section_updates))
 
                 SettingsSwitch(
@@ -261,9 +311,32 @@ fun SettingsScreen(
                         onDismiss = viewModel::dismissFailure,
                     )
                 }
+
+                /*
+                 * Last on the page, and meant to be.
+                 *
+                 * A beta is an unfinished build of an app somebody keeps their family in. Putting it
+                 * under the ordinary updates is the honest placement: it is for people who came looking
+                 * for it, and nobody should meet it while turning ordinary updates on.
+                 */
+                SectionRule(stringResource(R.string.settings_section_beta))
+                SettingsSwitch(
+                    title = stringResource(R.string.settings_beta_toggle),
+                    body = stringResource(
+                        if (enabled) R.string.settings_beta_explainer
+                        else R.string.settings_beta_explainer_updates_off
+                    ),
+                    checked = betaChannel,
+                    enabled = enabled,
+                    onCheckedChange = { wanted ->
+                        // Turning it off is not a decision worth interrupting; turning it on is.
+                        if (wanted) confirmingBeta = true else viewModel.setBetaChannel(false)
+                    },
+                    tag = SettingsBetaToggleTag,
+                )
             }
 
-            Column {
+            SettingsPage.DATA -> Column(Modifier.widthIn(max = READABLE_MEASURE)) {
                 SectionRule(stringResource(R.string.settings_section_data))
 
                 SettingsAction(
@@ -283,12 +356,12 @@ fun SettingsScreen(
             }
 
             /*
-             * After "Your data", because export, import and this are three answers to one question:
-             * how does a tree get from here to there. Off until switched on, and even then nothing
-             * is announced until one of the two screens is open — there is no "always visible" and
-             * no "accept without asking", and both absences are the design.
+             * Next to the data: export, import and this are three answers to one question: how does a
+             * tree get from here to there. Off until switched on, and even then nothing is announced
+             * until one of the two screens is open — there is no "always visible" and no "accept
+             * without asking", and both absences are the design.
              */
-            Column {
+            SettingsPage.NEARBY -> Column(Modifier.widthIn(max = READABLE_MEASURE)) {
                 SectionRule(stringResource(R.string.settings_section_nearby))
 
                 SettingsSwitch(
@@ -382,13 +455,16 @@ fun SettingsScreen(
                 }
             }
 
-            TreesSettings()
+            SettingsPage.TREES -> Column(Modifier.widthIn(max = READABLE_MEASURE)) {
+                TreesSettings()
+            }
 
             /*
              * Off until switched on. Once on it uses the default relay unless the person chose others,
              * which they can do under Advanced. Messages are end-to-end encrypted before they leave the phone.
+             * The note about new messages is here because messages travel by this.
              */
-            Column {
+            SettingsPage.SYNC -> Column(Modifier.widthIn(max = READABLE_MEASURE)) {
                 SectionRule(stringResource(R.string.settings_section_sync))
 
                 SettingsSwitch(
@@ -466,11 +542,11 @@ fun SettingsScreen(
                         )
                     }
                 }
+
+                MessageNotificationSettings()
             }
 
-            MessageNotificationSettings()
-
-            Column {
+            SettingsPage.ABOUT -> Column(Modifier.widthIn(max = READABLE_MEASURE)) {
                 SectionRule(stringResource(R.string.settings_section_about))
 
                 Text(
@@ -538,34 +614,6 @@ fun SettingsScreen(
             }
         }
 
-        /*
-         * Last on the page, and meant to be — which is why it is not one of the columns.
-         *
-         * A beta is an unfinished build of an app somebody keeps their family in. Putting it under
-         * the licence notice rather than beside "Check for updates" is the honest placement: it is
-         * for people who came looking for it, and nobody should meet it while turning ordinary
-         * updates on. Inside the columns it would go wherever there was room, and on a wide window
-         * that could be directly beside the updates switch, so it sits below them all instead and
-         * keeps its own measure.
-         */
-        Column(Modifier.widthIn(max = READABLE_MEASURE)) {
-            SectionRule(stringResource(R.string.settings_section_beta))
-            SettingsSwitch(
-                title = stringResource(R.string.settings_beta_toggle),
-                body = stringResource(
-                    if (enabled) R.string.settings_beta_explainer
-                    else R.string.settings_beta_explainer_updates_off
-                ),
-                checked = betaChannel,
-                enabled = enabled,
-                onCheckedChange = { wanted ->
-                    // Turning it off is not a decision worth interrupting; turning it on is.
-                    if (wanted) confirmingBeta = true else viewModel.setBetaChannel(false)
-                },
-                tag = SettingsBetaToggleTag,
-            )
-        }
-
         Spacer(Modifier.height(40.dp))
     }
     }
@@ -590,6 +638,42 @@ fun SettingsScreen(
                 viewModel.setBetaChannel(true)
             },
         )
+    }
+}
+
+/** The first thing Settings shows: where to go, as big plain rows. */
+@Composable
+private fun SettingsHub(onOpen: (SettingsPage) -> Unit) {
+    Column(Modifier.widthIn(max = READABLE_MEASURE)) {
+        SettingsPage.entries
+            // The Play build cannot update itself, so it has no updates page to offer.
+            .filter { it != SettingsPage.UPDATES || BuildConfig.SELF_UPDATE }
+            .forEach { entry ->
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = 72.dp)
+                        .clickable { onOpen(entry) }
+                        .padding(vertical = 12.dp)
+                        .testTag(entry.tag),
+                ) {
+                    Column(Modifier.weight(1f)) {
+                        Text(stringResource(entry.title), style = MaterialTheme.typography.titleMedium)
+                        Text(
+                            stringResource(entry.body),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                    Icon(
+                        Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                HorizontalDivider()
+            }
     }
 }
 

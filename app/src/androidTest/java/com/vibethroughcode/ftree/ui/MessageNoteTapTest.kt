@@ -1,5 +1,6 @@
 package com.vibethroughcode.ftree.ui
 
+import com.vibethroughcode.ftree.ui.settings.SettingsPage
 import com.vibethroughcode.ftree.ui.more.MoreSettingsTag
 import android.content.Intent
 import androidx.compose.ui.test.assertIsDisplayed
@@ -86,6 +87,7 @@ class MessageNoteTapTest {
         compose.waitUntil(5_000) { compose.onAllNodesWithTag(NavMoreTag).fetchSemanticsNodes().isNotEmpty() }
         compose.onNodeWithTag(NavMoreTag).performClick()
         compose.onNodeWithTag(MoreSettingsTag).performClick()
+        compose.onNodeWithTag(SettingsPage.SYNC.tag).performClick()
         compose.waitUntil(5_000) { compose.onAllNodesWithTag(SettingsMessageNotesToggleTag).fetchSemanticsNodes().isNotEmpty() }
 
         // Notifications are already allowed for this run, so turning it on needs no dialog.
