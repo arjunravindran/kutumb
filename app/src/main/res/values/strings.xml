@@ -557,6 +557,10 @@
     <string name="sharing_nobody">Nobody to share with yet. Meet a relative in person and add them under Network (in More) first.</string>
     <string name="sharing_waiting">%1$d changes waiting to be sent</string>
     <string name="sharing_sync_off">Family sync is off, so nothing is sent yet. Changes are saved here and go when you switch it on.</string>
+    <string name="sharing_stop">Stop sharing this tree</string>
+    <string name="sharing_stop_title">Stop sharing %1$s?</string>
+    <string name="sharing_stop_body">This phone will stop sending and receiving changes for this tree. The tree stays exactly as it is here. Relatives who already have it keep their copy; stopping does not take anything back from them.</string>
+    <string name="sharing_stop_confirm">Stop sharing</string>
     <string name="sharing_done">Done</string>
     <string name="sharing_loading">One moment…</string>
     <string name="settings_section_sync">Family sync over the internet</string>

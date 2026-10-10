@@ -38,6 +38,8 @@ import kotlinx.coroutines.launch
 const val SharingButtonTag = "settings-trees-sharing"
 const val SharingTurnOnTag = "sharing-turn-on"
 const val SharingMemberTagPrefix = "sharing-member-"
+const val SharingStopTag = "sharing-stop"
+const val SharingStopConfirmTag = "sharing-stop-confirm"
 
 /**
  * Who the open tree is shared with. Everything that decides anything lives in [TreeSharing]; this only
@@ -64,6 +66,7 @@ fun TreeSharingDialog(treeName: String, onDismiss: () -> Unit) {
     var state by remember { mutableStateOf<SharingState?>(null) }
     var contacts by remember { mutableStateOf<Map<String, TrustedContact>>(emptyMap()) }
     var names by remember { mutableStateOf<Map<String, String>>(emptyMap()) }
+    var confirmingStop by remember { mutableStateOf(false) }
 
     suspend fun reload() {
         val next = sharing.state()
@@ -139,10 +142,37 @@ fun TreeSharingDialog(treeName: String, onDismiss: () -> Unit) {
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         }
+                        TextButton(
+                            onClick = { confirmingStop = true },
+                            modifier = Modifier.testTag(SharingStopTag),
+                        ) { Text(stringResource(R.string.sharing_stop), color = MaterialTheme.colorScheme.error) }
                     }
                 }
             }
         },
         confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.sharing_done)) } },
     )
+
+    if (confirmingStop) {
+        AlertDialog(
+            onDismissRequest = { confirmingStop = false },
+            title = { Text(stringResource(R.string.sharing_stop_title, treeName)) },
+            text = { Text(stringResource(R.string.sharing_stop_body), style = MaterialTheme.typography.bodyMedium) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        confirmingStop = false
+                        scope.launch {
+                            sharing.turnOff()
+                            reload()
+                        }
+                    },
+                    modifier = Modifier.testTag(SharingStopConfirmTag),
+                ) { Text(stringResource(R.string.sharing_stop_confirm)) }
+            },
+            dismissButton = {
+                TextButton(onClick = { confirmingStop = false }) { Text(stringResource(R.string.trees_cancel)) }
+            },
+        )
+    }
 }

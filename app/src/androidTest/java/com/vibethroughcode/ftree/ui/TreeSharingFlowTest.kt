@@ -23,6 +23,8 @@ import com.vibethroughcode.ftree.kutumb.trust.PairingMethod
 import com.vibethroughcode.ftree.kutumb.trust.TrustedContact
 import com.vibethroughcode.ftree.ui.settings.SharingButtonTag
 import com.vibethroughcode.ftree.ui.settings.SharingMemberTagPrefix
+import com.vibethroughcode.ftree.ui.settings.SharingStopConfirmTag
+import com.vibethroughcode.ftree.ui.settings.SharingStopTag
 import com.vibethroughcode.ftree.ui.settings.SharingTurnOnTag
 import kotlinx.coroutines.runBlocking
 import org.junit.After
@@ -108,6 +110,25 @@ class TreeSharingFlowTest {
         // Switching them off again stops them being a member.
         compose.onNodeWithTag(SharingMemberTagPrefix + "kiran").performClick()
         compose.waitUntil(5_000) { !runBlocking { app.container.treeSync.isMember("kiran") } }
+    }
+
+    @Test fun stoppingSharingAsksFirstThenForgetsItAndLeavesThePeopleAlone() {
+        runBlocking { app.container.familyRepository.addPerson(Person(id = "kiran", name = "Kiran")) }
+        openSharing()
+        waitForTurnOn()
+        compose.onNodeWithTag(SharingTurnOnTag).performClick()
+        compose.waitUntil(5_000) { compose.onAllNodesWithTag(SharingStopTag).fetchSemanticsNodes().isNotEmpty() }
+
+        // Asking first: cancelling leaves it shared.
+        compose.onNodeWithTag(SharingStopTag).performClick()
+        compose.onNodeWithText("Cancel").performClick()
+        assertTrue(runBlocking { app.container.treeSync.isShared() })
+
+        compose.onNodeWithTag(SharingStopTag).performClick()
+        compose.onNodeWithTag(SharingStopConfirmTag).performClick()
+        compose.waitUntil(5_000) { !runBlocking { app.container.treeSync.isShared() } }
+        compose.waitUntil(5_000) { compose.onAllNodesWithTag(SharingTurnOnTag).fetchSemanticsNodes().isNotEmpty() }
+        assertTrue("the person is still in the tree", runBlocking { app.container.familyRepository.person("kiran") } != null)
     }
 
     private fun androidx.compose.ui.test.SemanticsNodeInteractionCollection.assertCountIsZero() =

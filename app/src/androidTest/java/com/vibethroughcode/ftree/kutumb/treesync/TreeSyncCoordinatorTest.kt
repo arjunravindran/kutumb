@@ -231,6 +231,43 @@ class TreeSyncCoordinatorTest {
         assertFalse(a.sync.isMember("kiran"))
     }
 
+    @Test fun stoppingForgetsTheSharingButKeepsTheTree() = runBlocking {
+        val a = phone("a")
+        a.person("me", "Me"); a.person("dad", "Dad")
+        a.repo.addRelative("me", "dad", RelativeKind.PARENT)
+        assertFalse("nothing to stop yet", a.sync.stopSharing())
+        a.sync.share("t")
+        a.sync.addMember("kiran")
+        val before = a.tree()
+
+        assertTrue(a.sync.stopSharing())
+        assertFalse(a.sync.isShared())
+        assertEquals(0, a.db.treeSyncDao().opCount())
+        assertTrue(a.sync.members().isEmpty())
+        assertEquals("the tree itself is untouched", before, a.tree())
+        assertFalse("already stopped", a.sync.stopSharing())
+
+        // From here the tree behaves as if it had never been shared: edits are not recorded, and what
+        // another phone still sends is dropped.
+        a.person("kid", "Kid")
+        assertEquals(0, a.sync.reconcile())
+        assertEquals(Received(0, 0, 0), a.sync.receive(listOf(TreeOp.PersonAdd("x", Hlc(1, 0, "z"), "ghost"))))
+        assertEquals(0, a.db.treeSyncDao().opCount())
+        assertFalse(a.tree().people.containsKey("x"))
+    }
+
+    @Test fun aStoppedTreeCanBeSharedAgainAndRecordsEverythingAfresh() = runBlocking {
+        val a = phone("a")
+        a.person("me", "Me")
+        a.sync.share("t1")
+        a.sync.stopSharing()
+        a.person("kid", "Kid")
+        assertTrue(a.sync.share("t2"))
+        assertEquals("t2", a.sync.sharedId())
+        assertTrue("both people are in the new log", a.db.treeSyncDao().opCount() >= 2)
+        assertEquals(0, a.sync.reconcile())
+    }
+
     /** A relay that hands each envelope to the other phone's real handler, after a real trip through JSON. */
     private inner class Link(val from: Phone, val to: Phone, val fromAsSeenByTo: TrustedContact, val toPersonId: String) : SyncPublisher {
         val handler = TreeSyncHandler(to.sync)

@@ -74,6 +74,12 @@ interface TreeSyncDao {
 
     @Query("SELECT COUNT(*) FROM tree_sync_ops")
     suspend fun opCount(): Int
+
+    @Query("DELETE FROM tree_sync_meta")
+    suspend fun clearMeta()
+
+    @Query("DELETE FROM tree_sync_ops")
+    suspend fun clearOps()
 }
 
 /**
@@ -98,4 +104,7 @@ interface TreeSyncMemberDao {
 
     @Query("DELETE FROM tree_sync_members WHERE personId = :personId")
     suspend fun remove(personId: String)
+
+    @Query("DELETE FROM tree_sync_members")
+    suspend fun clear()
 }

@@ -84,6 +84,23 @@ class TreeSyncCoordinator(
 
     override suspend fun startSharing(): Boolean = share()
 
+    /**
+     * Stops sharing: forgets the marker, the operation log and the members. The people and relationships
+     * themselves are the tree and stay exactly as they are. With the marker gone every method here returns
+     * at once, so changes are no longer recorded and anything still arriving from the other phones is dropped.
+     * Sharing again later starts afresh, as if it had never been shared.
+     */
+    override suspend fun stopSharing(): Boolean = mutex.withLock {
+        if (dao.meta() == null) return@withLock false
+        db.withTransaction {
+            memberDao.clear()
+            dao.clearOps()
+            dao.clearMeta()
+        }
+        loaded = null
+        true
+    }
+
     /** Records whatever the user has changed since last time. Returns how many operations that made. */
     suspend fun reconcile(): Int = mutex.withLock { reconcileLocked() }
 

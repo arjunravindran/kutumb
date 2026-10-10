@@ -7,6 +7,9 @@ import com.vibethroughcode.ftree.kutumb.trust.TrustedContact
 interface TreeSyncSwitch {
     /** Starts sharing this tree. False if it was already shared. */
     suspend fun startSharing(): Boolean
+
+    /** Stops sharing this tree and forgets who it was shared with. The tree itself is left alone. False if it was not shared. */
+    suspend fun stopSharing(): Boolean
 }
 
 /** One person the tree could be shared with, and whether it is. */
@@ -48,6 +51,9 @@ class TreeSharing(
 
     /** Switches sharing on. Nobody receives anything until they are added as a member. */
     suspend fun turnOn(): Boolean = switch.startSharing()
+
+    /** Stops sharing. Phones that already hold the tree keep their copy; nothing is taken back from them. */
+    suspend fun turnOff(): Boolean = switch.stopSharing()
 
     /**
      * Adds or removes a member. Adding sends them the whole tree straight away. Returns whether anything changed:

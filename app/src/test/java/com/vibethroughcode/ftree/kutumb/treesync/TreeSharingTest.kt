@@ -37,6 +37,14 @@ class TreeSharingTest {
         override suspend fun addMember(personId: String) = shared != null && personId !in memberIds && memberIds.add(personId)
         override suspend fun removeMember(personId: String) { memberIds.remove(personId) }
         override suspend fun startSharing(): Boolean { if (shared != null) return false; shared = "tree-1"; return true }
+        override suspend fun stopSharing(): Boolean {
+            if (shared == null) return false
+            shared = null
+            memberIds.clear()
+            history.clear()
+            pending = 0
+            return true
+        }
     }
 
     private class Transport(var accept: Boolean = true) : SyncPublisher {
@@ -67,6 +75,28 @@ class TreeSharingTest {
         val s = sharing(FakeTree(), listOf(kiran))
         assertTrue(s.turnOn())
         assertFalse(s.turnOn())
+    }
+
+    @Test fun stoppingMakesTheTreeUnsharedAndForgetsItsMembers() = runBlocking {
+        val tree = FakeTree(shared = "tree-1")
+        val s = sharing(tree, listOf(kiran, asha))
+        assertTrue(s.setMember(kiran, true))
+        assertTrue(s.turnOff())
+        assertEquals(SharingState(shared = false, candidates = emptyList(), waiting = 0), s.state())
+        assertTrue(tree.memberIds.isEmpty())
+    }
+
+    @Test fun stoppingATreeThatIsNotSharedDoesNothing() = runBlocking {
+        assertFalse(sharing(FakeTree(), listOf(kiran)).turnOff())
+    }
+
+    @Test fun aTreeThatWasStoppedCanBeSharedAgainWithNobodyInIt() = runBlocking {
+        val tree = FakeTree(shared = "tree-1")
+        val s = sharing(tree, listOf(kiran))
+        assertTrue(s.setMember(kiran, true))
+        assertTrue(s.turnOff())
+        assertTrue(s.turnOn())
+        assertTrue("a fresh share starts with no members", s.state().candidates.none { it.isMember })
     }
 
     @Test fun addingAMemberMarksThemAndSendsThemTheTree() = runBlocking {
