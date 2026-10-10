@@ -1,5 +1,8 @@
 package com.vibethroughcode.ftree.ui.settings
 
+import androidx.compose.material3.FilterChip
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import android.content.Intent
 import android.net.Uri
 import androidx.activity.compose.BackHandler
@@ -93,6 +96,7 @@ import com.vibethroughcode.ftree.update.UpdateState
 
 const val SettingsUpdatesToggleTag = "settings-updates-toggle"
 const val SettingsPhotosToggleTag = "settings-photos-toggle"
+const val SettingsWordsTagPrefix = "settings-words-"
 const val SettingsWordsEnglishTag = "settings-words-english"
 const val SettingsWordsHindiTag = "settings-words-hindi"
 const val SettingsExportTag = "settings-export"
@@ -246,6 +250,42 @@ fun SettingsScreen(
                                 shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2),
                                 modifier = Modifier.testTag(SettingsWordsHindiTag),
                             ) { Text(stringResource(R.string.settings_words_hindi)) }
+                        }
+
+                        Text(
+                            stringResource(R.string.settings_words_more),
+                            style = MaterialTheme.typography.labelLarge,
+                            modifier = Modifier.padding(top = 16.dp, bottom = 8.dp),
+                        )
+                        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            listOf(
+                                    KinshipLanguage.MANDARIN to R.string.settings_words_mandarin,
+                                    KinshipLanguage.SPANISH to R.string.settings_words_spanish,
+                                    KinshipLanguage.ARABIC to R.string.settings_words_arabic,
+                                    KinshipLanguage.FRENCH to R.string.settings_words_french,
+                                    KinshipLanguage.BENGALI to R.string.settings_words_bengali,
+                                    KinshipLanguage.PORTUGUESE to R.string.settings_words_portuguese,
+                                    KinshipLanguage.RUSSIAN to R.string.settings_words_russian,
+                                    KinshipLanguage.URDU to R.string.settings_words_urdu,
+                                    KinshipLanguage.MARATHI to R.string.settings_words_marathi,
+                                    KinshipLanguage.TELUGU to R.string.settings_words_telugu,
+                                    KinshipLanguage.TAMIL to R.string.settings_words_tamil,
+                            ).forEach { (language, label) ->
+                                FilterChip(
+                                    selected = kinshipLanguage == language,
+                                    onClick = { viewModel.setKinshipLanguage(language) },
+                                    label = { Text(stringResource(label)) },
+                                    modifier = Modifier.testTag(SettingsWordsTagPrefix + language.name.lowercase()),
+                                )
+                            }
+                        }
+                        if (kinshipLanguage != KinshipLanguage.ENGLISH && !kinshipLanguage.hasWords) {
+                            Text(
+                                stringResource(R.string.settings_words_more_note),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(top = 8.dp),
+                            )
                         }
                     }
 

@@ -361,6 +361,19 @@
     <string name="extended_via_cousin_new">A child of a brother or sister of %1$s, not in the tree yet</string>
     <string name="extended_via_cousin_unknown">A child of a parent’s brother or sister, not in the tree yet</string>
     <string name="extended_save">Add</string>
+    <string name="settings_words_more">More languages</string>
+    <string name="settings_words_more_note">Family words for these are not ready yet, so relationships still read in English. Your choice is kept for when they are.</string>
+    <string name="settings_words_mandarin" translatable="false">中文</string>
+    <string name="settings_words_spanish" translatable="false">Español</string>
+    <string name="settings_words_arabic" translatable="false">العربية</string>
+    <string name="settings_words_french" translatable="false">Français</string>
+    <string name="settings_words_bengali" translatable="false">বাংলা</string>
+    <string name="settings_words_portuguese" translatable="false">Português</string>
+    <string name="settings_words_russian" translatable="false">Русский</string>
+    <string name="settings_words_urdu" translatable="false">اردو</string>
+    <string name="settings_words_marathi" translatable="false">मराठी</string>
+    <string name="settings_words_telugu" translatable="false">తెలుగు</string>
+    <string name="settings_words_tamil" translatable="false">தமிழ்</string>
     <string name="welcome_invited">Someone invited me</string>
     <string name="welcome_invited_title">Joining a relative’s tree</string>
     <string name="welcome_invited_lead">You will get their tree, so there is no need to type it in. A few steps first, while you are together:</string>

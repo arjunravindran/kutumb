@@ -14,7 +14,17 @@ import android.content.Context
  * meaning English cannot: [HINDI] has five words for the one English calls "uncle", and a family
  * that says मामा does not think "maternal uncle" and translate.
  */
-enum class KinshipLanguage { ENGLISH, HINDI }
+enum class KinshipLanguage(
+    /** Whether the app has this language's family words. The others can be chosen, and read in English until it does. */
+    val hasWords: Boolean = false,
+) {
+    ENGLISH(hasWords = true),
+    HINDI(hasWords = true),
+
+    /* The ten most spoken languages in the world and the five most spoken in India, less those above. */
+    MANDARIN, SPANISH, ARABIC, FRENCH, BENGALI, PORTUGUESE, RUSSIAN, URDU,
+    MARATHI, TELUGU, TAMIL,
+}
 
 /**
  * The chosen family vocabulary, remembered.
