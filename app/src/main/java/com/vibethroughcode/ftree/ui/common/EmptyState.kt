@@ -10,6 +10,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -28,6 +29,9 @@ fun EmptyState(
     illustration: @Composable (() -> Unit)? = null,
     /** Short numbered instructions shown under the body, for a first screen that has to teach by itself. */
     steps: List<String> = emptyList(),
+    /** A second way in, shown under the main button. */
+    secondaryLabel: String? = null,
+    onSecondary: (() -> Unit)? = null,
 ) {
     Column(
         modifier = modifier
@@ -69,6 +73,14 @@ fun EmptyState(
             modifier = Modifier.padding(top = 28.dp).heightIn(min = 56.dp),
         ) {
             Text(actionLabel, style = MaterialTheme.typography.titleMedium)
+        }
+        if (secondaryLabel != null && onSecondary != null) {
+            OutlinedButton(
+                onClick = onSecondary,
+                modifier = Modifier.padding(top = 12.dp).heightIn(min = 56.dp),
+            ) {
+                Text(secondaryLabel, style = MaterialTheme.typography.titleMedium)
+            }
         }
     }
 }

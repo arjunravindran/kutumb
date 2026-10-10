@@ -53,6 +53,14 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
+    <!--
+        Adding people from the phone's contacts, to fill an empty tree quickly. Asked for only when
+        somebody taps "Allow contacts" on that page and at no other time; refusing it costs nothing
+        but that shortcut. Only names and birthdays are read (see Phonebook), and only what the reader
+        ticks is copied into the tree. Nothing about contacts is sent anywhere.
+    -->
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
+
     <application
         android:name=".FTreeApplication"
         android:allowBackup="true"

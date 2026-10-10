@@ -142,6 +142,8 @@ private val ChartMode.isDrawn: Boolean get() = this != ChartMode.COMPACT
 fun TreeScreen(
     onOpenPerson: (String) -> Unit,
     onAddPerson: () -> Unit,
+    /** Opens the import of contacts, offered under "Add myself" on an empty tree. */
+    onImportContacts: () -> Unit = {},
     onAddRelative: (String, RelativeKind) -> Unit,
     onShare: (String) -> Unit,
     /** The family book: null for everyone, or the person whose branch it starts from. */
@@ -387,6 +389,8 @@ fun TreeScreen(
                                         steps = listOf(R.string.empty_step_1, R.string.empty_step_2, R.string.empty_step_3).map { stringResource(it) },
 actionLabel = stringResource(R.string.empty_action),
                     onAction = onAddPerson,
+                    secondaryLabel = stringResource(R.string.contacts_entry),
+                    onSecondary = onImportContacts,
                     illustration = { TreeGlyph() },
                 )
 

@@ -76,6 +76,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import com.vibethroughcode.ftree.ui.more.JoinInvitationDialog
 import com.vibethroughcode.ftree.ui.more.MoreScreen
+import com.vibethroughcode.ftree.ui.phonebook.ContactsImportDialog
 import com.vibethroughcode.ftree.ui.welcome.WelcomeAction
 import com.vibethroughcode.ftree.ui.welcome.WelcomePolicy
 import com.vibethroughcode.ftree.ui.welcome.WelcomePreferences
@@ -308,6 +309,11 @@ fun FTreeApp(
         }
     }
     if (showWelcome) WelcomeScreen(onStart = { welcome.markSeen(); showWelcome = false })
+
+    // Adding people from the phone's contacts, from the empty tree's second button or from Settings.
+    // A circle has no mothers or sons, so there people are added without connections.
+    var importingContacts by remember { mutableStateOf(false) }
+    if (importingContacts) ContactsImportDialog(onDismiss = { importingContacts = false }, allowRelations = !isCircle)
     answering?.let { invite ->
         // The invitation may have been answered somewhere else meanwhile; only one still waiting is asked about.
         if (invitations.any { it.tree == invite.tree }) JoinInvitationDialog(invite, onDismiss = { answering = null })
@@ -376,6 +382,7 @@ fun FTreeApp(
                             onOpenNetwork = { navController.navigate(PathRoute(it)) },
                             onOpenPerson = { navController.navigate(PersonRoute(it)) },
                             onAddPerson = { navController.navigate(EditPersonRoute()) },
+                            onImportContacts = { importingContacts = true },
                             onAddRelative = { anchorId, kind ->
                                 navController.navigate(AddRelativeRoute(anchorId, kind))
                             },
@@ -392,6 +399,7 @@ fun FTreeApp(
                         PeopleScreen(
                             onOpenPerson = { navController.navigate(PersonRoute(it)) },
                             onAddPerson = { navController.navigate(EditPersonRoute()) },
+                            onImportContacts = { importingContacts = true },
                             remindersOn = remindersOn,
                             onReminders = {
                                 focusReminders = true
@@ -456,6 +464,7 @@ fun FTreeApp(
                             onImport = { importPicker.launch(arrayOf("*/*")) },
                             onNearby = nearbyViewModel::open,
                             viewModel = settingsViewModel,
+                            onContacts = { importingContacts = true },
                             focusReminders = focusReminders,
                             onRemindersFocused = { focusReminders = false },
                         )

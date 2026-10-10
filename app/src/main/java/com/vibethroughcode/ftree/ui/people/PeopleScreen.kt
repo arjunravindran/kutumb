@@ -69,6 +69,8 @@ const val PeopleAddFabTag = "people-add-fab"
 fun PeopleScreen(
     onOpenPerson: (String) -> Unit,
     onAddPerson: () -> Unit,
+    /** Opens the import of contacts, offered under "Add myself" on an empty tree. */
+    onImportContacts: () -> Unit = {},
     modifier: Modifier = Modifier,
     remindersOn: Boolean = false,
     onReminders: () -> Unit = {},
@@ -171,6 +173,8 @@ fun PeopleScreen(
                                         steps = listOf(R.string.empty_step_1, R.string.empty_step_2, R.string.empty_step_3).map { stringResource(it) },
 actionLabel = stringResource(R.string.empty_action),
                     onAction = onAddPerson,
+                    secondaryLabel = stringResource(R.string.contacts_entry),
+                    onSecondary = onImportContacts,
                     illustration = { TreeGlyph() },
                 )
 

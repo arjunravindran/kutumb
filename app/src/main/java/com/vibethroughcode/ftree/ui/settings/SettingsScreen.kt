@@ -26,6 +26,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.CallReceived
 import androidx.compose.material.icons.filled.CloudDownload
+import androidx.compose.material.icons.filled.Contacts
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.OpenInNew
 import androidx.compose.material.icons.filled.Send
@@ -125,6 +126,7 @@ const val SettingsNearbySendTag = "settings-nearby-send"
 const val SettingsNearbyReceiveTag = "settings-nearby-receive"
 const val SettingsNearbyRenameTag = "settings-nearby-rename"
 const val SettingsFinePrintTag = "settings-fineprint"
+const val SettingsContactsTag = "settings-contacts"
 
 /**
  * The places Settings is divided into. The first screen is a plain list of these, as big rows like the
@@ -161,6 +163,8 @@ fun SettingsScreen(
     onNearby: (NearbyMode) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: SettingsViewModel,
+    /** Opens the import of contacts. */
+    onContacts: () -> Unit = {},
     focusReminders: Boolean = false,
     onRemindersFocused: () -> Unit = {},
 ) {
@@ -352,6 +356,13 @@ fun SettingsScreen(
                     body = stringResource(R.string.settings_import_body),
                     onClick = onImport,
                     modifier = Modifier.testTag(SettingsImportTag),
+                )
+                SettingsAction(
+                    icon = { Icon(Icons.Default.Contacts, contentDescription = null) },
+                    title = stringResource(R.string.contacts_entry),
+                    body = stringResource(R.string.contacts_entry_body),
+                    onClick = onContacts,
+                    modifier = Modifier.testTag(SettingsContactsTag),
                 )
             }
 

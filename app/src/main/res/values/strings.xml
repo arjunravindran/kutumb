@@ -348,6 +348,36 @@
     <string name="welcome_share_title">Share with relatives you meet</string>
     <string name="welcome_share_body">When you meet a relative, you can add each other and keep your trees up to date together.</string>
     <string name="welcome_start">Get started</string>
+    <string name="contacts_entry">Add people from my contacts</string>
+    <string name="contacts_entry_body">Choose family from your phone’s contacts. Only names and birthdays are read.</string>
+    <string name="contacts_ask_title">Add people from your contacts</string>
+    <string name="contacts_ask_body">Choose who to add to your tree. Kutumb reads only names and birthdays, and only the people you choose are copied. Nothing leaves your phone.</string>
+    <string name="contacts_allow">Allow contacts</string>
+    <string name="contacts_denied">Contacts are turned off for Kutumb. You can turn them on in your phone’s settings.</string>
+    <string name="contacts_open_settings">Open settings</string>
+    <string name="contacts_loading">Reading your contacts…</string>
+    <string name="contacts_none">No contacts with names were found on this phone.</string>
+    <string name="contacts_pick_title_new">Who is in your family?</string>
+    <string name="contacts_pick_title">Choose who to add</string>
+    <string name="contacts_me_label">Your name</string>
+    <string name="contacts_search">Search your contacts</string>
+    <string name="contacts_already">Already in your tree</string>
+    <string name="contacts_relation_prompt">How are they related to you?</string>
+    <string name="contacts_rel_mother">Mother</string>
+    <string name="contacts_rel_father">Father</string>
+    <string name="contacts_rel_sister">Sister</string>
+    <string name="contacts_rel_brother">Brother</string>
+    <string name="contacts_rel_spouse">Husband or wife</string>
+    <string name="contacts_rel_daughter">Daughter</string>
+    <string name="contacts_rel_son">Son</string>
+    <string name="contacts_rel_none">Add without a connection</string>
+    <string name="contacts_add">Add %1$d chosen</string>
+    <string name="contacts_cancel">Cancel</string>
+    <string name="contacts_done_title">Added to your tree</string>
+    <string name="contacts_done_added">Added: %1$d</string>
+    <string name="contacts_done_connected">Connected to you: %1$d</string>
+    <string name="contacts_done_skipped">Already in your tree, so left out: %1$d</string>
+    <string name="contacts_done_button">Done</string>
     <string name="settings_title">Settings</string>
     <string name="settings_back">Back to Settings</string>
     <string name="settings_hub_names">Names and chart</string>
@@ -505,7 +535,9 @@
     <string name="settings_fineprint_show">Permissions and licences</string>
     <string name="settings_fineprint_hide">Hide permissions and licences</string>
     <string name="settings_permissions_title">Permissions</string>
-    <string name="settings_permissions_body">Nothing about your family leaves this phone unless you choose it.\n\nInternet: to check for updates if you turn that on, to get a book template when you ask for one, and to send encrypted family messages if you turn on sync.\n\nInstalling updates: only when you accept one.\n\nWi-Fi: to find nearby phones, and to be found by them, while you share a tree.\n\nStart-up: so birthday reminders and sync carry on after the phone restarts.\n\nCamera: only if you choose to scan a code. You can always type instead.\n\nNotifications: only if you turn on birthday reminders or new-message alerts.</string>
+    <string name="settings_permissions_body">Nothing about your family leaves this phone unless you choose it.\n\nInternet: to check for updates if you turn that on, to get a book template when you ask for one, and to send encrypted family messages if you turn on sync.\n\nInstalling updates: only when you accept one.\n\nWi-Fi: to find nearby phones, and to be found by them, while you share a tree.\n\nStart-up: so birthday reminders and sync carry on after the phone restarts.\n\nContacts: only if you choose to add people from your contacts. Names and birthdays are read, and only the people you pick are copied into your tree.
+
+Camera: only if you choose to scan a code. You can always type instead.\n\nNotifications: only if you turn on birthday reminders or new-message alerts.</string>
 
     <!-- Nearby sharing -->
     <string name="settings_section_nearby">Nearby sharing</string>
