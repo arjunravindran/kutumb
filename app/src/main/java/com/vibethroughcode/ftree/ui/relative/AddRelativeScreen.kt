@@ -1,5 +1,7 @@
 package com.vibethroughcode.ftree.ui.relative
 
+import com.vibethroughcode.ftree.graph.LinkSuggestions
+import androidx.compose.foundation.clickable
 import com.vibethroughcode.ftree.ui.phonebook.ContactsImportDialog
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.foundation.layout.Arrangement
@@ -55,6 +57,9 @@ import com.vibethroughcode.ftree.ui.common.readableMeasure
 import com.vibethroughcode.ftree.ui.common.rejectionMessage
 
 const val AddRelativeFromContactTag = "add-relative-from-contact"
+const val AddRelativeSuggestionTagPrefix = "add-relative-suggestion-"
+const val AddRelativeUseExistingTag = "add-relative-use-existing"
+const val AddRelativeAddAnywayTag = "add-relative-add-anyway"
 const val AddRelativeNameTag = "add-relative-name"
 const val AddRelativeSaveTag = "add-relative-save"
 const val AddRelativeUnknownTag = "add-relative-unknown"
@@ -108,6 +113,26 @@ fun AddRelativeScreen(
                     modifier = Modifier.padding(horizontal = 20.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
+                    if (state.suggestions.isNotEmpty()) {
+                        SectionRule(stringResource(R.string.add_relative_maybe))
+                        state.suggestions.forEach { suggestion ->
+                            Column(
+                                Modifier
+                                    .fillMaxWidth()
+                                    .clickable { viewModel.linkExisting(suggestion.person.id, onBack) }
+                                    .padding(vertical = 8.dp)
+                                    .testTag(AddRelativeSuggestionTagPrefix + suggestion.person.id),
+                            ) {
+                                Text(suggestion.person.displayName(), style = MaterialTheme.typography.titleMedium)
+                                Text(
+                                    suggestion.reasonText(),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                        }
+                    }
+
                     SectionRule(stringResource(R.string.add_relative_new))
 
                     OutlinedButton(
@@ -189,6 +214,27 @@ fun AddRelativeScreen(
         }
     }
 
+    if (state.sameNameAsk.isNotEmpty()) {
+        val first = state.sameNameAsk.first()
+        AlertDialog(
+            onDismissRequest = viewModel::dismissSameNameAsk,
+            title = { Text(stringResource(R.string.add_relative_same_title, first.displayName())) },
+            text = { Text(stringResource(R.string.add_relative_same_body)) },
+            confirmButton = {
+                Button(
+                    onClick = { viewModel.dismissSameNameAsk(); viewModel.linkExisting(first.id, onBack) },
+                    modifier = Modifier.testTag(AddRelativeUseExistingTag),
+                ) { Text(stringResource(R.string.add_relative_same_use)) }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { viewModel.createAndLink(onBack, confirmed = true) },
+                    modifier = Modifier.testTag(AddRelativeAddAnywayTag),
+                ) { Text(stringResource(R.string.add_relative_same_new)) }
+            },
+        )
+    }
+
     state.rejection?.let { reason ->
         AlertDialog(
             onDismissRequest = viewModel::dismissRejection,
@@ -226,5 +272,16 @@ private fun UnknownPersonChoice(onClick: () -> Unit) {
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun LinkSuggestions.Suggestion.reasonText(): String {
+    val via = via?.displayName()
+    return when (reason) {
+        LinkSuggestions.Reason.SHARES_CHILD -> stringResource(R.string.add_relative_reason_shares_child, via.orEmpty())
+        LinkSuggestions.Reason.PARTNER_OF_PARENT -> stringResource(R.string.add_relative_reason_partner_of_parent, via.orEmpty())
+        LinkSuggestions.Reason.CHILD_OF_PARTNER -> stringResource(R.string.add_relative_reason_child_of_partner, via.orEmpty())
+        LinkSuggestions.Reason.SAME_NAME -> stringResource(R.string.add_relative_reason_same_name)
     }
 }

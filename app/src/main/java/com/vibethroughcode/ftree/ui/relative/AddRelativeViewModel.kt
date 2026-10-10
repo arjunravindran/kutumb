@@ -6,7 +6,9 @@ import com.vibethroughcode.ftree.data.FamilyRepository
 import com.vibethroughcode.ftree.data.Gender
 import com.vibethroughcode.ftree.data.Person
 import com.vibethroughcode.ftree.data.RelativeKind
+import com.vibethroughcode.ftree.graph.LinkSuggestions
 import com.vibethroughcode.ftree.graph.RelationshipRejection
+import com.vibethroughcode.ftree.transfer.nameKey
 import com.vibethroughcode.ftree.data.RelationshipRejectedException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,6 +18,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -27,6 +30,10 @@ data class AddRelativeUiState(
     val newName: String = "",
     val newGender: Gender = Gender.UNSPECIFIED,
     val rejection: RelationshipRejection? = null,
+    /** Who the person being added may already be, from the shape of the tree and the name typed. */
+    val suggestions: List<LinkSuggestions.Suggestion> = emptyList(),
+    /** People already in the tree with the name just typed, asked about before a second one is made. */
+    val sameNameAsk: List<Person> = emptyList(),
 )
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -39,6 +46,7 @@ class AddRelativeViewModel(
     private val query = MutableStateFlow("")
     private val form = MutableStateFlow(FormState())
     private val rejection = MutableStateFlow<RelationshipRejection?>(null)
+    private val sameNameAsk = MutableStateFlow<List<Person>>(emptyList())
 
     private data class FormState(val name: String = "", val gender: Gender = Gender.UNSPECIFIED, val birthDate: String? = null)
 
@@ -87,11 +95,17 @@ class AddRelativeViewModel(
             newGender = formState.gender,
             rejection = rejected,
         )
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5_000),
-        initialValue = AddRelativeUiState(),
-    )
+    }.combine(
+        combine(repository.observeWholeGraph(), form, ineligible) { tree, formState, excluded ->
+            LinkSuggestions.forNewRelative(kind, anchorId, formState.name, tree, excluded)
+        },
+    ) { ui, suggestions -> ui.copy(suggestions = suggestions) }
+        .combine(sameNameAsk) { ui, ask -> ui.copy(sameNameAsk = ask) }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = AddRelativeUiState(),
+        )
 
     val currentRejection: StateFlow<RelationshipRejection?> = rejection.asStateFlow()
 
@@ -112,17 +126,35 @@ class AddRelativeViewModel(
         repository.addRelative(anchorId, personId, kind).map { }
     }
 
-    /** Creates a named person and links them. */
-    fun createAndLink(onDone: () -> Unit) {
+    /**
+     * Creates a named person and links them, unless somebody of that name is already in the tree, in which case
+     * the reader is asked first ([AddRelativeUiState.sameNameAsk]): a second Asha is nearly always the first one
+     * entered again from another page.
+     */
+    fun createAndLink(onDone: () -> Unit, confirmed: Boolean = false) {
         val state = form.value
-        attempt(onDone) {
-            repository.addNewRelative(
-                anchorId = anchorId,
-                person = Person(name = state.name.trim().ifBlank { null }, gender = state.gender, birthDate = state.birthDate),
-                kind = kind,
-            ).map { }
+        viewModelScope.launch {
+            val key = nameKey(state.name)
+            if (!confirmed && key != null) {
+                val excluded = ineligible.first()
+                val same = repository.allPeople().filter { nameKey(it.name) == key && it.id !in excluded }
+                if (same.isNotEmpty()) {
+                    sameNameAsk.value = same
+                    return@launch
+                }
+            }
+            sameNameAsk.value = emptyList()
+            attempt(onDone) {
+                repository.addNewRelative(
+                    anchorId = anchorId,
+                    person = Person(name = state.name.trim().ifBlank { null }, gender = state.gender, birthDate = state.birthDate),
+                    kind = kind,
+                ).map { }
+            }
         }
     }
+
+    fun dismissSameNameAsk() { sameNameAsk.value = emptyList() }
 
     /**
      * Records the connection to someone whose name is not known.

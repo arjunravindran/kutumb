@@ -383,6 +383,22 @@
     <string name="settings_words_marathi" translatable="false">मराठी</string>
     <string name="settings_words_telugu" translatable="false">తెలుగు</string>
     <string name="settings_words_tamil" translatable="false">தமிழ்</string>
+    <string name="add_relative_maybe">Is it one of these?</string>
+    <string name="add_relative_reason_shares_child">Already a parent of %1$s</string>
+    <string name="add_relative_reason_partner_of_parent">Already married to %1$s</string>
+    <string name="add_relative_reason_child_of_partner">Already a child of %1$s</string>
+    <string name="add_relative_reason_same_name">Already in your tree with this name</string>
+    <string name="add_relative_same_title">%1$s is already in your tree</string>
+    <string name="add_relative_same_body">Use the one you already have, so the same person is not in the tree twice. Or add a new person if this is somebody else with the same name.</string>
+    <string name="add_relative_same_use">Use the one I have</string>
+    <string name="add_relative_same_new">Add a new person</string>
+    <string name="merge_person_menu">Same person as another entry</string>
+    <string name="merge_person_title">Merge two entries</string>
+    <string name="merge_person_pick">Who is the same person as %1$s?</string>
+    <string name="merge_person_body">%1$s will be folded into %2$s: their links and details move across and the other entry is removed. This cannot be undone, except by restoring a backup.</string>
+    <string name="merge_person_confirm">Merge</string>
+    <string name="merge_person_banner">There is another %1$s in your tree. The same person?</string>
+    <string name="merge_person_banner_action">Merge</string>
     <string name="welcome_invited">Someone invited me</string>
     <string name="welcome_invited_title">Joining a relative’s tree</string>
     <string name="welcome_invited_lead">You will get their tree, so there is no need to type it in. A few steps first, while you are together:</string>

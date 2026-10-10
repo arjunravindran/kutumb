@@ -1,5 +1,8 @@
 package com.vibethroughcode.ftree.ui.person
 
+import androidx.compose.ui.platform.LocalContext
+import com.vibethroughcode.ftree.graph.LinkSuggestions
+import com.vibethroughcode.ftree.FTreeApplication
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -101,6 +104,7 @@ fun PersonDetailScreen(
     var menuOpen by remember { mutableStateOf(false) }
     var pendingRemoval by remember { mutableStateOf<Person?>(null) }
     var addingExtended by remember { mutableStateOf(false) }
+    var merging by remember { mutableStateOf<MergeRequest?>(null) }
     var relabelling by remember { mutableStateOf<com.vibethroughcode.ftree.graph.Connection?>(null) }
     val isCircle = (androidx.compose.ui.platform.LocalContext.current.applicationContext as com.vibethroughcode.ftree.FTreeApplication)
         .container.tree.kind == com.vibethroughcode.ftree.data.TreeKind.CIRCLE
@@ -179,6 +183,14 @@ fun PersonDetailScreen(
                             )
                         }
                         DropdownMenuItem(
+                            text = { Text(stringResource(R.string.merge_person_menu)) },
+                            leadingIcon = {
+                                Icon(Icons.Default.CompareArrows, contentDescription = null)
+                            },
+                            onClick = { menuOpen = false; merging = MergeRequest(null) },
+                            modifier = Modifier.testTag(PersonMergeTag),
+                        )
+                        DropdownMenuItem(
                             text = { Text(stringResource(R.string.delete_person)) },
                             leadingIcon = {
                                 Icon(Icons.Default.DeleteOutline, contentDescription = null)
@@ -209,6 +221,8 @@ fun PersonDetailScreen(
                 person,
                 Modifier.widthIn(max = READABLE_MEASURE).padding(horizontal = 20.dp),
             )
+
+            PossibleDuplicates(person, onMerge = { merging = MergeRequest(it) })
 
             // No gutter: each section already holds its rows twenty points off its own edges, so
             // two of them side by side keep forty points between the names, which is enough.
@@ -300,6 +314,7 @@ fun PersonDetailScreen(
         )
     }
 
+    state.person?.let { shown -> merging?.let { MergePersonDialog(shown, it.other, onDismiss = { merging = null }) } }
     state.person?.takeIf { addingExtended }?.let { AddExtendedRelativeDialog(it, onDismiss = { addingExtended = false }) }
 
     pendingRemoval?.let { other ->
@@ -546,9 +561,43 @@ private fun EmptySection(kind: RelativeKind, onAdd: () -> Unit) {
     }
 }
 
+const val PersonMergeTag = "person-merge"
+const val MergeBannerTagPrefix = "merge-banner-"
+
 const val AddExtendedTag = "add-extended"
 
 fun addSectionTag(kind: RelativeKind): String = "add-relative-" + kind.name.lowercase()
 
 /** The whole-row way into an empty section, as opposed to the plus on its rule. */
 fun emptySectionTag(kind: RelativeKind): String = "empty-section-" + kind.name.lowercase()
+
+/** Which entry is being folded into this one; null until the reader picks it. */
+private data class MergeRequest(val other: Person?)
+
+/**
+ * "There is another Asha. The same person?" under the name, when another entry has the same name and no date that
+ * contradicts it: the mark of a person entered twice from two pages. It only asks; nothing changes until the
+ * reader confirms the merge.
+ */
+@Composable
+private fun PossibleDuplicates(person: Person, onMerge: (Person) -> Unit) {
+    val family = (LocalContext.current.applicationContext as FTreeApplication).container.familyRepository
+    val name = person.name?.trim()?.takeIf { it.isNotEmpty() } ?: return
+    val found by remember(person.id, name) { family.searchPeople(name) }.collectAsStateWithLifecycle(emptyList())
+    LinkSuggestions.likelySamePerson(person, found).forEach { other ->
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .widthIn(max = READABLE_MEASURE)
+                .padding(horizontal = 20.dp, vertical = 4.dp)
+                .testTag(MergeBannerTagPrefix + other.id),
+        ) {
+            Text(
+                stringResource(R.string.merge_person_banner, other.displayName()),
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.weight(1f),
+            )
+            TextButton(onClick = { onMerge(other) }) { Text(stringResource(R.string.merge_person_banner_action)) }
+        }
+    }
+}

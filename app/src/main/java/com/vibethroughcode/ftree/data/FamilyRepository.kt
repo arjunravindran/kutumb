@@ -292,6 +292,60 @@ class FamilyRepository(
         }
     }
 
+    /**
+     * Makes two entries for one person into one: [dropId] is folded into [keepId] and removed.
+     *
+     * Everything the dropped entry knew that the kept one does not (a name, a birth date, a photograph, notes)
+     * moves across, and every link it had is given to the kept one, so a mother added twice ends as one mother
+     * with all her children. Links both already had are not doubled. It goes in as one step: if a link would
+     * break the family's rules (two entries that are really a parent and a child cannot be one person) nothing
+     * is changed and the reason is returned.
+     */
+    suspend fun mergePeople(keepId: String, dropId: String): Result<Unit> = runCatching {
+        if (keepId == dropId) throw RelationshipRejectedException(RelationshipRejection.SELF_REFERENCE)
+        val photoToDelete = db.withTransaction {
+            val keep = people.findById(keepId) ?: throw IllegalArgumentException("No such person")
+            val drop = people.findById(dropId) ?: throw IllegalArgumentException("No such person")
+            val edges = relationships.edgesOf(dropId)
+
+            // One entry cannot be a parent, spouse or sibling of the other and be the same person.
+            if (edges.any { it.other(dropId) == keepId }) {
+                throw RelationshipRejectedException(RelationshipRejection.CONTRADICTS_EXISTING)
+            }
+
+            val notes = when {
+                keep.notes.isNullOrBlank() -> drop.notes
+                drop.notes.isNullOrBlank() || drop.notes == keep.notes -> keep.notes
+                else -> keep.notes + "\n\n" + drop.notes
+            }
+            val merged = keep.copy(
+                name = keep.name?.takeIf { it.isNotBlank() } ?: drop.name,
+                gender = if (keep.gender == Gender.UNSPECIFIED) drop.gender else keep.gender,
+                birthDate = keep.birthDate ?: drop.birthDate,
+                deathDate = keep.deathDate ?: drop.deathDate,
+                deceased = keep.deceased || drop.deceased,
+                photoId = keep.photoId ?: drop.photoId,
+                notes = notes,
+                updatedAt = System.currentTimeMillis(),
+            )
+            people.update(merged)
+
+            // Move the links. Taken off the dropped entry first, so the rules judge the family as it will be.
+            edges.forEach { relationships.deleteById(it.id) }
+            for (edge in edges) {
+                val from = if (edge.fromPersonId == dropId) keepId else edge.fromPersonId
+                val to = if (edge.toPersonId == dropId) keepId else edge.toPersonId
+                val result = addRelationship(from, to, edge.type, edge.subtype)
+                val failure = result.exceptionOrNull() as? RelationshipRejectedException
+                if (failure != null && failure.reason != RelationshipRejection.DUPLICATE) throw failure
+            }
+            origins.insertAll(origins.originsOf(listOf(dropId)).map { it.copy(personId = keepId) })
+            people.deleteById(dropId)
+            drop.photoId?.takeIf { it != merged.photoId }
+        }
+        photos.delete(photoToDelete)
+    }
+
     suspend fun originsOf(personIds: List<String>): List<PersonOrigin> = origins.originsOf(personIds)
 
     /** Whole-tree reads, used only by export. Everything else asks a narrower question. */
