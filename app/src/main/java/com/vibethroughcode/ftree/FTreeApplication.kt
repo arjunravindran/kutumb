@@ -15,6 +15,7 @@ import com.vibethroughcode.ftree.kutumb.treesync.PendingInvite
 import com.vibethroughcode.ftree.kutumb.treesync.TreeInviteCodec
 import com.vibethroughcode.ftree.kutumb.treesync.TreeJoin
 import com.vibethroughcode.ftree.kutumb.treesync.JoinPlan
+import com.vibethroughcode.ftree.kutumb.treesync.MergeSuggestion
 import com.vibethroughcode.ftree.kutumb.treesync.prepareJoinedTree
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -285,6 +286,31 @@ class FTreeApplication : Application() {
         old.stopServices()
         open(catalog.active)
         Handler(Looper.getMainLooper()).postDelayed({ old.closeDatabase() }, CLOSE_DELAY_MS)
+    }
+
+    private val mergeWaved by lazy { getSharedPreferences("merge-suggestions", Context.MODE_PRIVATE) }
+
+    /** The other tree on this phone worth bringing into the open one, or null. See [MergeSuggestion]. */
+    suspend fun mergeOffer(): MergeSuggestion.Candidate? = withContext(Dispatchers.IO) {
+        val open = container
+        if (open.tree.kind != TreeKind.FAMILY || !open.treeSync.isShared()) return@withContext null
+        val others = catalog.trees.filter { it.id != open.tree.id }.map {
+            MergeSuggestion.Candidate(it.id, it.name, peopleOf(it).size, it.kind == TreeKind.FAMILY)
+        }
+        MergeSuggestion.pick(
+            open.tree.id, true, true, others, mergeWaved.getStringSet("waved", emptySet()).orEmpty(),
+        )
+    }
+
+    /** Stops offering to bring [otherId] into the open tree. */
+    fun waveAwayMerge(otherId: String) {
+        val key = MergeSuggestion.key(container.tree.id, otherId)
+        mergeWaved.edit().putStringSet("waved", mergeWaved.getStringSet("waved", emptySet()).orEmpty() + key).apply()
+    }
+
+    /** Writes tree [treeId] to [file] as a `.ftree`, for the import review to line up with the open tree. */
+    suspend fun exportTreeTo(treeId: String, file: File): Boolean = withContext(Dispatchers.IO) {
+        withTreeContainer(treeId) { other -> file.outputStream().use { other.exporter.exportTo(it) } } != null
     }
 
     /** Runs [block] against the wiring of tree [treeId]: the open one, one syncing unseen, or one opened just for this. */

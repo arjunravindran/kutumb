@@ -29,9 +29,11 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.vibethroughcode.ftree.R
+import com.vibethroughcode.ftree.kutumb.treesync.MergeSuggestion
 import com.vibethroughcode.ftree.kutumb.treesync.PendingInvite
 
 const val MoreInvitationTagPrefix = "more-invitation-"
+const val MoreMergeTag = "more-merge"
 const val MoreNetworkTag = "more-network"
 const val MoreFactsTag = "more-facts"
 const val MoreSettingsTag = "more-settings"
@@ -53,6 +55,9 @@ fun MoreScreen(
     /** Trees somebody has offered to share, at the top because they are waiting for an answer. */
     invitations: List<PendingInvite> = emptyList(),
     onInvitation: (PendingInvite) -> Unit = {},
+    /** Another tree on this phone that could be lined up with this one. */
+    mergeOffer: MergeSuggestion.Candidate? = null,
+    onMergeOffer: () -> Unit = {},
 ) {
     Scaffold(
         modifier = modifier,
@@ -67,6 +72,15 @@ fun MoreScreen(
                     body = invite.name,
                     tag = MoreInvitationTagPrefix + invite.tree,
                     onClick = { onInvitation(invite) },
+                )
+            }
+            mergeOffer?.let { offer ->
+                MoreRow(
+                    icon = Icons.Default.Share,
+                    title = stringResource(R.string.more_merge_title, offer.name),
+                    body = stringResource(R.string.more_merge_body, offer.people),
+                    tag = MoreMergeTag,
+                    onClick = onMergeOffer,
                 )
             }
             MoreRow(Icons.Default.Group, R.string.nav_network, R.string.more_network_body, MoreNetworkTag, onNetwork)

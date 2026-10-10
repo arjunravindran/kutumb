@@ -2,6 +2,9 @@ package com.vibethroughcode.ftree.ui
 
 import android.content.Intent
 import android.net.Uri
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
+import java.io.File
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Row
@@ -75,6 +78,8 @@ import com.vibethroughcode.ftree.kutumb.treesync.PendingInvite
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import com.vibethroughcode.ftree.ui.more.JoinInvitationDialog
+import com.vibethroughcode.ftree.ui.more.MergeOfferDialog
+import com.vibethroughcode.ftree.kutumb.treesync.MergeSuggestion
 import com.vibethroughcode.ftree.ui.more.MoreScreen
 import com.vibethroughcode.ftree.ui.phonebook.ContactsImportDialog
 import com.vibethroughcode.ftree.ui.welcome.WelcomeAction
@@ -290,6 +295,34 @@ fun FTreeApp(
         .container.invitations.pending.collectAsStateWithLifecycle()
     var answering by remember { mutableStateOf<PendingInvite?>(null) }
 
+    // A second tree on this phone that could be lined up with the open shared one.
+    val mergeApp = LocalContext.current.applicationContext as FTreeApplication
+    var mergeOffer by remember { mutableStateOf<MergeSuggestion.Candidate?>(null) }
+    var askingMerge by remember { mutableStateOf(false) }
+    val mergeScope = rememberCoroutineScope()
+    LaunchedEffect(Unit) {
+        val found = mergeApp.mergeOffer()
+        withContext(Dispatchers.Main) { mergeOffer = found }
+    }
+    mergeOffer?.takeIf { askingMerge }?.let { offer ->
+        MergeOfferDialog(
+            offer = offer,
+            onDismiss = { askingMerge = false },
+            onNoThanks = { mergeApp.waveAwayMerge(offer.id); mergeOffer = null; askingMerge = false },
+            onReview = {
+                askingMerge = false
+                mergeScope.launch {
+                    val file = File(mergeApp.cacheDir, "merge-${offer.id}.ftree")
+                    if (mergeApp.exportTreeTo(offer.id, file)) {
+                        // Offered once: the review is where it is decided, and backing out of it leaves everything as it was.
+                        mergeApp.waveAwayMerge(offer.id)
+                        withContext(Dispatchers.Main) { mergeOffer = null; transferViewModel.prepareImport(Uri.fromFile(file)) }
+                    }
+                }
+            },
+        )
+    }
+
     // Said once, to somebody new with an empty tree. An updated install that already has people is marked as
     // welcomed without being shown it. See WelcomePolicy.
     val welcomeApp = LocalContext.current.applicationContext as FTreeApplication
@@ -417,6 +450,8 @@ fun FTreeApp(
                             onSettings = { navController.navigate(SettingsRoute) },
                             invitations = invitations,
                             onInvitation = { answering = it },
+                            mergeOffer = mergeOffer,
+                            onMergeOffer = { askingMerge = true },
                         )
                     }
 

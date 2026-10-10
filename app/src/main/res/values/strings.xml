@@ -627,6 +627,11 @@ Camera: only if you choose to scan a code. You can always type instead.\n\nNotif
     <string name="sharing_invited_waiting">Invited. Waiting for them to open it.</string>
     <string name="more_invitation_title">%1$s shared a tree with you</string>
     <string name="more_invitation_title_unknown">A relative shared a tree with you</string>
+    <string name="more_merge_title">Bring “%1$s” into this tree</string>
+    <string name="more_merge_body">%1$d people. You check each match before anything changes.</string>
+    <string name="merge_dialog_body">The people in “%1$s” will be lined up with this tree. Anyone who looks like somebody already here is shown to you first, and you decide whether they are the same person. Nothing changes until you confirm.</string>
+    <string name="merge_review">Review</string>
+    <string name="merge_no_thanks">No thanks</string>
     <string name="join_title">Open “%1$s”?</string>
     <string name="join_body">People in it: %1$d. Opening it adds a new tree to this phone, and the people arrive over the next few minutes. Nothing in your other trees changes.</string>
     <string name="join_open">Open it</string>
