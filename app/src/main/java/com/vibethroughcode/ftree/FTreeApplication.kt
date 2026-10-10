@@ -9,6 +9,12 @@ import com.vibethroughcode.ftree.data.CatalogStore
 import com.vibethroughcode.ftree.data.TreeCatalog
 import com.vibethroughcode.ftree.data.Person
 import com.vibethroughcode.ftree.data.TreeInfo
+import com.vibethroughcode.ftree.data.TreeKind
+import com.vibethroughcode.ftree.data.CatalogResult
+import com.vibethroughcode.ftree.kutumb.treesync.PendingInvite
+import com.vibethroughcode.ftree.kutumb.treesync.TreeInviteCodec
+import com.vibethroughcode.ftree.kutumb.treesync.TreeJoin
+import com.vibethroughcode.ftree.kutumb.treesync.prepareJoinedTree
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -23,6 +29,20 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
+
+/** What came of saying yes to an invitation to a shared tree. */
+sealed interface JoinResult {
+    /** A new tree now holds the shared one. [asked] is whether the request for its people was handed to sync. */
+    data class Joined(val tree: TreeInfo, val asked: Boolean) : JoinResult
+
+    /** Family sync is off, so nothing could arrive; nothing was created. */
+    data object SyncOff : JoinResult
+
+    data object AlreadyJoined : JoinResult
+
+    /** Something went wrong before the tree was complete; whatever was started has been removed. */
+    data object Failed : JoinResult
+}
 
 class FTreeApplication : Application() {
     lateinit var catalog: TreeCatalog
@@ -184,7 +204,74 @@ class FTreeApplication : Application() {
         )
     }
 
+    /**
+     * Says yes to an invitation: makes a new tree beside the others, marks it as the shared tree, and gives it
+     * what it needs to hear from the person who shared it (who this phone is in that tree, and the inviter as
+     * somebody met in person). It then opens it and asks for the people. The new tree holds nobody until they
+     * arrive, and nothing in any other tree is touched.
+     *
+     * The caller restarts the UI ([relaunch]) after a [JoinResult.Joined], as for any change of tree.
+     */
+    suspend fun joinSharedTree(invite: PendingInvite): JoinResult {
+        val invitations = container.invitations
+        if (invitations.hasJoined(invite.tree)) return JoinResult.AlreadyJoined
+        if (!syncPreferences.enabled.value) return JoinResult.SyncOff
+        val created = withContext(Dispatchers.IO) {
+            // The key the inviter knows this phone by is the one the tree that received the invitation holds.
+            val key = withTreeContainer(invite.viaTree) { it.kutumbRepository.observeIdentity().first()?.keyPair }
+                ?: return@withContext null
+            val tree = createTreeFor(invite.name) ?: return@withContext null
+            try {
+                val fresh = AppContainer(this@FTreeApplication, tree, syncPreferences, ::everyoneInAllTrees)
+                try {
+                    prepareJoinedTree(fresh.treeSync, fresh.kutumbRepository, invite, key, System.currentTimeMillis())
+                } finally {
+                    fresh.closeDatabase()
+                }
+                tree
+            } catch (e: Throwable) {
+                catalog.remove(tree.id)
+                deleteFilesOf(tree)
+                null
+            }
+        } ?: return JoinResult.Failed
+        invitations.joined(invite.tree, created.id)
+        val opened = withContext(Dispatchers.Main) { switchTo(created.id) }
+        if (!opened) return JoinResult.Failed
+        val asked = withContext(Dispatchers.IO) {
+            container.syncPublisher.publish(TreeInviteCodec.join(TreeJoin(invite.tree)), listOf(invite.from))
+        }
+        return JoinResult.Joined(created, asked)
+    }
+
+    /** Runs [block] against the wiring of tree [treeId]: the open one, one syncing unseen, or one opened just for this. */
+    private suspend fun <T> withTreeContainer(treeId: String, block: suspend (AppContainer) -> T): T? {
+        val info = catalog.trees.firstOrNull { it.id == treeId } ?: return null
+        val live = synchronized(background) { if (info.id == container.tree.id) container else background[info.id] }
+        if (live != null) return block(live)
+        val shut = AppContainer(this, info, syncPreferences)
+        try {
+            return block(shut)
+        } finally {
+            shut.closeDatabase()
+        }
+    }
+
+    /** A new Family tree called [wanted], or "wanted (2)" and so on if that name is taken. Null if none would do. */
+    private fun createTreeFor(wanted: String): TreeInfo? {
+        val base = wanted.trim().take(TreeCatalog.MAX_NAME)
+        for (n in 1..MAX_NAME_TRIES) {
+            val name = if (n == 1) base else "${base.take(TreeCatalog.MAX_NAME - 5)} ($n)"
+            when (val made = catalog.create(name, TreeKind.FAMILY)) {
+                is CatalogResult.Ok -> return made.tree
+                is CatalogResult.Refused -> if (made.reason != CatalogResult.Reason.NAME_TAKEN) return null
+            }
+        }
+        return null
+    }
+
     private companion object {
+        const val MAX_NAME_TRIES = 9
         const val CLOSE_DELAY_MS = 3_000L
         const val BACKGROUND_PASS_MS = 30_000L
     }

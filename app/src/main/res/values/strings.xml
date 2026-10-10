@@ -557,6 +557,15 @@
     <string name="sharing_nobody">Nobody to share with yet. Meet a relative in person and add them under Network (in More) first.</string>
     <string name="sharing_waiting">%1$d changes waiting to be sent</string>
     <string name="sharing_sync_off">Family sync is off, so nothing is sent yet. Changes are saved here and go when you switch it on.</string>
+    <string name="sharing_invited_waiting">Invited. Waiting for them to open it.</string>
+    <string name="more_invitation_title">%1$s shared a tree with you</string>
+    <string name="more_invitation_title_unknown">A relative shared a tree with you</string>
+    <string name="join_title">Open “%1$s”?</string>
+    <string name="join_body">People in it: %1$d. Opening it adds a new tree to this phone, and the people arrive over the next few minutes. Nothing in your other trees changes.</string>
+    <string name="join_open">Open it</string>
+    <string name="join_not_now">Not now</string>
+    <string name="join_sync_off">Family sync is off, so the tree cannot arrive. Switch it on in Settings, then try again.</string>
+    <string name="join_failed">That did not work. Nothing was changed.</string>
     <string name="sharing_stop">Stop sharing this tree</string>
     <string name="sharing_stop_title">Stop sharing %1$s?</string>
     <string name="sharing_stop_body">This phone will stop sending and receiving changes for this tree. The tree stays exactly as it is here. Relatives who already have it keep their copy; stopping does not take anything back from them.</string>

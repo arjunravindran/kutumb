@@ -39,6 +39,9 @@ import com.vibethroughcode.ftree.kutumb.sync.SyncPublisher
 import com.vibethroughcode.ftree.kutumb.sync.SyncPreferences
 import com.vibethroughcode.ftree.kutumb.sync.SyncService
 import com.vibethroughcode.ftree.kutumb.sync.relay.WebSocketRelay
+import com.vibethroughcode.ftree.kutumb.treesync.AppInvitations
+import com.vibethroughcode.ftree.kutumb.treesync.TreeInvitations
+import com.vibethroughcode.ftree.kutumb.treesync.TreeInviteHandler
 import com.vibethroughcode.ftree.kutumb.treesync.TreeSyncCoordinator
 import com.vibethroughcode.ftree.kutumb.treesync.TreeSyncHandler
 import com.vibethroughcode.ftree.kutumb.treesync.TreeSyncPublisher
@@ -89,6 +92,8 @@ class AppContainer(
     val syncPreferences: SyncPreferences = SyncPreferences(context),
     /** Every person in every tree, for the birthday reminders; null means just this tree's. */
     private val everyoneInAllTrees: (suspend () -> List<Person>)? = null,
+    /** Invitations to join shared trees: the phone's, so one instance for every tree's container. */
+    val invitations: TreeInvitations = AppInvitations.get(context),
 ) {
     private val databaseLazy = lazy { FTreeDatabase.build(context, tree.databaseName) }
 
@@ -135,7 +140,11 @@ class AppContainer(
                         GameSyncHandler(kutumbRepository),
                         RotationSyncHandler(kutumbRepository, signatureScheme),
                         MessageSyncHandler(kutumbRepository, System::currentTimeMillis) { messageNotifier.onReceived(it) },
-                        TreeSyncHandler(treeSync),
+                        TreeSyncHandler(treeSync, heardFrom = { shared, person -> invitations.answered(shared, person) }),
+                        TreeInviteHandler(
+                            tree = treeSync, invitations = invitations, publisher = treeSyncPublisher, viaTree = tree.id,
+                            nameOf = { personId -> familyRepository.person(personId)?.name },
+                        ),
                     ),
                 )
             },

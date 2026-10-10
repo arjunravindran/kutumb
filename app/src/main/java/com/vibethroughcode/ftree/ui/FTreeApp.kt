@@ -18,6 +18,8 @@ import androidx.compose.material.icons.filled.Quiz
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationRail
 import androidx.compose.material3.NavigationRailItem
@@ -69,6 +71,8 @@ import com.vibethroughcode.ftree.ui.network.PathScreen
 import com.vibethroughcode.ftree.ui.nearby.QrPanel
 import com.vibethroughcode.ftree.ui.nearby.ScanAction
 import com.vibethroughcode.ftree.ui.nearby.NearbyViewModel
+import com.vibethroughcode.ftree.kutumb.treesync.PendingInvite
+import com.vibethroughcode.ftree.ui.more.JoinInvitationDialog
 import com.vibethroughcode.ftree.ui.more.MoreScreen
 import com.vibethroughcode.ftree.ui.people.PeopleScreen
 import com.vibethroughcode.ftree.ui.person.PersonDetailScreen
@@ -274,6 +278,16 @@ fun FTreeApp(
      */
     val useRail = onTopLevel && isShortWindow()
 
+    // Trees somebody has offered to share: a dot on More, and a row at the top of it.
+    val invitations by (LocalContext.current.applicationContext as FTreeApplication)
+        .container.invitations.pending.collectAsStateWithLifecycle()
+    var answering by remember { mutableStateOf<PendingInvite?>(null) }
+    answering?.let { invite ->
+        // The invitation may have been answered somewhere else meanwhile; only one still waiting is asked about.
+        if (invitations.any { it.tree == invite.tree }) JoinInvitationDialog(invite, onDismiss = { answering = null })
+        else answering = null
+    }
+
     CompositionLocalProvider(LocalKinshipLanguage provides kinshipLanguage) {
         Scaffold(
             snackbarHost = { SnackbarHost(snackbarHostState) },
@@ -285,7 +299,7 @@ fun FTreeApp(
                             NavigationBarItem(
                                 selected = selected,
                                 onClick = { if (item.type == MoreRoute::class) navController.openMore() else navController.switchTo(item.route) },
-                                icon = { Icon(item.icon, contentDescription = null) },
+                                icon = { NavIcon(item, badge = item.type == MoreRoute::class && invitations.isNotEmpty()) },
                                 label = { Text(stringResource(item.label)) },
                                 modifier = Modifier.testTag(item.tag),
                             )
@@ -304,7 +318,7 @@ fun FTreeApp(
                             NavigationRailItem(
                                 selected = selected,
                                 onClick = { if (item.type == MoreRoute::class) navController.openMore() else navController.switchTo(item.route) },
-                                icon = { Icon(item.icon, contentDescription = null) },
+                                icon = { NavIcon(item, badge = item.type == MoreRoute::class && invitations.isNotEmpty()) },
                                 label = { Text(stringResource(item.label)) },
                                 modifier = Modifier.testTag(item.tag),
                             )
@@ -367,6 +381,8 @@ fun FTreeApp(
                             onNetwork = { navController.navigate(NetworkRoute) },
                             onFacts = { navController.navigate(FactsRoute) },
                             onSettings = { navController.navigate(SettingsRoute) },
+                            invitations = invitations,
+                            onInvitation = { answering = it },
                         )
                     }
 
@@ -575,6 +591,13 @@ private fun NavHostController.openMore() {
  * stack would put the reader back on one of them when they tap Tree. What a tab shows is kept in its
  * view model, so leaving it costs nothing but its scroll position.
  */
+/** A bottom-bar or rail icon, with a dot when there is something waiting behind it. */
+@Composable
+private fun NavIcon(item: Destination, badge: Boolean) {
+    if (badge) BadgedBox(badge = { Badge() }) { Icon(item.icon, contentDescription = null) }
+    else Icon(item.icon, contentDescription = null)
+}
+
 private fun NavHostController.switchTo(route: Any) {
     navigate(route) {
         popUpTo(graph.findStartDestination().id)

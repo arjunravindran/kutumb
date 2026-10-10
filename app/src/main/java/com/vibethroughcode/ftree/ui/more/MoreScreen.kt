@@ -11,6 +11,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Group
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Quiz
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -28,7 +29,9 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.vibethroughcode.ftree.R
+import com.vibethroughcode.ftree.kutumb.treesync.PendingInvite
 
+const val MoreInvitationTagPrefix = "more-invitation-"
 const val MoreNetworkTag = "more-network"
 const val MoreFactsTag = "more-facts"
 const val MoreSettingsTag = "more-settings"
@@ -47,12 +50,25 @@ fun MoreScreen(
     onFacts: () -> Unit,
     onSettings: () -> Unit,
     modifier: Modifier = Modifier,
+    /** Trees somebody has offered to share, at the top because they are waiting for an answer. */
+    invitations: List<PendingInvite> = emptyList(),
+    onInvitation: (PendingInvite) -> Unit = {},
 ) {
     Scaffold(
         modifier = modifier,
         topBar = { CenterAlignedTopAppBar(title = { Text(stringResource(R.string.nav_more)) }) },
     ) { padding ->
         Column(Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState())) {
+            invitations.forEach { invite ->
+                MoreRow(
+                    icon = Icons.Default.Share,
+                    title = invite.fromName?.let { stringResource(R.string.more_invitation_title, it) }
+                        ?: stringResource(R.string.more_invitation_title_unknown),
+                    body = invite.name,
+                    tag = MoreInvitationTagPrefix + invite.tree,
+                    onClick = { onInvitation(invite) },
+                )
+            }
             MoreRow(Icons.Default.Group, R.string.nav_network, R.string.more_network_body, MoreNetworkTag, onNetwork)
             if (showFacts) {
                 MoreRow(Icons.Default.Quiz, R.string.nav_facts, R.string.more_facts_body, MoreFactsTag, onFacts)
@@ -63,7 +79,11 @@ fun MoreScreen(
 }
 
 @Composable
-private fun MoreRow(icon: ImageVector, title: Int, body: Int, tag: String, onClick: () -> Unit) {
+private fun MoreRow(icon: ImageVector, title: Int, body: Int, tag: String, onClick: () -> Unit) =
+    MoreRow(icon, stringResource(title), stringResource(body), tag, onClick)
+
+@Composable
+private fun MoreRow(icon: ImageVector, title: String, body: String, tag: String, onClick: () -> Unit) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
@@ -75,9 +95,9 @@ private fun MoreRow(icon: ImageVector, title: Int, body: Int, tag: String, onCli
     ) {
         Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
         Column(Modifier.padding(start = 20.dp)) {
-            Text(stringResource(title), style = MaterialTheme.typography.titleMedium)
+            Text(title, style = MaterialTheme.typography.titleMedium)
             Text(
-                stringResource(body),
+                body,
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )

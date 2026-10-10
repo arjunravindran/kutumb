@@ -33,7 +33,11 @@ interface TreeSyncSource {
  *
  * What is accepted is then applied by [TreeSyncSink.receive], which does the merging and is idempotent.
  */
-class TreeSyncHandler(private val tree: TreeSyncSink) : SyncHandler {
+class TreeSyncHandler(
+    private val tree: TreeSyncSink,
+    /** Told which member has just sent a valid edit for which shared tree: they plainly hold it. */
+    private val heardFrom: (sharedTreeId: String, personId: String) -> Unit = { _, _ -> },
+) : SyncHandler {
     override suspend fun onEnvelope(envelope: SyncEnvelope, sender: TrustedContact, rumor: UnsignedEvent) {
         if (envelope.type != SyncType.TREE_EDIT) return
         if (sender.pairingMethod != PairingMethod.DIRECT) return
@@ -43,6 +47,7 @@ class TreeSyncHandler(private val tree: TreeSyncSink) : SyncHandler {
         if (!tree.isMember(sender.personId)) return
         if (decoded.ops.isEmpty()) return
         tree.receive(decoded.ops)
+        heardFrom(shared, sender.personId)
     }
 }
 
@@ -108,4 +113,49 @@ suspend fun shareTreeWith(contact: TrustedContact, members: TreeSyncMembers, pub
     if (!members.addMember(contact.personId)) return false
     publisher.sendEverythingTo(contact.personId)
     return true
+}
+
+/**
+ * Hears the two messages that bring somebody into a shared tree.
+ *
+ * `tree-invite` is kept as a waiting invitation, only from a contact paired **in person**, and never for a
+ * tree this tree already is. Nothing is created until the reader says yes. `tree-join` is the answer: if it
+ * comes from a paired contact who is a member of **this** shared tree, they are sent the whole history, which
+ * is what they have just made room for. Anything else is dropped without a word, like the other handlers.
+ */
+class TreeInviteHandler(
+    private val tree: TreeSyncSink,
+    private val invitations: TreeInvitations,
+    private val publisher: TreeSyncPublisher,
+    /** The id of the tree on this phone that holds the pairing, which is where the invitation arrived. */
+    private val viaTree: String,
+    /** What this tree calls a person, for the line saying who shared the tree. */
+    private val nameOf: suspend (String) -> String?,
+    private val clock: () -> Long = System::currentTimeMillis,
+) : SyncHandler {
+    override suspend fun onEnvelope(envelope: SyncEnvelope, sender: TrustedContact, rumor: UnsignedEvent) {
+        if (sender.pairingMethod != PairingMethod.DIRECT) return
+        when (envelope.type) {
+            SyncType.TREE_INVITE -> {
+                val invite = TreeInviteCodec.parseInvite(envelope) ?: return
+                if (tree.sharedId() == invite.tree) return
+                invitations.receive(
+                    PendingInvite(
+                        tree = invite.tree, name = invite.name, people = invite.people,
+                        from = invite.from, you = invite.you,
+                        senderKey = sender.pubKeyCurrent, fromName = nameOf(sender.personId),
+                        viaTree = viaTree, receivedAt = clock(),
+                    ),
+                )
+            }
+            SyncType.TREE_JOIN -> {
+                val join = TreeInviteCodec.parseJoin(envelope) ?: return
+                if (tree.sharedId() != join.tree) return
+                if (!tree.isMember(sender.personId)) return
+                invitations.answered(join.tree, sender.personId)
+                publisher.sendEverythingTo(sender.personId)
+            }
+            else -> Unit
+        }
+    }
 }

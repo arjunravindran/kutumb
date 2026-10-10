@@ -7,7 +7,7 @@ import org.junit.Assert.assertNull
 import org.junit.Test
 
 class TreeInviteCodecTest {
-    private val invite = TreeInvite("tree-1", "Ravindran family", 42)
+    private val invite = TreeInvite("tree-1", "Ravindran family", 42, from = "asha", you = "ravi")
 
     @Test fun anInviteSurvivesTheWire() {
         val sent = SyncEnvelope.parse(TreeInviteCodec.invite(invite).toJson())!!
@@ -22,7 +22,7 @@ class TreeInviteCodecTest {
     }
 
     @Test fun theNameIsTrimmedAndABlankOrTooLongOneRefusesTheWholeInvite() {
-        fun with(name: Any?) = SyncEnvelope(SyncType.TREE_INVITE, mapOf("tree" to "t", "name" to name, "people" to 1L))
+        fun with(name: Any?) = SyncEnvelope(SyncType.TREE_INVITE, mapOf("tree" to "t", "name" to name, "people" to 1L, "from" to "a", "you" to "b"))
         assertEquals("Ravindran", TreeInviteCodec.parseInvite(with("  Ravindran "))!!.name)
         assertNull(TreeInviteCodec.parseInvite(with("   ")))
         assertNull(TreeInviteCodec.parseInvite(with("x".repeat(TreeInviteCodec.MAX_NAME + 1))))
@@ -31,7 +31,7 @@ class TreeInviteCodecTest {
     }
 
     @Test fun aMissingOrOversizedTreeIdOrPeopleCountRefusesTheMessage() {
-        fun inv(tree: Any?, people: Any?) = SyncEnvelope(SyncType.TREE_INVITE, mapOf("tree" to tree, "name" to "n", "people" to people))
+        fun inv(tree: Any?, people: Any?) = SyncEnvelope(SyncType.TREE_INVITE, mapOf("tree" to tree, "name" to "n", "people" to people, "from" to "a", "you" to "b"))
         assertNull(TreeInviteCodec.parseInvite(inv(null, 1L)))
         assertNull(TreeInviteCodec.parseInvite(inv("", 1L)))
         assertNull(TreeInviteCodec.parseInvite(inv("x".repeat(TreeOpRules.MAX_ID + 1), 1L)))
@@ -39,6 +39,18 @@ class TreeInviteCodecTest {
         assertNull(TreeInviteCodec.parseInvite(inv("t", -1L)))
         assertNull(TreeInviteCodec.parseInvite(inv("t", "many")))
         assertNull(TreeInviteCodec.parseJoin(SyncEnvelope(SyncType.TREE_JOIN, emptyMap())))
+    }
+
+    @Test fun bothPeopleMustBeNamedAndBeDifferent() {
+        fun with(from: Any?, you: Any?) =
+            SyncEnvelope(SyncType.TREE_INVITE, mapOf("tree" to "t", "name" to "n", "people" to 1L, "from" to from, "you" to you))
+        assertEquals(TreeInvite("t", "n", 1, "a", "b"), TreeInviteCodec.parseInvite(with("a", "b")))
+        assertNull(TreeInviteCodec.parseInvite(with(null, "b")))
+        assertNull(TreeInviteCodec.parseInvite(with("a", null)))
+        assertNull(TreeInviteCodec.parseInvite(with("", "b")))
+        assertNull(TreeInviteCodec.parseInvite(with("a", 5L)))
+        assertNull(TreeInviteCodec.parseInvite(with("x".repeat(TreeOpRules.MAX_ID + 1), "b")))
+        assertNull("nobody invites themselves", TreeInviteCodec.parseInvite(with("a", "a")))
     }
 
     @Test fun eachParserOnlyReadsItsOwnType() {

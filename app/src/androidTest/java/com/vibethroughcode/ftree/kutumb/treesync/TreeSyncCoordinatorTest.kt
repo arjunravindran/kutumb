@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.vibethroughcode.ftree.data.CatalogStore
 import com.vibethroughcode.ftree.data.DeletionMode
 import com.vibethroughcode.ftree.data.FTreeDatabase
 import com.vibethroughcode.ftree.data.FamilyRepository
@@ -11,7 +12,12 @@ import com.vibethroughcode.ftree.data.Gender
 import com.vibethroughcode.ftree.data.Person
 import com.vibethroughcode.ftree.data.PhotoStore
 import com.vibethroughcode.ftree.data.RelativeKind
+import com.vibethroughcode.ftree.kutumb.Bip340Scheme
+import com.vibethroughcode.ftree.kutumb.InMemoryKutumbRepository
+import com.vibethroughcode.ftree.kutumb.sync.CompositeSyncHandler
+import com.vibethroughcode.ftree.kutumb.sync.NoSyncPublisher
 import com.vibethroughcode.ftree.kutumb.sync.SyncEnvelope
+import com.vibethroughcode.ftree.kutumb.sync.SyncHandler
 import com.vibethroughcode.ftree.kutumb.sync.SyncPublisher
 import com.vibethroughcode.ftree.kutumb.sync.UnsignedEvent
 import com.vibethroughcode.ftree.kutumb.trust.PairingMethod
@@ -19,6 +25,7 @@ import com.vibethroughcode.ftree.kutumb.trust.TrustedContact
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -269,8 +276,13 @@ class TreeSyncCoordinatorTest {
     }
 
     /** A relay that hands each envelope to the other phone's real handler, after a real trip through JSON. */
-    private inner class Link(val from: Phone, val to: Phone, val fromAsSeenByTo: TrustedContact, val toPersonId: String) : SyncPublisher {
-        val handler = TreeSyncHandler(to.sync)
+    private inner class Link(
+        val from: Phone,
+        val to: Phone,
+        val fromAsSeenByTo: TrustedContact,
+        val toPersonId: String,
+        val handler: SyncHandler = TreeSyncHandler(to.sync),
+    ) : SyncPublisher {
         var up = true
         override suspend fun publish(envelope: SyncEnvelope, personIds: Collection<String>): Boolean {
             if (!up || toPersonId !in personIds) return false
@@ -315,6 +327,86 @@ class TreeSyncCoordinatorTest {
         aToB.up = true
         assertTrue(aPublisher.flush() > 0)
         assertEquals(a.tree(), b.tree())
+    }
+
+    private class MemoryStore : CatalogStore {
+        var text: String? = null
+        override fun read() = text
+        override fun write(text: String) { this.text = text }
+    }
+
+    /**
+     * The whole of joining, on real databases and the real handlers: Asha shares a tree and invites Ravi, the
+     * invitation reaches the tree where he holds Asha, he says yes, a new tree is prepared, he asks for the
+     * people, and ends up with the same tree under the same ids, which then keeps in step both ways.
+     */
+    @Test fun aRelativeInvitedToATreeOpensItAndEndsUpWithTheSameTree() = runBlocking {
+        val asha = phone("asha"); val raviOld = phone("raviOld"); val raviNew = phone("raviNew")
+        val ashaKey = Bip340Scheme.generateKeyPair(); val raviKey = Bip340Scheme.generateKeyPair()
+
+        // Asha's tree: herself, Ravi (as she records him) and their father.
+        asha.person("asha", "Asha"); asha.person("ravi-p", "Ravi"); asha.person("dad", "Dad")
+        asha.repo.addRelative("asha", "dad", RelativeKind.PARENT)
+        asha.repo.addRelative("ravi-p", "dad", RelativeKind.PARENT)
+        assertTrue(asha.sync.share("shared-1"))
+
+        val raviAsSeenByAsha = TrustedContact("ravi-p", raviKey.publicKey, pairedAt = 1, pairingMethod = PairingMethod.DIRECT)
+        val ashaAsSeenByRaviOld = TrustedContact("asha-there", ashaKey.publicKey, pairedAt = 1, pairingMethod = PairingMethod.DIRECT)
+        val ashaAsSeenByRaviNew = TrustedContact("asha", ashaKey.publicKey, pairedAt = 1, pairingMethod = PairingMethod.DIRECT)
+        val raviInvitations = TreeInvitations(MemoryStore())
+        val ashaInvitations = TreeInvitations(MemoryStore())
+
+        // The invitation goes to the tree where Ravi already holds Asha, which is where the pairing lives.
+        val toRaviOld = Link(
+            asha, raviOld, ashaAsSeenByRaviOld, toPersonId = "ravi-p",
+            handler = CompositeSyncHandler(
+                TreeSyncHandler(raviOld.sync),
+                TreeInviteHandler(raviOld.sync, raviInvitations, TreeSyncPublisher(raviOld.sync, NoSyncPublisher), "old", { "Asha" }, { 9L }),
+            ),
+        )
+        val sharing = TreeSharing(
+            asha.sync, asha.sync, asha.sync, { listOf(raviAsSeenByAsha) }, TreeSyncPublisher(asha.sync, toRaviOld),
+            SharingInviter({ asha.sync.sharedId() }, { "Ravindran family" }, { asha.db.personDao().allPeople().size }, { "asha" }, toRaviOld, ashaInvitations),
+        )
+        assertTrue(sharing.setMember(raviAsSeenByAsha, true))
+        assertTrue("shown as waiting until he answers", sharing.state().candidates.single().invitedWaiting)
+
+        val pending = raviInvitations.pending.value.single()
+        assertEquals(PendingInvite("shared-1", "Ravindran family", 3, "asha", "ravi-p", ashaKey.publicKey, "Asha", "old", 9L), pending)
+        assertTrue("nothing has been created yet", raviNew.tree().people.isEmpty() && !raviNew.sync.isShared())
+
+        // He says yes: a new tree is made ready to hear from Asha.
+        val raviKutumb = InMemoryKutumbRepository()
+        prepareJoinedTree(raviNew.sync, raviKutumb, pending, raviKey, now = 5L)
+        raviInvitations.joined(pending.tree, "new")
+        assertEquals("shared-1", raviNew.sync.sharedId())
+        assertEquals(listOf("asha"), raviNew.sync.members())
+        assertEquals("ravi-p", raviKutumb.observeIdentity().first()!!.personId)
+        assertEquals(raviKey.publicKey, raviKutumb.observeIdentity().first()!!.keyPair.publicKey)
+        assertEquals(listOf("asha"), raviKutumb.observeContacts().first().map { it.personId })
+        assertTrue(raviNew.tree().people.isEmpty())
+
+        // He asks for the people; Asha's side hears it and sends the whole tree.
+        val toRaviNew = Link(asha, raviNew, ashaAsSeenByRaviNew, toPersonId = "ravi-p", handler = TreeSyncHandler(raviNew.sync))
+        val toAsha = Link(
+            raviNew, asha, raviAsSeenByAsha, toPersonId = "asha",
+            handler = CompositeSyncHandler(
+                TreeSyncHandler(asha.sync),
+                TreeInviteHandler(asha.sync, ashaInvitations, TreeSyncPublisher(asha.sync, toRaviNew), "asha-tree", { null }, { 10L }),
+            ),
+        )
+        assertTrue(toAsha.publish(TreeInviteCodec.join(TreeJoin(pending.tree)), listOf("asha")))
+        assertEquals("the same people under the same ids", asha.tree(), raviNew.tree())
+        assertEquals(setOf("asha", "ravi-p", "dad"), raviNew.tree().people.keys)
+        assertFalse("no longer waiting", sharing.state().candidates.single().invitedWaiting)
+
+        // And from here an edit on either side reaches the other.
+        raviNew.tick(1_000)
+        raviNew.repo.updatePerson(raviNew.repo.person("ravi-p")!!.copy(name = "Ravi K"))
+        raviNew.sync.reconcile()
+        assertTrue(TreeSyncPublisher(raviNew.sync, toAsha).flush() > 0)
+        assertEquals(raviNew.tree(), asha.tree())
+        assertEquals("Ravi K", asha.repo.person("ravi-p")!!.name)
     }
 
     @Test fun someoneNotAMemberCannotWriteIntoTheTree() = runBlocking {

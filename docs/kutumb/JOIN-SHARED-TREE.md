@@ -1,7 +1,7 @@
 # Joining a shared tree: proposal (2026-10-09)
 
-Status: **proposal, nothing built.** Needs the owner's yes before code, because it adds two message types
-to the wire and makes the app create a tree on its own (CLAUDE.md: wire and schema changes are discussed first).
+Status: **first cut built 2026-10-10** (see "What was built" at the end); the later steps are not. The text below is
+the proposal as it was agreed; where the build differs, the last section says so.
 
 ## The problem
 
@@ -72,3 +72,37 @@ has shared. `Not now` just drops the invitation; Asha can invite again.
 2. Open (proposed default): the relay path alone is enough for the first release; the nearby snapshot waits
    until large trees prove too slow.
 3. Open (proposed default): Ravi is asked ("Open it" / "Not now") before the tree is created.
+
+## What was built (2026-10-10)
+
+Everything in "How it works" exists, tested on the JVM, on real databases and in the UI, and has **not** yet been
+run on two phones. Where it differs from the proposal:
+
+- **The invitation carries two more ids**, `from` (who the sender is in the shared tree) and `you` (who they have
+  recorded the invited phone as). A new tree is empty, so it has to be told who it is and who invited it; the
+  proposal missed that. Both are ids inside the shared tree, so they match on every phone.
+- **Joining always makes a new tree**, beside the others. The rule "if your own tree is empty or holds only you,
+  joining fills it" is **not built**: a tree that has paired with anyone already holds that person under an id of
+  its own, which would have to be rewritten to the shared one. Someone's first tree therefore stays, with just
+  themselves in it, next to the new one. Nothing is ever deleted for them.
+- **No schema change.** Pending invitations live in preferences (`TreeInvitations`, one instance for the phone,
+  committed on every change so a crash cannot bring one back), not in a Room table, because an invitation belongs
+  to the phone and can arrive through any tree that holds the pairing.
+- **Where it arrives and what it creates.** Every tree's own sync engine hears the message and `TreeInviteHandler`
+  keeps it (only from somebody paired in person, never for a tree that tree already is). Saying yes
+  (`FTreeApplication.joinSharedTree`) takes the key from the tree that received it, makes the tree, marks it shared
+  under the inviter's id, records this phone's identity and the inviter as a contact and member
+  (`prepareJoinedTree`), opens it, and sends `tree-join` from there.
+- **Asha's side.** Switching someone on in Sharing now sends the invitation and holds the tree back; their row says
+  "Invited. Waiting for them to open it." until they ask (or send an edit). A `tree-join` from a member sends them
+  the whole history. Somebody who has asked before and is switched on again is sent what they missed at once.
+- **The invitation** is a row at the top of **More** with a dot on the tab, then one dialog: **Open it** or
+  **Not now**. With family sync off, Open it says so and creates nothing.
+
+Not built, and worth knowing:
+
+- **The "add the people from your other tree" offer** for someone with a larger tree of their own.
+- **A `tree-join` that is lost is not retried.** If it is not handed to sync, the new tree stays empty. Switching the
+  person off and on in Sharing does not help, because a phone that has joined ignores a second invitation.
+- **No way to leave** a shared tree other than deleting it.
+- The invitation is not announced by a notification, only by the row and the dot.

@@ -29,6 +29,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.vibethroughcode.ftree.FTreeApplication
 import com.vibethroughcode.ftree.R
+import com.vibethroughcode.ftree.kutumb.treesync.SharingInviter
 import com.vibethroughcode.ftree.kutumb.treesync.SharingState
 import com.vibethroughcode.ftree.kutumb.treesync.TreeSharing
 import com.vibethroughcode.ftree.kutumb.trust.TrustedContact
@@ -61,6 +62,14 @@ fun TreeSharingDialog(treeName: String, onDismiss: () -> Unit) {
             members = container.treeSync,
             contacts = { container.kutumbRepository.observeContacts().first() },
             publisher = container.treeSyncPublisher,
+            inviter = SharingInviter(
+                sharedId = { container.treeSync.sharedId() },
+                treeName = { treeName },
+                peopleCount = { container.familyRepository.allPeople().size },
+                myPersonId = { container.kutumbRepository.observeIdentity().first()?.personId },
+                transport = container.syncPublisher,
+                invitations = container.invitations,
+            ),
         )
     }
     var state by remember { mutableStateOf<SharingState?>(null) }
@@ -110,11 +119,16 @@ fun TreeSharingDialog(treeName: String, onDismiss: () -> Unit) {
                         }
                         s.candidates.forEach { candidate ->
                             Row(Modifier.fillMaxWidth().padding(top = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-                                Text(
-                                    names[candidate.personId] ?: candidate.personId,
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    modifier = Modifier.weight(1f),
-                                )
+                                Column(Modifier.weight(1f)) {
+                                    Text(names[candidate.personId] ?: candidate.personId, style = MaterialTheme.typography.bodyLarge)
+                                    if (candidate.invitedWaiting) {
+                                        Text(
+                                            stringResource(R.string.sharing_invited_waiting),
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        )
+                                    }
+                                }
                                 Switch(
                                     checked = candidate.isMember,
                                     onCheckedChange = { on ->
