@@ -217,6 +217,34 @@ class FamilyRepository(
         }
     }
 
+    /**
+     * Adds an uncle or aunt of [personId]: a brother or sister of one of their parents. Nothing new is stored
+     * for it; it is a person joined as a sibling to a parent, so the kinship rules work it out as they do for
+     * anyone. With no [parentId] the parent is not in the tree yet, so an unknown one is made first, and both
+     * go in together or neither does.
+     */
+    suspend fun addUncleOrAunt(personId: String, parentId: String?, relative: Person): Result<Person> = runCatching {
+        db.withTransaction {
+            val parent = parentId ?: addNewRelative(personId, Person(), RelativeKind.PARENT).getOrThrow().id
+            addNewRelative(parent, relative, RelativeKind.SIBLING).getOrThrow()
+        }
+    }
+
+    /**
+     * Adds a cousin of [personId]: a child of an uncle or aunt. With [auntUncleId] that uncle or aunt is already
+     * in the tree. Without it, one is made as an unknown sibling of the parent [parentId] (and that parent, too,
+     * if none is given), so the cousin is not left hanging. All of it goes in together or none of it does.
+     */
+    suspend fun addCousin(personId: String, auntUncleId: String?, parentId: String?, relative: Person): Result<Person> = runCatching {
+        db.withTransaction {
+            val auntUncle = auntUncleId ?: run {
+                val parent = parentId ?: addNewRelative(personId, Person(), RelativeKind.PARENT).getOrThrow().id
+                addNewRelative(parent, Person(), RelativeKind.SIBLING).getOrThrow().id
+            }
+            addNewRelative(auntUncle, relative, RelativeKind.CHILD).getOrThrow()
+        }
+    }
+
     suspend fun originsOf(personIds: List<String>): List<PersonOrigin> = origins.originsOf(personIds)
 
     /** Whole-tree reads, used only by export. Everything else asks a narrower question. */

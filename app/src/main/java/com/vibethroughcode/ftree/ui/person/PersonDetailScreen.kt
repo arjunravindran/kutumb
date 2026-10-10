@@ -54,6 +54,7 @@ import com.vibethroughcode.ftree.R
 import com.vibethroughcode.ftree.data.RecordedDate
 import com.vibethroughcode.ftree.data.Person
 import com.vibethroughcode.ftree.data.RelativeKind
+import com.vibethroughcode.ftree.ui.relative.AddExtendedRelativeDialog
 import com.vibethroughcode.ftree.data.SpouseKind
 import com.vibethroughcode.ftree.ui.FTreeViewModels
 import com.vibethroughcode.ftree.ui.common.PersonAvatar
@@ -99,6 +100,7 @@ fun PersonDetailScreen(
     var confirmingDelete by remember { mutableStateOf(false) }
     var menuOpen by remember { mutableStateOf(false) }
     var pendingRemoval by remember { mutableStateOf<Person?>(null) }
+    var addingExtended by remember { mutableStateOf(false) }
     var relabelling by remember { mutableStateOf<com.vibethroughcode.ftree.graph.Connection?>(null) }
     val isCircle = (androidx.compose.ui.platform.LocalContext.current.applicationContext as com.vibethroughcode.ftree.FTreeApplication)
         .container.tree.kind == com.vibethroughcode.ftree.data.TreeKind.CIRCLE
@@ -234,6 +236,12 @@ fun PersonDetailScreen(
                             )
                         }
                     }
+                    Column {
+                        TextButton(
+                            onClick = { addingExtended = true },
+                            modifier = Modifier.padding(horizontal = 12.dp).testTag(AddExtendedTag),
+                        ) { Text(stringResource(R.string.extended_open)) }
+                    }
                 }
 
                 Column {
@@ -291,6 +299,8 @@ fun PersonDetailScreen(
             dismissButton = { TextButton(onClick = { relabelling = null }) { Text(stringResource(R.string.trees_cancel)) } },
         )
     }
+
+    state.person?.takeIf { addingExtended }?.let { AddExtendedRelativeDialog(it, onDismiss = { addingExtended = false }) }
 
     pendingRemoval?.let { other ->
         val subject = other.displayName()
@@ -535,6 +545,8 @@ private fun EmptySection(kind: RelativeKind, onAdd: () -> Unit) {
         )
     }
 }
+
+const val AddExtendedTag = "add-extended"
 
 fun addSectionTag(kind: RelativeKind): String = "add-relative-" + kind.name.lowercase()
 

@@ -87,6 +87,8 @@ fun ContactsImportDialog(
     /** False for a circle, which has no mothers or sons: everyone is then added without a connection. */
     allowRelations: Boolean = true,
     source: PhonebookSource? = null,
+    /** When set, the page is for choosing one contact to fill a form in with: a tap picks and closes. Nothing is added. */
+    pickOne: ((PhoneContact) -> Unit)? = null,
 ) {
     val context = LocalContext.current
     val app = context.applicationContext as FTreeApplication
@@ -122,7 +124,7 @@ fun ContactsImportDialog(
                 failed = true
             } else {
                 existing = people.map { Phonebook.nameKey(it.name) }.filter { it.isNotEmpty() }.toSet()
-                emptyTree = people.isEmpty() && allowRelations
+                emptyTree = people.isEmpty() && allowRelations && pickOne == null
                 contacts = read
             }
         }
@@ -166,6 +168,8 @@ fun ContactsImportDialog(
                 query = query,
                 onQuery = { query = it.take(100) },
                 busy = busy,
+                single = pickOne != null,
+                onSingle = { contact -> pickOne?.invoke(contact); onDismiss() },
                 onAdd = {
                     busy = true
                     scope.launch {
@@ -263,6 +267,8 @@ fun ContactsPicker(
     busy: Boolean,
     onAdd: () -> Unit,
     onCancel: () -> Unit,
+    single: Boolean = false,
+    onSingle: (PhoneContact) -> Unit = {},
 ) {
     val shown = remember(contacts, query) {
         val q = query.trim()
@@ -271,7 +277,13 @@ fun ContactsPicker(
     Column(Modifier.fillMaxSize()) {
         Column(Modifier.padding(horizontal = 20.dp, vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Text(
-                stringResource(if (emptyTree) R.string.contacts_pick_title_new else R.string.contacts_pick_title),
+                stringResource(
+                    when {
+                        single -> R.string.contacts_pick_title_one
+                        emptyTree -> R.string.contacts_pick_title_new
+                        else -> R.string.contacts_pick_title
+                    },
+                ),
                 style = MaterialTheme.typography.titleLarge,
             )
             if (emptyTree) {
@@ -306,18 +318,19 @@ fun ContactsPicker(
                     Column(
                         Modifier
                             .fillMaxWidth()
-                            .clickable(enabled = !already) {
-                                onPick(contact.id, if (chosen == null) ContactRelation.NOT_CONNECTED else null)
+                            .clickable(enabled = !already || single) {
+                                if (single) onSingle(contact)
+                                else onPick(contact.id, if (chosen == null) ContactRelation.NOT_CONNECTED else null)
                             }
                             .padding(horizontal = 20.dp, vertical = 8.dp)
                             .testTag(ContactRowTagPrefix + contact.id),
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Checkbox(checked = chosen != null, onCheckedChange = null, enabled = !already)
-                            Column(Modifier.padding(start = 12.dp)) {
+                            if (!single) Checkbox(checked = chosen != null, onCheckedChange = null, enabled = !already)
+                            Column(Modifier.padding(start = if (single) 0.dp else 12.dp)) {
                                 Text(contact.name, style = MaterialTheme.typography.bodyLarge)
                                 val note = when {
-                                    already -> stringResource(R.string.contacts_already)
+                                    already && !single -> stringResource(R.string.contacts_already)
                                     else -> contact.birthday?.let { RecordedDate.parse(it)?.display() }
                                 }
                                 if (note != null) {
@@ -358,7 +371,7 @@ fun ContactsPicker(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             TextButton(onClick = onCancel, enabled = !busy) { Text(stringResource(R.string.contacts_cancel)) }
-            Button(
+            if (!single) Button(
                 onClick = onAdd,
                 enabled = picks.isNotEmpty() && !busy && (!emptyTree || myName.isNotBlank()),
                 modifier = Modifier.weight(1f).heightIn(min = 52.dp).testTag(ContactsAddTag),

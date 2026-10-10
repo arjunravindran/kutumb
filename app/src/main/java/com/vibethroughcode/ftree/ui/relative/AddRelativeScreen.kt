@@ -1,5 +1,7 @@
 package com.vibethroughcode.ftree.ui.relative
 
+import com.vibethroughcode.ftree.ui.phonebook.ContactsImportDialog
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -52,6 +54,7 @@ import com.vibethroughcode.ftree.ui.common.displayName
 import com.vibethroughcode.ftree.ui.common.readableMeasure
 import com.vibethroughcode.ftree.ui.common.rejectionMessage
 
+const val AddRelativeFromContactTag = "add-relative-from-contact"
 const val AddRelativeNameTag = "add-relative-name"
 const val AddRelativeSaveTag = "add-relative-save"
 const val AddRelativeUnknownTag = "add-relative-unknown"
@@ -72,6 +75,13 @@ fun AddRelativeScreen(
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val anchorName = state.anchor?.displayName().orEmpty()
+    var choosingContact by remember { mutableStateOf(false) }
+    if (choosingContact) {
+        ContactsImportDialog(
+            onDismiss = { choosingContact = false },
+            pickOne = { contact -> viewModel.onContactChosen(contact.name, contact.birthday) },
+        )
+    }
 
     Scaffold(
         modifier = modifier,
@@ -99,6 +109,11 @@ fun AddRelativeScreen(
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
                     SectionRule(stringResource(R.string.add_relative_new))
+
+                    OutlinedButton(
+                        onClick = { choosingContact = true },
+                        modifier = Modifier.fillMaxWidth().testTag(AddRelativeFromContactTag),
+                    ) { Text(stringResource(R.string.contacts_fill)) }
 
                     OutlinedTextField(
                         value = state.newName,

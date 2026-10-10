@@ -1,5 +1,7 @@
 package com.vibethroughcode.ftree.ui.person
 
+import com.vibethroughcode.ftree.ui.phonebook.ContactsImportDialog
+import androidx.compose.material3.OutlinedButton
 import android.net.Uri
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -65,6 +67,7 @@ import com.vibethroughcode.ftree.ui.FTreeViewModels
 import com.vibethroughcode.ftree.ui.common.readableMeasure
 import com.vibethroughcode.ftree.ui.theme.FTreeText
 
+const val EditFromContactTag = "edit-from-contact"
 const val EditNameFieldTag = "edit-name"
 const val EditBornFieldTag = "edit-born"
 const val EditDiedFieldTag = "edit-died"
@@ -84,6 +87,7 @@ fun PersonEditScreen(
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val crop by viewModel.crop.collectAsStateWithLifecycle()
     var confirmingDiscard by remember { mutableStateOf(false) }
+    var choosingContact by remember { mutableStateOf(false) }
 
     fun attemptBack() {
         if (state.dirty) confirmingDiscard = true else onBack()
@@ -131,11 +135,18 @@ fun PersonEditScreen(
                 onRemove = viewModel::onPhotoRemoved,
             )
 
+            if (state.isNew) {
+                OutlinedButton(
+                    onClick = { choosingContact = true },
+                    modifier = Modifier.fillMaxWidth().testTag(EditFromContactTag),
+                ) { Text(stringResource(R.string.contacts_fill)) }
+            }
+
             OutlinedTextField(
                 value = state.name,
                 onValueChange = viewModel::onNameChange,
                 label = { Text(stringResource(R.string.edit_name)) },
-                supportingText = { Text(stringResource(R.string.edit_name_hint)) },
+                supportingText = if (state.isNew) null else ({ Text(stringResource(R.string.edit_name_hint)) }),
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words),
                 modifier = Modifier.fillMaxWidth().testTag(EditNameFieldTag),
@@ -193,6 +204,16 @@ fun PersonEditScreen(
 
             Spacer(Modifier.height(32.dp))
         }
+    }
+
+    if (choosingContact) {
+        ContactsImportDialog(
+            onDismiss = { choosingContact = false },
+            pickOne = { contact ->
+                viewModel.onNameChange(contact.name)
+                contact.birthday?.let(viewModel::onBirthDateChange)
+            },
+        )
     }
 
     if (confirmingDiscard) {

@@ -40,7 +40,7 @@ class AddRelativeViewModel(
     private val form = MutableStateFlow(FormState())
     private val rejection = MutableStateFlow<RelationshipRejection?>(null)
 
-    private data class FormState(val name: String = "", val gender: Gender = Gender.UNSPECIFIED)
+    private data class FormState(val name: String = "", val gender: Gender = Gender.UNSPECIFIED, val birthDate: String? = null)
 
     /**
      * People this relationship could never legally reach.
@@ -98,6 +98,9 @@ class AddRelativeViewModel(
     fun onQueryChange(value: String) { query.value = value }
     fun onNewNameChange(value: String) = form.update { it.copy(name = value) }
     fun onNewGenderChange(value: Gender) = form.update { it.copy(gender = value) }
+
+    /** A contact was chosen to fill the form in: their name, and their birthday if the phone has one. */
+    fun onContactChosen(name: String, birthDate: String?) = form.update { it.copy(name = name, birthDate = birthDate) }
     fun dismissRejection() { rejection.value = null }
 
     private inline fun MutableStateFlow<FormState>.update(block: (FormState) -> FormState) {
@@ -115,7 +118,7 @@ class AddRelativeViewModel(
         attempt(onDone) {
             repository.addNewRelative(
                 anchorId = anchorId,
-                person = Person(name = state.name.trim().ifBlank { null }, gender = state.gender),
+                person = Person(name = state.name.trim().ifBlank { null }, gender = state.gender, birthDate = state.birthDate),
                 kind = kind,
             ).map { }
         }
