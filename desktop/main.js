@@ -57,7 +57,7 @@ if (process.platform === 'linux' && !process.env.DISPLAY && !process.env.WAYLAND
  * unlabelled and liable to be silently grouped under whatever "Electron" last used the same slot.
  * Harmless to call on platforms that ignore it, so this is not gated to `win32` by an `if`.
  */
-app.setAppUserModelId('com.vibethroughcode.ftree');
+app.setAppUserModelId('contact.arjun.kutumb');
 
 /*
  * The viewer, which lives beside this app rather than inside it.

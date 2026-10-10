@@ -1,11 +1,10 @@
 {
-  "name": "f-tree-desktop",
-  "productName": "f-tree",
+  "name": "kutumb-desktop",
+  "productName": "Kutumb",
   "version": "1.0.0",
   "description": "A local-first family tree, on your own machine",
   "author": {
-    "name": "thisisankit27",
-    "email": "69184999+thisisankit27@users.noreply.github.com"
+    "name": "Arjun Ravindran"
   },
   "license": "MIT",
   "main": "main.js",
@@ -23,8 +22,8 @@
     "electron-builder": "^25.1.8"
   },
   "build": {
-    "appId": "com.vibethroughcode.ftree",
-    "productName": "f-tree",
+    "appId": "contact.arjun.kutumb",
+    "productName": "Kutumb",
     "copyright": "MIT",
     "directories": {
       "buildResources": "build",
@@ -105,7 +104,7 @@
       "mimeTypes": [
         "application/x-ftree"
       ],
-      "maintainer": "thisisankit27 <69184999+thisisankit27@users.noreply.github.com>"
+      "maintainer": "Arjun Ravindran <arjunravindran@users.noreply.github.com>"
     },
     "deb": {
       "afterInstall": "build/linux-after-install.sh"

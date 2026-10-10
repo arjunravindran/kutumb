@@ -6,12 +6,12 @@
 
 if type update-alternatives 2>/dev/null >&1; then
     # Remove previous link if it doesn't use update-alternatives
-    if [ -L '/usr/bin/f-tree-desktop' -a -e '/usr/bin/f-tree-desktop' -a "`readlink '/usr/bin/f-tree-desktop'`" != '/etc/alternatives/f-tree-desktop' ]; then
-        rm -f '/usr/bin/f-tree-desktop'
+    if [ -L '/usr/bin/kutumb-desktop' -a -e '/usr/bin/kutumb-desktop' -a "`readlink '/usr/bin/kutumb-desktop'`" != '/etc/alternatives/kutumb-desktop' ]; then
+        rm -f '/usr/bin/kutumb-desktop'
     fi
-    update-alternatives --install '/usr/bin/f-tree-desktop' 'f-tree-desktop' '/opt/f-tree/f-tree-desktop' 100 || ln -sf '/opt/f-tree/f-tree-desktop' '/usr/bin/f-tree-desktop'
+    update-alternatives --install '/usr/bin/kutumb-desktop' 'kutumb-desktop' '/opt/Kutumb/kutumb-desktop' 100 || ln -sf '/opt/Kutumb/kutumb-desktop' '/usr/bin/kutumb-desktop'
 else
-    ln -sf '/opt/f-tree/f-tree-desktop' '/usr/bin/f-tree-desktop'
+    ln -sf '/opt/Kutumb/kutumb-desktop' '/usr/bin/kutumb-desktop'
 fi
 
 # Give Chromium its SUID sandbox helper, always.
@@ -28,8 +28,8 @@ fi
 # debs do. Where the namespace sandbox does work Chromium prefers it and never runs this
 # binary; where it does not, this is the difference between a window and a core dump. Either
 # way the renderer stays sandboxed, which is the point -- --no-sandbox is not a fix.
-chown root:root '/opt/f-tree/chrome-sandbox' || true
-chmod 4755 '/opt/f-tree/chrome-sandbox' || true
+chown root:root '/opt/Kutumb/chrome-sandbox' || true
+chmod 4755 '/opt/Kutumb/chrome-sandbox' || true
 
 if hash update-mime-database 2>/dev/null; then
     update-mime-database /usr/share/mime || true

@@ -240,7 +240,7 @@ jobs:
           FTREE_SMOKE_ARGV: ${{ runner.temp }}/fixtures/a-cousins-tree.ftree
         run: |
           python3 ../tools/make_sample_tree.py "$RUNNER_TEMP/fixtures"
-          xvfb-run -a ./dist/linux-unpacked/f-tree-desktop --no-sandbox "$RUNNER_TEMP/fixtures/a-cousins-tree.ftree"
+          xvfb-run -a ./dist/linux-unpacked/kutumb-desktop --no-sandbox "$RUNNER_TEMP/fixtures/a-cousins-tree.ftree"
 
       - uses: actions/upload-artifact@v4
         with:

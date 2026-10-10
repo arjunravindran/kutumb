@@ -67,7 +67,7 @@ Install and run it:
 
 ```bash
 ./gradlew installDebug
-adb shell am start -n com.vibethroughcode.kutumb.debug/com.vibethroughcode.ftree.MainActivity
+adb shell am start -n contact.arjun.kutumb.debug/com.vibethroughcode.ftree.MainActivity
 ```
 
 **Do not tap through hundreds of forms to get test data.** Debug builds carry a seeder:
@@ -75,14 +75,14 @@ adb shell am start -n com.vibethroughcode.kutumb.debug/com.vibethroughcode.ftree
 ```bash
 # A deliberately awkward family: unknown ancestors, two marriages, half-siblings, missing dates.
 adb shell am broadcast -a com.vibethroughcode.ftree.SEED \
-    -n com.vibethroughcode.kutumb.debug/com.vibethroughcode.ftree.debug.SeedReceiver --es mode family
+    -n contact.arjun.kutumb.debug/com.vibethroughcode.ftree.debug.SeedReceiver --es mode family
 
 # A large tree, for performance work.
 adb shell am broadcast -a com.vibethroughcode.ftree.SEED \
-    -n com.vibethroughcode.kutumb.debug/com.vibethroughcode.ftree.debug.SeedReceiver --es mode large --ei size 2000
+    -n contact.arjun.kutumb.debug/com.vibethroughcode.ftree.debug.SeedReceiver --es mode large --ei size 2000
 
 adb shell am broadcast -a com.vibethroughcode.ftree.SEED \
-    -n com.vibethroughcode.kutumb.debug/com.vibethroughcode.ftree.debug.SeedReceiver --es mode clear
+    -n contact.arjun.kutumb.debug/com.vibethroughcode.ftree.debug.SeedReceiver --es mode clear
 ```
 
 Full detail in [docs/building.md](docs/building.md).

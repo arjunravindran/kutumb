@@ -31,7 +31,7 @@ Requires **JDK 17+** and the Android SDK (platform 37, build-tools 36).
 
 ```bash
 ./gradlew installDebug
-adb shell am start -n com.vibethroughcode.kutumb.debug/com.vibethroughcode.ftree.MainActivity
+adb shell am start -n contact.arjun.kutumb.debug/com.vibethroughcode.ftree.MainActivity
 ```
 
 Debug builds carry a seeder for development, so the chart and the merge logic can be exercised
@@ -40,14 +40,14 @@ without tapping through hundreds of forms:
 ```bash
 # A deliberately awkward family: unknown ancestors, two marriages, half-siblings, missing dates.
 adb shell am broadcast -a com.vibethroughcode.ftree.SEED \
-    -n com.vibethroughcode.kutumb.debug/com.vibethroughcode.ftree.debug.SeedReceiver --es mode family
+    -n contact.arjun.kutumb.debug/com.vibethroughcode.ftree.debug.SeedReceiver --es mode family
 
 # A large tree, for performance work.
 adb shell am broadcast -a com.vibethroughcode.ftree.SEED \
-    -n com.vibethroughcode.kutumb.debug/com.vibethroughcode.ftree.debug.SeedReceiver --es mode large --ei size 2000
+    -n contact.arjun.kutumb.debug/com.vibethroughcode.ftree.debug.SeedReceiver --es mode large --ei size 2000
 
 adb shell am broadcast -a com.vibethroughcode.ftree.SEED \
-    -n com.vibethroughcode.kutumb.debug/com.vibethroughcode.ftree.debug.SeedReceiver --es mode clear
+    -n contact.arjun.kutumb.debug/com.vibethroughcode.ftree.debug.SeedReceiver --es mode clear
 ```
 
 The receiver exists only in debug builds.

@@ -16,7 +16,7 @@ const path = require('node:path');
 const { execFileSync } = require('node:child_process');
 
 const DIST = path.join(__dirname, 'dist');
-const SANDBOX = "'/opt/f-tree/chrome-sandbox'";
+const SANDBOX = "'/opt/Kutumb/chrome-sandbox'";
 
 function newestDeb() {
   if (!fs.existsSync(DIST)) return null;
@@ -56,19 +56,20 @@ function chmodIsConditional(lines) {
   return null;
 }
 
-// Every way this postinst could leave Chromium without a usable sandbox helper.
-function sandboxComplaints(postinst) {
+// Every way this postinst could leave Chromium without a usable sandbox helper. [sandbox] is the path the
+// script is expected to name: ours, unless the script under test is the old one kept as a fixture.
+function sandboxComplaints(postinst, sandbox = SANDBOX) {
   const lines = code(postinst);
   const script = lines.join('\n');
   const found = [];
 
-  if (!script.includes(`chmod 4755 ${SANDBOX}`)) found.push('never sets the SUID bit');
-  if (!script.includes(`chown root:root ${SANDBOX}`)) found.push('never gives root the file');
+  if (!script.includes(`chmod 4755 ${sandbox}`)) found.push('never sets the SUID bit');
+  if (!script.includes(`chown root:root ${sandbox}`)) found.push('never gives root the file');
   // The defect itself. `unshare --user true` answers "can a namespace be created", but
   // Chromium needs "does a created namespace keep CAP_SYS_ADMIN" -- and under Ubuntu's
   // apparmor_restrict_unprivileged_userns those answers differ.
   if (script.includes('unshare --user')) found.push('decides by probing for user namespaces');
-  if (script.includes(`chmod 0755 ${SANDBOX}`)) found.push('has a branch that strips the bit');
+  if (script.includes(`chmod 0755 ${sandbox}`)) found.push('has a branch that strips the bit');
 
   const conditional = chmodIsConditional(lines);
   if (conditional) found.push(conditional);
@@ -84,7 +85,7 @@ test('the deb hands Chromium a sandbox helper it can use', { skip: noDeb }, () =
 
 test('replacing the stock postinst kept everything else it did', { skip: noDeb }, () => {
   const script = postinstOf(deb);
-  assert.match(script, /update-alternatives --install '\/usr\/bin\/f-tree-desktop'/,
+  assert.match(script, /update-alternatives --install '\/usr\/bin\/kutumb-desktop'/,
     'the binary has to land on PATH');
   assert.match(script, /update-mime-database/, 'the .ftree association needs this');
   assert.match(script, /update-desktop-database/, 'the launcher entry needs this');
@@ -94,7 +95,8 @@ test('these assertions reject the postinst that actually shipped broken', () => 
   const shipped = fs.readFileSync(
     path.join(__dirname, 'test-fixtures', 'stock-electron-builder-postinst.sh'), 'utf8');
 
-  assert.deepStrictEqual(sandboxComplaints(shipped), [
+  // The fixture is the postinst as it shipped, so it names the install folder it had then.
+  assert.deepStrictEqual(sandboxComplaints(shipped, "'/opt/f-tree/chrome-sandbox'"), [
     'never gives root the file',
     'decides by probing for user namespaces',
     'has a branch that strips the bit',
@@ -128,7 +130,7 @@ test('these assertions reject the postinst that actually shipped broken', () => 
 const asar = require('@electron/asar');
 
 // Defaults to the build just made, but can be pointed at any installed copy -- an unpacked deb,
-// or /opt/f-tree itself. That is not test scaffolding: it is how these assertions were shown to
+// or /opt/Kutumb itself. That is not test scaffolding: it is how these assertions were shown to
 // reject the 0.4.0 that shipped, rather than only to accept the build that replaced it.
 const RESOURCES = process.env.FTREE_PACKAGE_UNDER_TEST
   || path.join(DIST, 'linux-unpacked', 'resources');
