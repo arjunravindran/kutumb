@@ -33,7 +33,9 @@ import com.vibethroughcode.ftree.kutumb.treesync.SharingInviter
 import com.vibethroughcode.ftree.kutumb.treesync.SharingState
 import com.vibethroughcode.ftree.kutumb.treesync.TreeSharing
 import com.vibethroughcode.ftree.kutumb.trust.TrustedContact
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.launch
 
 const val SharingButtonTag = "settings-trees-sharing"
@@ -80,9 +82,15 @@ fun TreeSharingDialog(treeName: String, onDismiss: () -> Unit) {
     suspend fun reload() {
         val next = sharing.state()
         val all = container.kutumbRepository.observeContacts().first().associateBy { it.personId }
-        names = next.candidates.associate { c -> c.personId to (container.familyRepository.person(c.personId)?.name ?: c.personId) }
-        contacts = all
-        state = next
+        val shown = next.candidates.associate { c -> c.personId to (container.familyRepository.person(c.personId)?.name ?: c.personId) }
+        // The database calls above can resume this on one of Room's threads. What the dialog shows is
+        // written on the main thread, so a change is always picked up by the next frame; written from
+        // anywhere else the dialog could be left saying "One moment" after it had loaded.
+        withContext(Dispatchers.Main) {
+            names = shown
+            contacts = all
+            state = next
+        }
     }
     LaunchedEffect(sharing) { reload() }
 
