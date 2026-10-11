@@ -1,8 +1,29 @@
-# Handoff (updated 2026-10-09, end of the second session)
+# Handoff (updated 2026-10-11, end of the third session)
 
 Kutumb is a standalone repo, no longer a GitHub fork: github.com/arjunravindran/kutumb. It began as a fork of f-tree by Ankit Srivastava and is used under f-tree's MIT licence, whose notice is kept in `LICENSE`. Per-feature history is in `NOTES.md`; the product spec is `docs/kutumb/SPEC.md`; the tree-sync design is `docs/kutumb/TREE-SYNC.md`.
 
 **Branches:** the working branch is `kutumb`; on the remote it is `main`. Push with `git push origin kutumb:main` (a plain `git push` fails because the names differ). A separate local `main` holds the original f-tree history; ignore it.
+
+## Start here (written 2026-10-11, end of the third session)
+
+Latest commit `eb62016` on `kutumb`, pushed to `main`. Feature entries for everything below are further down, newest first.
+
+**Where the product stands.** Two onboarding stories drive the work: (1) first one in, fills the tree with "Add people from my contacts"; (2) invited in person: install, pair, join, inherit the inviter's tree in place, then add own contacts, which sync back. Built this stretch: fill-in-place join, merge offer for a second tree, uncle/aunt/cousin/nephew/grandparent joined through existing people, language picker (13 languages, only English and Hindi have words), duplicate prevention (suggestions, same-name prompt, merge two entries), and autosave when editing an existing person.
+
+**Devices.** Pixel `34011FDH2000VL` is plugged in and has the latest build and the full tree: do not wipe. Samsung `RFCT32HLRFZ` is unplugged and one build behind. Emulator `Medium_Phone_API_35` was started this session and may still be running; the system killed two background jobs for low memory, so **do not start long background runs or the emulator unprompted**. Run instrumented tests one class at a time (a comma-separated class list only runs the first); pin `ANDROID_SERIAL`; delete `app/build/outputs/androidTest-results` first.
+
+**Verified on a device this session:** `NoDuplicateRelativesFlowTest` (4), `AutosaveEditFlowTest` (3), `PersonFlowTest` (11), `DateFieldTest` (4), `RelationshipFlowTest` (10), `TreeFlowTest` (5). **Never exercised in a UI test:** contacts fill-in on a new person, the uncle/cousin dialog (`AddExtendedRelativeDialog`), the language chips, the merge dialog's confirm path, the welcome "Someone invited me" steps beyond `WelcomeFlowTest`. **The full instrumented suite has not been run since the memory kill** (last full run: 287 of 289; known flakes that pass alone: CircleFlowTest, TreeSharingFlowTest teardown, MessageNotificationTest, NetworkTreeLinkTest).
+
+**Open items, in the order I would do them**
+1. Run the full instrumented suite when memory allows, one class at a time if needed.
+2. Contacts import only skips exact-name matches ("Mom" vs "Asha" is added twice). Route it and the merge offer through `LinkSuggestions` / fuzzier matching.
+3. Walk the real two-phone join (Pixel + a second device) end to end; today it is covered only by fake-peer tests.
+4. A merge syncs to everyone and cannot be undone; consider an undo window or a confirmation from the others. A lost `tree-join` is not retried.
+5. New-person form still has an explicit Save by design (nothing is created until added). The user may want it to create on the first completed field; ask.
+6. Real Marathi, Bengali, Telugu and Tamil kinship words need native-speaker review (Hindi's side-of-family rules can be reused).
+7. Long-standing: review inbox, GEDCOM import, desktop installer build, Play listing items, GitHub Support purge of cached SHAs.
+
+**Conventions that bite.** Push with `git push origin kutumb:main`. Commit messages end with the `Co-Authored-By` and `Claude-Session` lines. Untracked `CI_ERRORS.md` and `CI_ERRORS_previous_runs.md` are deliberate; leave them. Compose state written off the main thread needs `withContext(Dispatchers.Main)`. `displayName()` is @Composable. Complex quoting breaks bash heredocs: write scripts with the Write tool and run them with Python. adb is at `/c/Users/arjun/AppData/Local/Android/Sdk/platform-tools/adb.exe` (not on PATH); use `MSYS_NO_PATHCONV=1` for device paths.
 
 ## What exists
 
