@@ -7,6 +7,7 @@ import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.performClick
@@ -97,7 +98,8 @@ class DateFieldTest {
         rule.onNodeWithTag(PersonEditTag).performClick()
         rule.waitForIdle()
         year.performTextInput("1938")
-        save()
+        rule.onNodeWithContentDescription("Back").performClick()
+        rule.waitForIdle()
         rule.onNodeWithText("Born ${PartialDate(1938, 4, 17).display()}").assertIsDisplayed()
     }
 

@@ -15,6 +15,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 /**
  * A picked image on its way to becoming a portrait.
@@ -130,12 +132,14 @@ class PersonEditViewModel(
             val saved = photos.saveCrop(ready.bitmap, square) ?: return@launch
             written += saved
             _uiState.update { it.copy(photoId = saved, dirty = true) }
+            autosave()
         }
     }
 
     fun onPhotoRemoved() {
         // The file is not deleted until the change is saved, so backing out leaves it intact.
         _uiState.update { it.copy(photoId = null, dirty = true) }
+        autosave()
     }
 
     /** Leaving without saving: everything written while framing goes, the person keeps what they had. */
@@ -145,13 +149,19 @@ class PersonEditViewModel(
         _crop.value = null
         viewModelScope.launch { orphans.forEach { photos.delete(it) } }
     }
-    fun onGenderChange(value: Gender) = _uiState.update { it.copy(gender = value, dirty = true) }
+    fun onGenderChange(value: Gender) {
+        _uiState.update { it.copy(gender = value, dirty = true) }
+        autosave()
+    }
     fun onNotesChange(value: String) = _uiState.update { it.copy(notes = value, dirty = true) }
 
-    fun onDeceasedChange(value: Boolean) = _uiState.update {
-        // Clearing "no longer living" would leave a death date stranded, so it goes with it.
-        val next = it.copy(deceased = value, dirty = true, deathDate = if (value) it.deathDate else "")
-        next.copy(deathProblem = validate(next).second)
+    fun onDeceasedChange(value: Boolean) {
+        _uiState.update {
+            // Clearing "no longer living" would leave a death date stranded, so it goes with it.
+            val next = it.copy(deceased = value, dirty = true, deathDate = if (value) it.deathDate else "")
+            next.copy(deathProblem = validate(next).second)
+        }
+        autosave()
     }
 
     fun onBirthDateChange(value: String) = _uiState.update {
@@ -185,11 +195,43 @@ class PersonEditViewModel(
     private fun kept(text: String): String? =
         (if (DateEntry.problem(text) == null) DateEntry.settle(text) else text.trim()).ifBlank { null }
 
+    private val writing = Mutex()
+
+    /**
+     * Keeps a person who already exists up to date as the form is changed: called when a field loses focus,
+     * when a chip or switch is flipped, and on the way out. [onDone] is told whether nothing is left unsaved;
+     * it is false only when a date cannot be understood, which is never written (the form keeps saying so).
+     * A new person is not written until they are added, so a half-typed stranger never appears in the tree.
+     */
+    fun commit(onDone: (clean: Boolean) -> Unit = {}) {
+        val state = _uiState.value
+        if (state.isNew || !state.dirty) { onDone(!state.dirty); return }
+        if (!state.canSave) { onDone(false); return }
+        viewModelScope.launch {
+            writing.withLock {
+                val seen = _uiState.value
+                if (!seen.canSave) { onDone(false); return@withLock }
+                persist(seen)
+                // Only forget the change if nothing else was typed while it was being written.
+                _uiState.update { if (it == seen) it.copy(dirty = false) else it }
+            }
+            onDone(!_uiState.value.dirty)
+        }
+    }
+
+    private fun autosave() { if (!_uiState.value.isNew) commit() }
+
     fun save(onSaved: (String) -> Unit) {
         val state = _uiState.value
         if (!state.canSave) return
 
         viewModelScope.launch {
+            onSaved(persist(state).id)
+        }
+    }
+
+    private suspend fun persist(state: PersonEditUiState): Person {
+        run {
             val base = original ?: Person()
             val updated = base.copy(
                 name = state.name.trim().ifBlank { null },
@@ -202,15 +244,16 @@ class PersonEditViewModel(
                 updatedAt = System.currentTimeMillis(),
             )
             if (original == null) repository.addPerson(updated) else repository.updatePerson(updated)
+            val replaced = original?.photoId
+            original = updated
 
             // Only now is a discarded photo actually removed from disk: the one the person had if
             // it has been replaced, and every frame tried on the way to the one being kept.
-            val removed = original?.photoId
-            if (removed != null && removed != state.photoId) photos.delete(removed)
+            if (replaced != null && replaced != state.photoId) photos.delete(replaced)
             written.filterNot { it == state.photoId }.forEach { photos.delete(it) }
             written.clear()
 
-            onSaved(updated.id)
+            return updated
         }
     }
 }

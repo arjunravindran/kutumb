@@ -105,7 +105,9 @@ class PersonFlowTest {
 
         rule.onNodeWithTag(PersonEditTag).performClick()
         rule.waitForIdle()
-        fillAndSave(name = "Raj Kumar")
+        rule.onNodeWithTag(EditNameFieldTag).performTextInput("Raj Kumar")
+        rule.onNodeWithContentDescription("Back").performClick()
+        rule.waitForIdle()
 
         rule.onNodeWithText("Raj Kumar").assertIsDisplayed()
     }
@@ -138,7 +140,8 @@ class PersonFlowTest {
         rule.waitForIdle()
         rule.onNodeWithTag(EditNameFieldTag).performTextClearance()
         rule.onNodeWithTag(EditNameFieldTag).performTextInput("Ankit Kumar")
-        rule.onNodeWithTag(EditSaveTag).performScrollTo().performClick()
+        // No Save button for someone already in the tree: leaving takes the entry in.
+        rule.onNodeWithContentDescription("Back").performClick()
         rule.waitForIdle()
 
         rule.onNodeWithText("Ankit Kumar").assertIsDisplayed()

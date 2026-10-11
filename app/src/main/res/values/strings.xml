@@ -94,6 +94,7 @@
     <string name="edit_notes">Notes</string>
     <string name="edit_notes_hint">Anything worth remembering</string>
     <string name="edit_save">Save</string>
+    <string name="edit_autosaves">Changes are saved as you go.</string>
     <string name="edit_cancel">Cancel</string>
     <string name="edit_back">Back</string>
     <string name="edit_discard_title">Discard changes?</string>

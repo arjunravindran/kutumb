@@ -55,6 +55,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.composed
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.runtime.DisposableEffect
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
@@ -89,11 +95,26 @@ fun PersonEditScreen(
     var confirmingDiscard by remember { mutableStateOf(false) }
     var choosingContact by remember { mutableStateOf(false) }
 
+    // Someone who is already in the tree is saved as the form changes, so leaving only needs to
+    // make sure the last field was taken in; a date that cannot be read is the one thing that is
+    // asked about, since it was never written.
     fun attemptBack() {
-        if (state.dirty) confirmingDiscard = true else onBack()
+        when {
+            !state.isNew && state.dirty -> viewModel.commit { clean -> if (clean) onBack() else confirmingDiscard = true }
+            state.dirty -> confirmingDiscard = true
+            else -> onBack()
+        }
     }
 
-    BackHandler(enabled = state.dirty) { confirmingDiscard = true }
+    BackHandler(enabled = state.dirty) { attemptBack() }
+
+    // Switching apps or locking the phone with a field still focused counts as leaving it.
+    val lifecycle = LocalLifecycleOwner.current.lifecycle
+    DisposableEffect(lifecycle) {
+        val observer = LifecycleEventObserver { _, event -> if (event == Lifecycle.Event.ON_STOP) viewModel.commit() }
+        lifecycle.addObserver(observer)
+        onDispose { lifecycle.removeObserver(observer) }
+    }
 
     Scaffold(
         modifier = modifier,
@@ -149,18 +170,20 @@ fun PersonEditScreen(
                 supportingText = if (state.isNew) null else ({ Text(stringResource(R.string.edit_name_hint)) }),
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words),
-                modifier = Modifier.fillMaxWidth().testTag(EditNameFieldTag),
+                modifier = Modifier.fillMaxWidth().testTag(EditNameFieldTag).onBlur { viewModel.commit() },
             )
 
             GenderChips(selected = state.gender, onSelect = viewModel::onGenderChange)
 
-            DateField(
-                value = state.birthDate,
-                onValueChange = viewModel::onBirthDateChange,
-                label = stringResource(R.string.edit_born),
-                problem = state.birthProblem,
-                tag = EditBornFieldTag,
-            )
+            Box(Modifier.fillMaxWidth().onBlur { viewModel.commit() }) {
+                DateField(
+                    value = state.birthDate,
+                    onValueChange = viewModel::onBirthDateChange,
+                    label = stringResource(R.string.edit_born),
+                    problem = state.birthProblem,
+                    tag = EditBornFieldTag,
+                )
+            }
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -175,13 +198,15 @@ fun PersonEditScreen(
             }
 
             if (state.deceased) {
-                DateField(
-                    value = state.deathDate,
-                    onValueChange = viewModel::onDeathDateChange,
-                    label = stringResource(R.string.edit_died),
-                    problem = state.deathProblem,
-                    tag = EditDiedFieldTag,
-                )
+                Box(Modifier.fillMaxWidth().onBlur { viewModel.commit() }) {
+                    DateField(
+                        value = state.deathDate,
+                        onValueChange = viewModel::onDeathDateChange,
+                        label = stringResource(R.string.edit_died),
+                        problem = state.deathProblem,
+                        tag = EditDiedFieldTag,
+                    )
+                }
             }
 
             OutlinedTextField(
@@ -191,15 +216,23 @@ fun PersonEditScreen(
                 placeholder = { Text(stringResource(R.string.edit_notes_hint)) },
                 minLines = 3,
                 keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
-                modifier = Modifier.fillMaxWidth().testTag(EditNotesFieldTag),
+                modifier = Modifier.fillMaxWidth().testTag(EditNotesFieldTag).onBlur { viewModel.commit() },
             )
 
-            Button(
-                onClick = { viewModel.save(onSaved) },
-                enabled = state.canSave,
-                modifier = Modifier.fillMaxWidth().testTag(EditSaveTag),
-            ) {
-                Text(stringResource(R.string.edit_save))
+            if (state.isNew) {
+                Button(
+                    onClick = { viewModel.save(onSaved) },
+                    enabled = state.canSave,
+                    modifier = Modifier.fillMaxWidth().testTag(EditSaveTag),
+                ) {
+                    Text(stringResource(R.string.edit_save))
+                }
+            } else {
+                Text(
+                    stringResource(R.string.edit_autosaves),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
             }
 
             Spacer(Modifier.height(32.dp))
@@ -355,5 +388,14 @@ private fun PhotoField(
                 }
             }
         }
+    }
+}
+
+/** Runs [action] when focus leaves this element, or anything inside it, having been there. */
+private fun Modifier.onBlur(action: () -> Unit): Modifier = composed {
+    var had by remember { mutableStateOf(false) }
+    onFocusChanged {
+        if (had && !it.hasFocus) action()
+        had = it.hasFocus
     }
 }

@@ -117,7 +117,8 @@ class RelationshipFlowTest {
         rule.onNodeWithTag(PersonEditTag).performClick()
         rule.waitForIdle()
         rule.onNodeWithTag(EditNameFieldTag).performTextInput("Raj Kumar")
-        rule.onNodeWithTag(EditSaveTag).performScrollTo().performClick()
+        // Leaving the form takes the name in; no Save button for someone already in the tree.
+        rule.onNodeWithContentDescription("Back").performClick()
         rule.waitForIdle()
 
         // Back on Ankit, the same relationship now names them.
