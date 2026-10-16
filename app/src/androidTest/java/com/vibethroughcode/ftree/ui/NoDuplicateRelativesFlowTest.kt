@@ -19,6 +19,7 @@ import com.vibethroughcode.ftree.data.RelativeKind
 import com.vibethroughcode.ftree.ui.person.EditNameFieldTag
 import com.vibethroughcode.ftree.ui.person.EditSaveTag
 import com.vibethroughcode.ftree.ui.person.MergeBannerTagPrefix
+import com.vibethroughcode.ftree.ui.person.MergeConfirmTag
 import com.vibethroughcode.ftree.ui.person.addSectionTag
 import com.vibethroughcode.ftree.ui.relative.AddRelativeAddAnywayTag
 import com.vibethroughcode.ftree.ui.relative.AddRelativeNameTag
@@ -135,5 +136,26 @@ class NoDuplicateRelativesFlowTest {
             },
         )
         assertEquals("the page offers to merge the other Asha", 1, banners.fetchSemanticsNodes().size)
+    }
+
+    @Test
+    fun aMergeFromTheBannerCanBeUndoneFromTheMessageThatFollows() {
+        runBlocking {
+            val ravi = family.allPeople().single { it.name == "Ravi" }
+            family.addNewRelative(ravi.id, com.vibethroughcode.ftree.data.Person(name = "Asha"), RelativeKind.SPOUSE).getOrThrow()
+        }
+        rule.onNodeWithText("Ravi").performClick()
+        rule.waitForIdle()
+        rule.onAllNodesWithText("Asha")[0].performClick()
+        rule.waitForIdle()
+
+        rule.onAllNodesWithText("Merge")[0].performClick()
+        rule.onNodeWithTag(MergeConfirmTag).performClick()
+        rule.waitUntil(5_000) { people().size == 3 }
+        rule.waitUntil(5_000) { rule.onAllNodesWithText("Undo").fetchSemanticsNodes().isNotEmpty() }
+
+        rule.onNodeWithText("Undo").performClick()
+        rule.waitUntil(5_000) { people().size == 4 }
+        assertEquals("both Ashas are back", 2, people().filter { it.name == "Asha" }.size)
     }
 }

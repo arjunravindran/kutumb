@@ -30,6 +30,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.vibethroughcode.ftree.FTreeApplication
 import com.vibethroughcode.ftree.R
+import com.vibethroughcode.ftree.data.MergeReceipt
 import com.vibethroughcode.ftree.data.Person
 import com.vibethroughcode.ftree.data.RelationshipRejectedException
 import com.vibethroughcode.ftree.graph.RelationshipRejection
@@ -49,7 +50,13 @@ const val MergePersonTagPrefix = "merge-person-"
  * other entry is removed (see `FamilyRepository.mergePeople`), so it says so before anything happens.
  */
 @Composable
-fun MergePersonDialog(person: Person, other: Person?, onDismiss: () -> Unit) {
+fun MergePersonDialog(
+    person: Person,
+    other: Person?,
+    onDismiss: () -> Unit,
+    /** Told once the merge is done, with what is needed to take it back. */
+    onMerged: (MergeReceipt) -> Unit = {},
+) {
     val app = LocalContext.current.applicationContext as FTreeApplication
     val family = app.container.familyRepository
     val scope = rememberCoroutineScope()
@@ -116,9 +123,9 @@ fun MergePersonDialog(person: Person, other: Person?, onDismiss: () -> Unit) {
                     working = true
                     refused = null
                     scope.launch {
-                        val result = family.mergePeople(keepId = person.id, dropId = drop.id)
+                        val result = family.mergePeopleUndoably(keepId = person.id, dropId = drop.id)
                         withContext(Dispatchers.Main) {
-                            if (result.isSuccess) onDismiss()
+                            if (result.isSuccess) { onMerged(result.getOrThrow()); onDismiss() }
                             else {
                                 working = false
                                 refused = (result.exceptionOrNull() as? RelationshipRejectedException)?.reason

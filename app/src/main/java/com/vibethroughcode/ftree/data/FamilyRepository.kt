@@ -301,9 +301,16 @@ class FamilyRepository(
      * break the family's rules (two entries that are really a parent and a child cannot be one person) nothing
      * is changed and the reason is returned.
      */
-    suspend fun mergePeople(keepId: String, dropId: String): Result<Unit> = runCatching {
+    suspend fun mergePeople(keepId: String, dropId: String): Result<Unit> =
+        mergePeopleUndoably(keepId, dropId).map { finishMerge(it) }
+
+    /**
+     * [mergePeople], but keeping what is needed to take it back. The dropped entry's photograph file is left on
+     * disk until [finishMerge] (the undo window closing) so that [undoMerge] can give it back.
+     */
+    suspend fun mergePeopleUndoably(keepId: String, dropId: String): Result<MergeReceipt> = runCatching {
         if (keepId == dropId) throw RelationshipRejectedException(RelationshipRejection.SELF_REFERENCE)
-        val photoToDelete = db.withTransaction {
+        db.withTransaction {
             val keep = people.findById(keepId) ?: throw IllegalArgumentException("No such person")
             val drop = people.findById(dropId) ?: throw IllegalArgumentException("No such person")
             val edges = relationships.edgesOf(dropId)
@@ -332,18 +339,76 @@ class FamilyRepository(
 
             // Move the links. Taken off the dropped entry first, so the rules judge the family as it will be.
             edges.forEach { relationships.deleteById(it.id) }
+            val added = ArrayList<String>()
             for (edge in edges) {
                 val from = if (edge.fromPersonId == dropId) keepId else edge.fromPersonId
                 val to = if (edge.toPersonId == dropId) keepId else edge.toPersonId
                 val result = addRelationship(from, to, edge.type, edge.subtype)
+                result.getOrNull()?.let { added += it.id }
                 val failure = result.exceptionOrNull() as? RelationshipRejectedException
                 if (failure != null && failure.reason != RelationshipRejection.DUPLICATE) throw failure
             }
             origins.insertAll(origins.originsOf(listOf(dropId)).map { it.copy(personId = keepId) })
             people.deleteById(dropId)
-            drop.photoId?.takeIf { it != merged.photoId }
+            MergeReceipt(
+                keepBefore = keep,
+                keepMerged = merged,
+                dropped = drop,
+                droppedEdges = edges,
+                addedEdgeIds = added,
+                photoToDelete = drop.photoId?.takeIf { it != merged.photoId },
+            )
         }
-        photos.delete(photoToDelete)
+    }
+
+    /** The undo window has closed: only now is the dropped entry's own photograph file removed. */
+    suspend fun finishMerge(receipt: MergeReceipt) {
+        photos.delete(receipt.photoToDelete)
+    }
+
+    /**
+     * Takes a merge back: the kept entry gets its old details back, the links the merge gave it are removed, and
+     * the dropped entry returns with its details, photograph and links.
+     *
+     * The returned entry has a **new id**. Tree sync treats a deleted person as gone for good (a local re-insert
+     * of the same id is deleted again by the next projection), so the entry comes back as an ordinary new person
+     * and the undo reaches everyone else as ordinary edits. Two things are not restored: a detail of the kept
+     * entry that was changed after the merge is left as changed, and import provenance stays with the kept entry.
+     * Everything runs in one step; if a link cannot be put back, nothing changes and the reason is thrown.
+     */
+    suspend fun undoMerge(receipt: MergeReceipt): Result<Person> = runCatching {
+        db.withTransaction {
+            val before = receipt.keepBefore
+            val merged = receipt.keepMerged
+            people.findById(before.id)?.let { now ->
+                people.update(
+                    now.copy(
+                        name = if (now.name == merged.name) before.name else now.name,
+                        gender = if (now.gender == merged.gender) before.gender else now.gender,
+                        birthDate = if (now.birthDate == merged.birthDate) before.birthDate else now.birthDate,
+                        deathDate = if (now.deathDate == merged.deathDate) before.deathDate else now.deathDate,
+                        deceased = if (now.deceased == merged.deceased) before.deceased else now.deceased,
+                        photoId = if (now.photoId == merged.photoId) before.photoId else now.photoId,
+                        notes = if (now.notes == merged.notes) before.notes else now.notes,
+                        updatedAt = System.currentTimeMillis(),
+                    ),
+                )
+            }
+            receipt.addedEdgeIds.forEach { relationships.deleteById(it) }
+
+            val back = receipt.dropped.copy(id = java.util.UUID.randomUUID().toString(), updatedAt = System.currentTimeMillis())
+            people.insert(back)
+            for (edge in receipt.droppedEdges) {
+                val from = if (edge.fromPersonId == receipt.dropped.id) back.id else edge.fromPersonId
+                val to = if (edge.toPersonId == receipt.dropped.id) back.id else edge.toPersonId
+                // Someone on the far end may have been removed during the window; that link is simply gone.
+                if (people.findById(from) == null || people.findById(to) == null) continue
+                val failure = addRelationship(from, to, edge.type, edge.subtype).exceptionOrNull()
+                    as? RelationshipRejectedException
+                if (failure != null && failure.reason != RelationshipRejection.DUPLICATE) throw failure
+            }
+            back
+        }
     }
 
     suspend fun originsOf(personIds: List<String>): List<PersonOrigin> = origins.originsOf(personIds)
@@ -382,3 +447,14 @@ class FamilyRepository(
 
 class RelationshipRejectedException(val reason: RelationshipRejection) :
     IllegalArgumentException("Relationship rejected: $reason")
+
+/** What [FamilyRepository.mergePeopleUndoably] kept so the merge can be taken back by [FamilyRepository.undoMerge]. */
+class MergeReceipt internal constructor(
+    internal val keepBefore: Person,
+    internal val keepMerged: Person,
+    /** The entry that was folded away, as it was. */
+    val dropped: Person,
+    internal val droppedEdges: List<Relationship>,
+    internal val addedEdgeIds: List<String>,
+    internal val photoToDelete: String?,
+)

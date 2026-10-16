@@ -99,4 +99,44 @@ class MergePeopleTest {
         assertEquals(3, repo.allPeople().size)
         assertEquals(setOf(grand.id to mid.id, mid.id to last.id), parentPairs())
     }
+
+    @Test fun aMergeCanBeTakenBackAndEverythingIsAsItWas() = runBlocking {
+        val me = repo.addPerson(Person(name = "Me"))
+        val mother = repo.addNewRelative(me.id, Person(name = "Asha"), RelativeKind.PARENT).getOrThrow()
+        val father = repo.addNewRelative(me.id, Person(name = "Ravi"), RelativeKind.PARENT).getOrThrow()
+        val copy = repo.addNewRelative(father.id, Person(name = "Asha", birthDate = "1960-02-11"), RelativeKind.SPOUSE).getOrThrow()
+        val linksBefore = edges().size
+
+        val receipt = repo.mergePeopleUndoably(mother.id, copy.id).getOrThrow()
+        assertEquals(3, repo.allPeople().size)
+        val back = repo.undoMerge(receipt).getOrThrow()
+
+        val people = repo.allPeople()
+        assertEquals("both entries are there again", 4, people.size)
+        assertEquals("the kept one lost the borrowed birth date", null, people.single { it.id == mother.id }.birthDate)
+        assertEquals("the returned one has its own", "1960-02-11", people.single { it.id == back.id }.birthDate)
+        assertTrue(
+            "the returned one is his wife again",
+            edges().any { it.type == RelationshipType.SPOUSE && setOf(it.fromPersonId, it.toPersonId) == setOf(father.id, back.id) },
+        )
+        assertTrue(
+            "and the kept one is no longer his wife",
+            edges().none { it.type == RelationshipType.SPOUSE && setOf(it.fromPersonId, it.toPersonId) == setOf(father.id, mother.id) },
+        )
+        assertTrue("she is still my mother", mother.id to me.id in parentPairs())
+        assertEquals("as many links as before", linksBefore, edges().size)
+    }
+
+    @Test fun aDetailChangedAfterTheMergeIsNotUndone() = runBlocking {
+        val keep = repo.addPerson(Person(name = "Asha", notes = "mine"))
+        val drop = repo.addPerson(Person(name = "Asha D", birthDate = "1961"))
+        val receipt = repo.mergePeopleUndoably(keep.id, drop.id).getOrThrow()
+        repo.updatePerson(repo.allPeople().single().copy(notes = "edited since"))
+
+        repo.undoMerge(receipt).getOrThrow()
+
+        val kept = repo.allPeople().single { it.id == keep.id }
+        assertEquals("edited since", kept.notes)
+        assertEquals("but the borrowed date goes back", null, kept.birthDate)
+    }
 }

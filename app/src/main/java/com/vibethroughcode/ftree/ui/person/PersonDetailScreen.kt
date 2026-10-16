@@ -105,6 +105,30 @@ fun PersonDetailScreen(
     var pendingRemoval by remember { mutableStateOf<Person?>(null) }
     var addingExtended by remember { mutableStateOf(false) }
     var merging by remember { mutableStateOf<MergeRequest?>(null) }
+    var undoable by remember { mutableStateOf<com.vibethroughcode.ftree.data.MergeReceipt?>(null) }
+    val snackbars = remember { androidx.compose.material3.SnackbarHostState() }
+    val family = (androidx.compose.ui.platform.LocalContext.current.applicationContext as com.vibethroughcode.ftree.FTreeApplication)
+        .container.familyRepository
+    val mergedMessage = stringResource(R.string.merge_person_done, undoable?.dropped?.displayName().orEmpty())
+    val undoLabel = stringResource(R.string.merge_person_undo)
+    // A merge can be taken back for as long as the message stays up. Leaving the screen ends the window too, and
+    // then the dropped entry's photograph file is finally removed.
+    LaunchedEffect(undoable) {
+        val receipt = undoable ?: return@LaunchedEffect
+        var undone = false
+        try {
+            val result = snackbars.showSnackbar(
+                message = mergedMessage,
+                actionLabel = undoLabel,
+                duration = androidx.compose.material3.SnackbarDuration.Long,
+            )
+            if (result == androidx.compose.material3.SnackbarResult.ActionPerformed) {
+                undone = family.undoMerge(receipt).isSuccess
+            }
+        } finally {
+            if (!undone) kotlinx.coroutines.withContext(kotlinx.coroutines.NonCancellable) { family.finishMerge(receipt) }
+        }
+    }
     var relabelling by remember { mutableStateOf<com.vibethroughcode.ftree.graph.Connection?>(null) }
     val isCircle = (androidx.compose.ui.platform.LocalContext.current.applicationContext as com.vibethroughcode.ftree.FTreeApplication)
         .container.tree.kind == com.vibethroughcode.ftree.data.TreeKind.CIRCLE
@@ -118,6 +142,7 @@ fun PersonDetailScreen(
 
     Scaffold(
         modifier = modifier,
+        snackbarHost = { androidx.compose.material3.SnackbarHost(snackbars) },
         topBar = {
             TopAppBar(
                 title = {},
@@ -314,7 +339,7 @@ fun PersonDetailScreen(
         )
     }
 
-    state.person?.let { shown -> merging?.let { MergePersonDialog(shown, it.other, onDismiss = { merging = null }) } }
+    state.person?.let { shown -> merging?.let { MergePersonDialog(shown, it.other, onDismiss = { merging = null }, onMerged = { receipt -> undoable = receipt }) } }
     state.person?.takeIf { addingExtended }?.let { AddExtendedRelativeDialog(it, onDismiss = { addingExtended = false }) }
 
     pendingRemoval?.let { other ->

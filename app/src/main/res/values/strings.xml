@@ -398,7 +398,9 @@
     <string name="merge_person_menu">Same person as another entry</string>
     <string name="merge_person_title">Merge two entries</string>
     <string name="merge_person_pick">Who is the same person as %1$s?</string>
-    <string name="merge_person_body">%1$s will be folded into %2$s: their links and details move across and the other entry is removed. This cannot be undone, except by restoring a backup.</string>
+    <string name="merge_person_body">%1$s will be folded into %2$s: their links and details move across and the other entry is removed. You can undo it for a few seconds afterwards.</string>
+    <string name="merge_person_done">Merged %1$s into this entry.</string>
+    <string name="merge_person_undo">Undo</string>
     <string name="merge_person_confirm">Merge</string>
     <string name="merge_person_banner">There is another %1$s in your tree. The same person?</string>
     <string name="merge_person_banner_action">Merge</string>
