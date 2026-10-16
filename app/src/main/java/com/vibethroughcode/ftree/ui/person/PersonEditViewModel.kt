@@ -51,6 +51,14 @@ data class PersonEditUiState(
      * valid: it records a person whose details nobody knows yet.
      */
     val canSave: Boolean get() = birthProblem == null && deathProblem == null
+
+    /**
+     * Whether there is anything to make a person of. A new person is created the first time a field is completed,
+     * and a form with nothing but a gender chip tapped is not yet anybody.
+     */
+    val hasContent: Boolean
+        get() = name.isNotBlank() || birthDate.isNotBlank() || deathDate.isNotBlank() ||
+            notes.isNotBlank() || photoId != null
 }
 
 class PersonEditViewModel(
@@ -198,15 +206,16 @@ class PersonEditViewModel(
     private val writing = Mutex()
 
     /**
-     * Keeps a person who already exists up to date as the form is changed: called when a field loses focus,
-     * when a chip or switch is flipped, and on the way out. [onDone] is told whether nothing is left unsaved;
-     * it is false only when a date cannot be understood, which is never written (the form keeps saying so).
-     * A new person is not written until they are added, so a half-typed stranger never appears in the tree.
+     * Keeps the person up to date as the form is changed: called when a field loses focus, when a chip or switch
+     * is flipped, and on the way out. [onDone] is told whether nothing is left unsaved; it is false when a date
+     * cannot be understood (never written; the form keeps saying so) or when a new form has nothing in it yet.
+     * A new person is created by the first commit that has something to record, so a field the reader finished
+     * is never lost, and a form opened and abandoned empty leaves nobody behind.
      */
     fun commit(onDone: (clean: Boolean) -> Unit = {}) {
         val state = _uiState.value
-        if (state.isNew || !state.dirty) { onDone(!state.dirty); return }
-        if (!state.canSave) { onDone(false); return }
+        if (!state.dirty) { onDone(true); return }
+        if (!state.canSave || (state.isNew && original == null && !state.hasContent)) { onDone(false); return }
         viewModelScope.launch {
             writing.withLock {
                 val seen = _uiState.value
@@ -219,14 +228,19 @@ class PersonEditViewModel(
         }
     }
 
-    private fun autosave() { if (!_uiState.value.isNew) commit() }
+    private fun autosave() = commit()
 
+    /** Writes whatever is on the form (a blank one records a person nobody knows yet) and reports who it is. */
     fun save(onSaved: (String) -> Unit) {
-        val state = _uiState.value
-        if (!state.canSave) return
+        if (!_uiState.value.canSave) return
 
         viewModelScope.launch {
-            onSaved(persist(state).id)
+            // Behind the same lock as commit(): a field written a moment ago must not make a second person.
+            val person = writing.withLock {
+                val seen = _uiState.value
+                if (!seen.canSave) null else persist(seen).also { _uiState.update { now -> if (now == seen) now.copy(dirty = false) else now } }
+            }
+            if (person != null) onSaved(person.id)
         }
     }
 

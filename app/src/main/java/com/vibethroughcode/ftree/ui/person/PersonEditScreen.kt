@@ -95,15 +95,11 @@ fun PersonEditScreen(
     var confirmingDiscard by remember { mutableStateOf(false) }
     var choosingContact by remember { mutableStateOf(false) }
 
-    // Someone who is already in the tree is saved as the form changes, so leaving only needs to
-    // make sure the last field was taken in; a date that cannot be read is the one thing that is
-    // asked about, since it was never written.
+    // The person is saved as the form changes (a new one from the first field finished), so leaving only
+    // needs to make sure the last field was taken in. What is asked about is what was never written: a
+    // date that cannot be read, or a new form with nothing in it worth a person.
     fun attemptBack() {
-        when {
-            !state.isNew && state.dirty -> viewModel.commit { clean -> if (clean) onBack() else confirmingDiscard = true }
-            state.dirty -> confirmingDiscard = true
-            else -> onBack()
-        }
+        if (state.dirty) viewModel.commit { clean -> if (clean) onBack() else confirmingDiscard = true } else onBack()
     }
 
     BackHandler(enabled = state.dirty) { attemptBack() }
@@ -227,6 +223,11 @@ fun PersonEditScreen(
                 ) {
                     Text(stringResource(R.string.edit_save))
                 }
+                Text(
+                    stringResource(R.string.edit_new_autosaves),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
             } else {
                 Text(
                     stringResource(R.string.edit_autosaves),
@@ -245,6 +246,7 @@ fun PersonEditScreen(
             pickOne = { contact ->
                 viewModel.onNameChange(contact.name)
                 contact.birthday?.let(viewModel::onBirthDateChange)
+                viewModel.commit()
             },
         )
     }
