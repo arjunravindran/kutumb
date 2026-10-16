@@ -12,16 +12,20 @@ Latest commit `eb62016` on `kutumb`, pushed to `main`. Feature entries for every
 
 **Devices.** Pixel `34011FDH2000VL` is plugged in and has the latest build and the full tree: do not wipe. Samsung `RFCT32HLRFZ` is unplugged and one build behind. Emulator `Medium_Phone_API_35` was started this session and may still be running; the system killed two background jobs for low memory, so **do not start long background runs or the emulator unprompted**. Run instrumented tests one class at a time (a comma-separated class list only runs the first); pin `ANDROID_SERIAL`; delete `app/build/outputs/androidTest-results` first.
 
-**Verified on a device this session:** `NoDuplicateRelativesFlowTest` (4), `AutosaveEditFlowTest` (3), `PersonFlowTest` (11), `DateFieldTest` (4), `RelationshipFlowTest` (10), `TreeFlowTest` (5). **Never exercised in a UI test:** contacts fill-in on a new person, the uncle/cousin dialog (`AddExtendedRelativeDialog`), the language chips, the merge dialog's confirm path, the welcome "Someone invited me" steps beyond `WelcomeFlowTest`. **The full instrumented suite has not been run since the memory kill** (last full run: 287 of 289; known flakes that pass alone: CircleFlowTest, TreeSharingFlowTest teardown, MessageNotificationTest, NetworkTreeLinkTest).
+**Verified on the emulator, 2026-10-15 (uncommitted work):** full instrumented suite, 324 run, 322 passed. `MergeOfferFlowTest` (2) failed in the full run and passes alone (2 of 2), so it joins the load-flake list with CircleFlowTest, TreeSharingFlowTest teardown, MessageNotificationTest and NetworkTreeLinkTest. `NewPersonAutosaveFlowTest` (4) passes alone. JVM tests, `:kutumb-core:test` and `lintDebug` pass. **Never exercised in a UI test:** contacts fill-in on a new person, the uncle/cousin dialog, the language chips, the merge dialog's confirm path, the welcome "Someone invited me" steps. The emulator has been shut down.
+
+**Done 2026-10-15 (not yet committed or pushed):**
+- **Fuzzier contacts matching** (`phonebook/ContactMatching.kt`, 11 JVM tests): on a tree with people, a contact whose name is close to someone already there ("Asha K" for "Asha Kumar", one slip of the pen in a word of 5+ letters, accents) shows "Might be X, already in your tree" but can still be ticked. A contact saved as "Mom" cannot be matched by any name rule; the person-page "Same person as another entry" is for that. The merge offer (`DuplicateMatcher`) was **not** changed.
+- **New person is created by the first finished field** (no more waiting for Save): `PersonEditViewModel.commit` creates the person once there is a name, date, note or photo, and later edits update the same row. Save stays and still opens the person's page; leaving an empty form adds nobody; a gender tap alone is not a person. Save and commit share one lock so a second person cannot be made.
+- **Draft kinship words for Marathi, Bengali, Telugu and Tamil** (`res/values/kinship_{mr,bn,te,ta}.xml`, `ui/common/KinshipWords.kt`, both generated from one table): my best guess, **not reviewed by a native speaker**; Settings says so (`KinshipLanguage.isDraft`). They reuse Hindi's rules and the Hindi English glosses. Tamil and Telugu use descriptive terms for cousins and step-relations where I was unsure. Marathi has one word (काका) for a father's brother, so it never asks for birth years there. **The family book still prints English for these four** (`site/book/compose.js` only knows `hi`).
+
+**GEDCOM import is ruled out permanently** (owner, 2026-10-15); do not list or propose it.
 
 **Open items, in the order I would do them**
-1. Run the full instrumented suite when memory allows, one class at a time if needed.
-2. Contacts import only skips exact-name matches ("Mom" vs "Asha" is added twice). Route it and the merge offer through `LinkSuggestions` / fuzzier matching.
-3. Walk the real two-phone join (Pixel + a second device) end to end; today it is covered only by fake-peer tests.
-4. A merge syncs to everyone and cannot be undone; consider an undo window or a confirmation from the others. A lost `tree-join` is not retried.
-5. New-person form still has an explicit Save by design (nothing is created until added). The user may want it to create on the first completed field; ask.
-6. Real Marathi, Bengali, Telugu and Tamil kinship words need native-speaker review (Hindi's side-of-family rules can be reused).
-7. Long-standing: review inbox, GEDCOM import, desktop installer build, Play listing items, GitHub Support purge of cached SHAs.
+1. Get a native speaker to read `kinship_mr/bn/te/ta.xml` against `kinship_hi.xml`.
+2. Walk the real two-phone join (Pixel + a second device) end to end; today it is covered only by fake-peer tests.
+3. A merge syncs to everyone and cannot be undone; consider an undo window or a confirmation from the others. A lost `tree-join` is not retried.
+4. Long-standing: review inbox, desktop installer build, Play listing items, GitHub Support purge of cached SHAs.
 
 **Conventions that bite.** Push with `git push origin kutumb:main`. Commit messages end with the `Co-Authored-By` and `Claude-Session` lines. Untracked `CI_ERRORS.md` and `CI_ERRORS_previous_runs.md` are deliberate; leave them. Compose state written off the main thread needs `withContext(Dispatchers.Main)`. `displayName()` is @Composable. Complex quoting breaks bash heredocs: write scripts with the Write tool and run them with Python. adb is at `/c/Users/arjun/AppData/Local/Android/Sdk/platform-tools/adb.exe` (not on PATH); use `MSYS_NO_PATHCONV=1` for device paths.
 
