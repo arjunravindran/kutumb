@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    The Telugu family vocabulary: a first draft, NOT yet reviewed by a native speaker.
+
+    One entry per term in graph/HindiKinship.kt (the Hindi-named enum is shared; where Telugu has a
+    single word for two of Hindi's terms, both entries hold the same word). The English gloss shown
+    in brackets is the Hindi file's (kin_hi_<term>_gloss), so it is not repeated here.
+    Reviewers: read the list top to bottom against the gloss in kinship_hi.xml.
+
+    Not translatable: these are Telugu, and a translator reaching them would be translating the
+    content rather than the interface.
+-->
+<resources>
+    <string name="kin_te_self" translatable="false">తాను</string>
+    <string name="kin_te_pita" translatable="false">తండ్రి</string>
+    <string name="kin_te_mata" translatable="false">తల్లి</string>
+    <string name="kin_te_dada" translatable="false">తాతయ్య</string>
+    <string name="kin_te_dadi" translatable="false">నాన్నమ్మ</string>
+    <string name="kin_te_nana" translatable="false">తాతయ్య</string>
+    <string name="kin_te_nani" translatable="false">అమ్మమ్మ</string>
+    <string name="kin_te_pardada" translatable="false">ముత్తాత</string>
+    <string name="kin_te_pardadi" translatable="false">ముత్తవ్వ</string>
+    <string name="kin_te_parnana" translatable="false">ముత్తాత</string>
+    <string name="kin_te_parnani" translatable="false">ముత్తవ్వ</string>
+    <string name="kin_te_beta" translatable="false">కొడుకు</string>
+    <string name="kin_te_beti" translatable="false">కూతురు</string>
+    <string name="kin_te_pota" translatable="false">మనవడు</string>
+    <string name="kin_te_poti" translatable="false">మనవరాలు</string>
+    <string name="kin_te_nati" translatable="false">మనవడు</string>
+    <string name="kin_te_natin" translatable="false">మనవరాలు</string>
+    <string name="kin_te_parpota" translatable="false">మునిమనవడు</string>
+    <string name="kin_te_parpoti" translatable="false">మునిమనవరాలు</string>
+    <string name="kin_te_parnati" translatable="false">మునిమనవడు</string>
+    <string name="kin_te_parnatin" translatable="false">మునిమనవరాలు</string>
+    <string name="kin_te_bhai" translatable="false">సోదరుడు</string>
+    <string name="kin_te_behen" translatable="false">సోదరి</string>
+    <string name="kin_te_tau" translatable="false">పెదనాన్న</string>
+    <string name="kin_te_chacha" translatable="false">బాబాయి</string>
+    <string name="kin_te_fathers_brother" translatable="false">నాన్న సోదరుడు</string>
+    <string name="kin_te_tai" translatable="false">పెద్దమ్మ</string>
+    <string name="kin_te_chachi" translatable="false">చిన్నమ్మ</string>
+    <string name="kin_te_fathers_brothers_wife" translatable="false">నాన్న సోదరుని భార్య</string>
+    <string name="kin_te_bua" translatable="false">అత్త</string>
+    <string name="kin_te_phupha" translatable="false">మామయ్య</string>
+    <string name="kin_te_mama" translatable="false">మేనమామ</string>
+    <string name="kin_te_mami" translatable="false">అత్త</string>
+    <string name="kin_te_mausi" translatable="false">పిన్ని</string>
+    <string name="kin_te_mausa" translatable="false">బాబాయి</string>
+    <string name="kin_te_bhatija" translatable="false">సోదరుని కొడుకు</string>
+    <string name="kin_te_bhatiji" translatable="false">సోదరుని కూతురు</string>
+    <string name="kin_te_bhanja" translatable="false">మేనల్లుడు</string>
+    <string name="kin_te_bhanji" translatable="false">మేనకోడలు</string>
+    <string name="kin_te_chachera_bhai" translatable="false">నాన్న సోదరుని కొడుకు</string>
+    <string name="kin_te_chacheri_behen" translatable="false">నాన్న సోదరుని కూతురు</string>
+    <string name="kin_te_phuphera_bhai" translatable="false">అత్త కొడుకు</string>
+    <string name="kin_te_phupheri_behen" translatable="false">అత్త కూతురు</string>
+    <string name="kin_te_mamera_bhai" translatable="false">మేనమామ కొడుకు</string>
+    <string name="kin_te_mameri_behen" translatable="false">మేనమామ కూతురు</string>
+    <string name="kin_te_mausera_bhai" translatable="false">పిన్ని కొడుకు</string>
+    <string name="kin_te_mauseri_behen" translatable="false">పిన్ని కూతురు</string>
+    <string name="kin_te_pati" translatable="false">భర్త</string>
+    <string name="kin_te_patni" translatable="false">భార్య</string>
+    <string name="kin_te_sasur" translatable="false">మామగారు</string>
+    <string name="kin_te_saas" translatable="false">అత్తగారు</string>
+    <string name="kin_te_jija" translatable="false">బావ</string>
+    <string name="kin_te_bhabhi" translatable="false">వదిన</string>
+    <string name="kin_te_bahu" translatable="false">కోడలు</string>
+    <string name="kin_te_damad" translatable="false">అల్లుడు</string>
+    <string name="kin_te_sala" translatable="false">బావమరిది</string>
+    <string name="kin_te_sali" translatable="false">మరదలు</string>
+    <string name="kin_te_jeth" translatable="false">బావగారు</string>
+    <string name="kin_te_devar" translatable="false">మరిది</string>
+    <string name="kin_te_husbands_brother" translatable="false">భర్త సోదరుడు</string>
+    <string name="kin_te_nanad" translatable="false">ఆడపడుచు</string>
+    <string name="kin_te_sautela_pita" translatable="false">సవతి తండ్రి</string>
+    <string name="kin_te_sauteli_mata" translatable="false">సవతి తల్లి</string>
+    <string name="kin_te_sautela_beta" translatable="false">సవతి కొడుకు</string>
+    <string name="kin_te_sauteli_beti" translatable="false">సవతి కూతురు</string>
+</resources>

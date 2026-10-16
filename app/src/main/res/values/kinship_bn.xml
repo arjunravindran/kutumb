@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    The Bengali family vocabulary: a first draft, NOT yet reviewed by a native speaker.
+
+    One entry per term in graph/HindiKinship.kt (the Hindi-named enum is shared; where Bengali has a
+    single word for two of Hindi's terms, both entries hold the same word). The English gloss shown
+    in brackets is the Hindi file's (kin_hi_<term>_gloss), so it is not repeated here.
+    Reviewers: read the list top to bottom against the gloss in kinship_hi.xml.
+
+    Not translatable: these are Bengali, and a translator reaching them would be translating the
+    content rather than the interface.
+-->
+<resources>
+    <string name="kin_bn_self" translatable="false">নিজে</string>
+    <string name="kin_bn_pita" translatable="false">বাবা</string>
+    <string name="kin_bn_mata" translatable="false">মা</string>
+    <string name="kin_bn_dada" translatable="false">ঠাকুরদা</string>
+    <string name="kin_bn_dadi" translatable="false">ঠাকুমা</string>
+    <string name="kin_bn_nana" translatable="false">দাদু</string>
+    <string name="kin_bn_nani" translatable="false">দিদা</string>
+    <string name="kin_bn_pardada" translatable="false">প্রপিতামহ</string>
+    <string name="kin_bn_pardadi" translatable="false">প্রপিতামহী</string>
+    <string name="kin_bn_parnana" translatable="false">প্রমাতামহ</string>
+    <string name="kin_bn_parnani" translatable="false">প্রমাতামহী</string>
+    <string name="kin_bn_beta" translatable="false">ছেলে</string>
+    <string name="kin_bn_beti" translatable="false">মেয়ে</string>
+    <string name="kin_bn_pota" translatable="false">নাতি</string>
+    <string name="kin_bn_poti" translatable="false">নাতনি</string>
+    <string name="kin_bn_nati" translatable="false">নাতি</string>
+    <string name="kin_bn_natin" translatable="false">নাতনি</string>
+    <string name="kin_bn_parpota" translatable="false">প্রপৌত্র</string>
+    <string name="kin_bn_parpoti" translatable="false">প্রপৌত্রী</string>
+    <string name="kin_bn_parnati" translatable="false">প্রদৌহিত্র</string>
+    <string name="kin_bn_parnatin" translatable="false">প্রদৌহিত্রী</string>
+    <string name="kin_bn_bhai" translatable="false">ভাই</string>
+    <string name="kin_bn_behen" translatable="false">বোন</string>
+    <string name="kin_bn_tau" translatable="false">জ্যাঠা</string>
+    <string name="kin_bn_chacha" translatable="false">কাকা</string>
+    <string name="kin_bn_fathers_brother" translatable="false">বাবার ভাই</string>
+    <string name="kin_bn_tai" translatable="false">জেঠিমা</string>
+    <string name="kin_bn_chachi" translatable="false">কাকিমা</string>
+    <string name="kin_bn_fathers_brothers_wife" translatable="false">বাবার ভাইয়ের স্ত্রী</string>
+    <string name="kin_bn_bua" translatable="false">পিসি</string>
+    <string name="kin_bn_phupha" translatable="false">পিসেমশাই</string>
+    <string name="kin_bn_mama" translatable="false">মামা</string>
+    <string name="kin_bn_mami" translatable="false">মামি</string>
+    <string name="kin_bn_mausi" translatable="false">মাসি</string>
+    <string name="kin_bn_mausa" translatable="false">মেসোমশাই</string>
+    <string name="kin_bn_bhatija" translatable="false">ভাইপো</string>
+    <string name="kin_bn_bhatiji" translatable="false">ভাইঝি</string>
+    <string name="kin_bn_bhanja" translatable="false">ভাগ্নে</string>
+    <string name="kin_bn_bhanji" translatable="false">ভাগ্নি</string>
+    <string name="kin_bn_chachera_bhai" translatable="false">খুড়তুতো ভাই</string>
+    <string name="kin_bn_chacheri_behen" translatable="false">খুড়তুতো বোন</string>
+    <string name="kin_bn_phuphera_bhai" translatable="false">পিসতুতো ভাই</string>
+    <string name="kin_bn_phupheri_behen" translatable="false">পিসতুতো বোন</string>
+    <string name="kin_bn_mamera_bhai" translatable="false">মামাতো ভাই</string>
+    <string name="kin_bn_mameri_behen" translatable="false">মামাতো বোন</string>
+    <string name="kin_bn_mausera_bhai" translatable="false">মাসতুতো ভাই</string>
+    <string name="kin_bn_mauseri_behen" translatable="false">মাসতুতো বোন</string>
+    <string name="kin_bn_pati" translatable="false">স্বামী</string>
+    <string name="kin_bn_patni" translatable="false">স্ত্রী</string>
+    <string name="kin_bn_sasur" translatable="false">শ্বশুর</string>
+    <string name="kin_bn_saas" translatable="false">শাশুড়ি</string>
+    <string name="kin_bn_jija" translatable="false">জামাইবাবু</string>
+    <string name="kin_bn_bhabhi" translatable="false">বউদি</string>
+    <string name="kin_bn_bahu" translatable="false">পুত্রবধূ</string>
+    <string name="kin_bn_damad" translatable="false">জামাই</string>
+    <string name="kin_bn_sala" translatable="false">শ্যালক</string>
+    <string name="kin_bn_sali" translatable="false">শ্যালিকা</string>
+    <string name="kin_bn_jeth" translatable="false">ভাসুর</string>
+    <string name="kin_bn_devar" translatable="false">দেবর</string>
+    <string name="kin_bn_husbands_brother" translatable="false">স্বামীর ভাই</string>
+    <string name="kin_bn_nanad" translatable="false">ননদ</string>
+    <string name="kin_bn_sautela_pita" translatable="false">সৎ বাবা</string>
+    <string name="kin_bn_sauteli_mata" translatable="false">সৎ মা</string>
+    <string name="kin_bn_sautela_beta" translatable="false">সৎ ছেলে</string>
+    <string name="kin_bn_sauteli_beti" translatable="false">সৎ মেয়ে</string>
+</resources>

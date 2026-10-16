@@ -202,15 +202,25 @@ fun kinshipName(
     target: Gender,
     language: KinshipLanguage = LocalKinshipLanguage.current,
 ): KinshipName? {
-    if (language == KinshipLanguage.HINDI) {
-        HindiKinship.term(term, path, subject, target)?.let { hindi ->
-            val word = hindi.word()
-            return KinshipName(
-                term = stringResource(word.term),
-                gloss = stringResource(word.gloss),
-                needsBirthYears = hindi.needsBirthYears,
-            )
+    if (language.hasWords && language != KinshipLanguage.ENGLISH) {
+        HindiKinship.term(term, path, subject, target)?.let { kin ->
+            val termRes = kin.termRes(language)
+            if (termRes != null) {
+                return KinshipName(
+                    term = stringResource(termRes),
+                    gloss = stringResource(kin.word().gloss),
+                    needsBirthYears = kin.needsBirthYears && language.distinguishesElderYounger(kin),
+                )
+            }
         }
     }
     return kinshipLabel(term, target)?.let { KinshipName(it) }
 }
+
+/**
+ * Whether [language] keeps Hindi's elder/younger split for [term]. Marathi has one word, काका, for a father's
+ * brother of either age, so a birth year would change nothing and the app must not ask for one.
+ */
+private fun KinshipLanguage.distinguishesElderYounger(term: com.vibethroughcode.ftree.graph.HindiKinTerm): Boolean =
+    this != KinshipLanguage.MARATHI ||
+        term == com.vibethroughcode.ftree.graph.HindiKinTerm.HUSBANDS_BROTHER

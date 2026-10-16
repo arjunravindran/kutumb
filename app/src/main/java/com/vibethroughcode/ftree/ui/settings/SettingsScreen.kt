@@ -279,6 +279,14 @@ fun SettingsScreen(
                                 )
                             }
                         }
+                        if (kinshipLanguage.isDraft) {
+                            Text(
+                                stringResource(R.string.settings_words_draft_note),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(top = 8.dp),
+                            )
+                        }
                         if (kinshipLanguage != KinshipLanguage.ENGLISH && !kinshipLanguage.hasWords) {
                             Text(
                                 stringResource(R.string.settings_words_more_note),

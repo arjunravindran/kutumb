@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    The Tamil family vocabulary: a first draft, NOT yet reviewed by a native speaker.
+
+    One entry per term in graph/HindiKinship.kt (the Hindi-named enum is shared; where Tamil has a
+    single word for two of Hindi's terms, both entries hold the same word). The English gloss shown
+    in brackets is the Hindi file's (kin_hi_<term>_gloss), so it is not repeated here.
+    Reviewers: read the list top to bottom against the gloss in kinship_hi.xml.
+
+    Not translatable: these are Tamil, and a translator reaching them would be translating the
+    content rather than the interface.
+-->
+<resources>
+    <string name="kin_ta_self" translatable="false">தானே</string>
+    <string name="kin_ta_pita" translatable="false">அப்பா</string>
+    <string name="kin_ta_mata" translatable="false">அம்மா</string>
+    <string name="kin_ta_dada" translatable="false">தாத்தா</string>
+    <string name="kin_ta_dadi" translatable="false">பாட்டி</string>
+    <string name="kin_ta_nana" translatable="false">தாத்தா</string>
+    <string name="kin_ta_nani" translatable="false">பாட்டி</string>
+    <string name="kin_ta_pardada" translatable="false">கொள்ளுத்தாத்தா</string>
+    <string name="kin_ta_pardadi" translatable="false">கொள்ளுப்பாட்டி</string>
+    <string name="kin_ta_parnana" translatable="false">கொள்ளுத்தாத்தா</string>
+    <string name="kin_ta_parnani" translatable="false">கொள்ளுப்பாட்டி</string>
+    <string name="kin_ta_beta" translatable="false">மகன்</string>
+    <string name="kin_ta_beti" translatable="false">மகள்</string>
+    <string name="kin_ta_pota" translatable="false">பேரன்</string>
+    <string name="kin_ta_poti" translatable="false">பேத்தி</string>
+    <string name="kin_ta_nati" translatable="false">பேரன்</string>
+    <string name="kin_ta_natin" translatable="false">பேத்தி</string>
+    <string name="kin_ta_parpota" translatable="false">கொள்ளுப்பேரன்</string>
+    <string name="kin_ta_parpoti" translatable="false">கொள்ளுப்பேத்தி</string>
+    <string name="kin_ta_parnati" translatable="false">கொள்ளுப்பேரன்</string>
+    <string name="kin_ta_parnatin" translatable="false">கொள்ளுப்பேத்தி</string>
+    <string name="kin_ta_bhai" translatable="false">சகோதரன்</string>
+    <string name="kin_ta_behen" translatable="false">சகோதரி</string>
+    <string name="kin_ta_tau" translatable="false">பெரியப்பா</string>
+    <string name="kin_ta_chacha" translatable="false">சித்தப்பா</string>
+    <string name="kin_ta_fathers_brother" translatable="false">அப்பாவின் சகோதரர்</string>
+    <string name="kin_ta_tai" translatable="false">பெரியம்மா</string>
+    <string name="kin_ta_chachi" translatable="false">சித்தி</string>
+    <string name="kin_ta_fathers_brothers_wife" translatable="false">அப்பாவின் சகோதரரின் மனைவி</string>
+    <string name="kin_ta_bua" translatable="false">அத்தை</string>
+    <string name="kin_ta_phupha" translatable="false">மாமா</string>
+    <string name="kin_ta_mama" translatable="false">மாமா</string>
+    <string name="kin_ta_mami" translatable="false">மாமி</string>
+    <string name="kin_ta_mausi" translatable="false">சித்தி</string>
+    <string name="kin_ta_mausa" translatable="false">சித்தப்பா</string>
+    <string name="kin_ta_bhatija" translatable="false">சகோதரனின் மகன்</string>
+    <string name="kin_ta_bhatiji" translatable="false">சகோதரனின் மகள்</string>
+    <string name="kin_ta_bhanja" translatable="false">சகோதரியின் மகன்</string>
+    <string name="kin_ta_bhanji" translatable="false">சகோதரியின் மகள்</string>
+    <string name="kin_ta_chachera_bhai" translatable="false">அப்பாவின் சகோதரர் மகன்</string>
+    <string name="kin_ta_chacheri_behen" translatable="false">அப்பாவின் சகோதரர் மகள்</string>
+    <string name="kin_ta_phuphera_bhai" translatable="false">அத்தை மகன்</string>
+    <string name="kin_ta_phupheri_behen" translatable="false">அத்தை மகள்</string>
+    <string name="kin_ta_mamera_bhai" translatable="false">மாமா மகன்</string>
+    <string name="kin_ta_mameri_behen" translatable="false">மாமா மகள்</string>
+    <string name="kin_ta_mausera_bhai" translatable="false">சித்தி மகன்</string>
+    <string name="kin_ta_mauseri_behen" translatable="false">சித்தி மகள்</string>
+    <string name="kin_ta_pati" translatable="false">கணவர்</string>
+    <string name="kin_ta_patni" translatable="false">மனைவி</string>
+    <string name="kin_ta_sasur" translatable="false">மாமனார்</string>
+    <string name="kin_ta_saas" translatable="false">மாமியார்</string>
+    <string name="kin_ta_jija" translatable="false">மைத்துனர்</string>
+    <string name="kin_ta_bhabhi" translatable="false">அண்ணி</string>
+    <string name="kin_ta_bahu" translatable="false">மருமகள்</string>
+    <string name="kin_ta_damad" translatable="false">மருமகன்</string>
+    <string name="kin_ta_sala" translatable="false">மச்சான்</string>
+    <string name="kin_ta_sali" translatable="false">மச்சினி</string>
+    <string name="kin_ta_jeth" translatable="false">மைத்துனர்</string>
+    <string name="kin_ta_devar" translatable="false">கொழுந்தனார்</string>
+    <string name="kin_ta_husbands_brother" translatable="false">கணவரின் சகோதரர்</string>
+    <string name="kin_ta_nanad" translatable="false">நாத்தனார்</string>
+    <string name="kin_ta_sautela_pita" translatable="false">அம்மாவின் கணவர்</string>
+    <string name="kin_ta_sauteli_mata" translatable="false">அப்பாவின் மனைவி</string>
+    <string name="kin_ta_sautela_beta" translatable="false">துணைவரின் மகன்</string>
+    <string name="kin_ta_sauteli_beti" translatable="false">துணைவரின் மகள்</string>
+</resources>

@@ -22,8 +22,16 @@ enum class KinshipLanguage(
     HINDI(hasWords = true),
 
     /* The ten most spoken languages in the world and the five most spoken in India, less those above. */
-    MANDARIN, SPANISH, ARABIC, FRENCH, BENGALI, PORTUGUESE, RUSSIAN, URDU,
-    MARATHI, TELUGU, TAMIL,
+    MANDARIN, SPANISH, ARABIC, FRENCH, PORTUGUESE, RUSSIAN, URDU,
+
+    /**
+     * First-draft words, guessed rather than reviewed (res/values/kinship_<code>.xml). They share Hindi's
+     * rules for which term applies; the settings screen says plainly that a native speaker has not checked them.
+     */
+    BENGALI(hasWords = true), MARATHI(hasWords = true), TELUGU(hasWords = true), TAMIL(hasWords = true);
+
+    /** Words that are spelled out but not yet checked by someone who speaks the language. */
+    val isDraft: Boolean get() = hasWords && this != ENGLISH && this != HINDI
 }
 
 /**

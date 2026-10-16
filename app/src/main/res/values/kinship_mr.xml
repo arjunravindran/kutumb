@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    The Marathi family vocabulary: a first draft, NOT yet reviewed by a native speaker.
+
+    One entry per term in graph/HindiKinship.kt (the Hindi-named enum is shared; where Marathi has a
+    single word for two of Hindi's terms, both entries hold the same word). The English gloss shown
+    in brackets is the Hindi file's (kin_hi_<term>_gloss), so it is not repeated here.
+    Reviewers: read the list top to bottom against the gloss in kinship_hi.xml.
+
+    Not translatable: these are Marathi, and a translator reaching them would be translating the
+    content rather than the interface.
+-->
+<resources>
+    <string name="kin_mr_self" translatable="false">स्वतः</string>
+    <string name="kin_mr_pita" translatable="false">वडील</string>
+    <string name="kin_mr_mata" translatable="false">आई</string>
+    <string name="kin_mr_dada" translatable="false">आजोबा</string>
+    <string name="kin_mr_dadi" translatable="false">आजी</string>
+    <string name="kin_mr_nana" translatable="false">आजोबा</string>
+    <string name="kin_mr_nani" translatable="false">आजी</string>
+    <string name="kin_mr_pardada" translatable="false">पणजोबा</string>
+    <string name="kin_mr_pardadi" translatable="false">पणजी</string>
+    <string name="kin_mr_parnana" translatable="false">पणजोबा</string>
+    <string name="kin_mr_parnani" translatable="false">पणजी</string>
+    <string name="kin_mr_beta" translatable="false">मुलगा</string>
+    <string name="kin_mr_beti" translatable="false">मुलगी</string>
+    <string name="kin_mr_pota" translatable="false">नातू</string>
+    <string name="kin_mr_poti" translatable="false">नात</string>
+    <string name="kin_mr_nati" translatable="false">नातू</string>
+    <string name="kin_mr_natin" translatable="false">नात</string>
+    <string name="kin_mr_parpota" translatable="false">पणतू</string>
+    <string name="kin_mr_parpoti" translatable="false">पणती</string>
+    <string name="kin_mr_parnati" translatable="false">पणतू</string>
+    <string name="kin_mr_parnatin" translatable="false">पणती</string>
+    <string name="kin_mr_bhai" translatable="false">भाऊ</string>
+    <string name="kin_mr_behen" translatable="false">बहीण</string>
+    <string name="kin_mr_tau" translatable="false">काका</string>
+    <string name="kin_mr_chacha" translatable="false">काका</string>
+    <string name="kin_mr_fathers_brother" translatable="false">काका</string>
+    <string name="kin_mr_tai" translatable="false">काकू</string>
+    <string name="kin_mr_chachi" translatable="false">काकू</string>
+    <string name="kin_mr_fathers_brothers_wife" translatable="false">काकू</string>
+    <string name="kin_mr_bua" translatable="false">आत्या</string>
+    <string name="kin_mr_phupha" translatable="false">मामा</string>
+    <string name="kin_mr_mama" translatable="false">मामा</string>
+    <string name="kin_mr_mami" translatable="false">मामी</string>
+    <string name="kin_mr_mausi" translatable="false">मावशी</string>
+    <string name="kin_mr_mausa" translatable="false">काका</string>
+    <string name="kin_mr_bhatija" translatable="false">पुतण्या</string>
+    <string name="kin_mr_bhatiji" translatable="false">पुतणी</string>
+    <string name="kin_mr_bhanja" translatable="false">भाचा</string>
+    <string name="kin_mr_bhanji" translatable="false">भाची</string>
+    <string name="kin_mr_chachera_bhai" translatable="false">चुलत भाऊ</string>
+    <string name="kin_mr_chacheri_behen" translatable="false">चुलत बहीण</string>
+    <string name="kin_mr_phuphera_bhai" translatable="false">आत्ये भाऊ</string>
+    <string name="kin_mr_phupheri_behen" translatable="false">आत्ये बहीण</string>
+    <string name="kin_mr_mamera_bhai" translatable="false">मामे भाऊ</string>
+    <string name="kin_mr_mameri_behen" translatable="false">मामे बहीण</string>
+    <string name="kin_mr_mausera_bhai" translatable="false">मावस भाऊ</string>
+    <string name="kin_mr_mauseri_behen" translatable="false">मावस बहीण</string>
+    <string name="kin_mr_pati" translatable="false">नवरा</string>
+    <string name="kin_mr_patni" translatable="false">बायको</string>
+    <string name="kin_mr_sasur" translatable="false">सासरे</string>
+    <string name="kin_mr_saas" translatable="false">सासू</string>
+    <string name="kin_mr_jija" translatable="false">दाजी</string>
+    <string name="kin_mr_bhabhi" translatable="false">वहिनी</string>
+    <string name="kin_mr_bahu" translatable="false">सून</string>
+    <string name="kin_mr_damad" translatable="false">जावई</string>
+    <string name="kin_mr_sala" translatable="false">मेहुणा</string>
+    <string name="kin_mr_sali" translatable="false">मेहुणी</string>
+    <string name="kin_mr_jeth" translatable="false">भासरा</string>
+    <string name="kin_mr_devar" translatable="false">दीर</string>
+    <string name="kin_mr_husbands_brother" translatable="false">नवऱ्याचा भाऊ</string>
+    <string name="kin_mr_nanad" translatable="false">नणंद</string>
+    <string name="kin_mr_sautela_pita" translatable="false">सावत्र वडील</string>
+    <string name="kin_mr_sauteli_mata" translatable="false">सावत्र आई</string>
+    <string name="kin_mr_sautela_beta" translatable="false">सावत्र मुलगा</string>
+    <string name="kin_mr_sauteli_beti" translatable="false">सावत्र मुलगी</string>
+</resources>

@@ -9,6 +9,7 @@ import com.vibethroughcode.ftree.data.Gender
 import com.vibethroughcode.ftree.data.KinshipLanguage
 import com.vibethroughcode.ftree.data.RelativeKind
 import com.vibethroughcode.ftree.data.SpouseKind
+import com.vibethroughcode.ftree.graph.HindiKinTerm
 import com.vibethroughcode.ftree.graph.SpouseStatus
 
 /**
@@ -36,12 +37,12 @@ fun relativeRoleLabel(
          * back to English the way an unrecorded gender already does. A late spouse keeps the word.
          */
         val hindiHasAWord = spouseSubtype != SpouseKind.DIVORCED && spouseSubtype != SpouseKind.PARTNER
-        hindiRoleLabel(kind, gender)
-            .takeIf { language == KinshipLanguage.HINDI && it != 0 && hindiHasAWord }
+        wordsRoleLabel(kind, gender, language)
+            .takeIf { it != 0 && hindiHasAWord }
             ?.let { return it }
         return spouseRoleLabel(gender, spouseSubtype, spouseStatus)
     }
-    return hindiRoleLabel(kind, gender).takeIf { language == KinshipLanguage.HINDI && it != 0 }
+    return wordsRoleLabel(kind, gender, language).takeIf { it != 0 }
         ?: relativeRoleLabel(kind, gender)
 }
 
@@ -63,17 +64,22 @@ private fun spouseRoleLabel(gender: Gender, subtype: SpouseKind?, status: Spouse
     else -> relativeRoleLabel(RelativeKind.SPOUSE, gender)
 }
 
+/** The heading in a language that has family words (Hindi, or a draft one), or 0 where there is none to give. */
 @StringRes
-private fun hindiRoleLabel(kind: RelativeKind, gender: Gender): Int = when (kind to gender) {
-    RelativeKind.PARENT to Gender.MALE -> R.string.kin_hi_pita
-    RelativeKind.PARENT to Gender.FEMALE -> R.string.kin_hi_mata
-    RelativeKind.SPOUSE to Gender.MALE -> R.string.kin_hi_pati
-    RelativeKind.SPOUSE to Gender.FEMALE -> R.string.kin_hi_patni
-    RelativeKind.CHILD to Gender.MALE -> R.string.kin_hi_beta
-    RelativeKind.CHILD to Gender.FEMALE -> R.string.kin_hi_beti
-    RelativeKind.SIBLING to Gender.MALE -> R.string.kin_hi_bhai
-    RelativeKind.SIBLING to Gender.FEMALE -> R.string.kin_hi_behen
-    else -> 0
+private fun wordsRoleLabel(kind: RelativeKind, gender: Gender, language: KinshipLanguage): Int {
+    if (!language.hasWords || language == KinshipLanguage.ENGLISH) return 0
+    val term = when (kind to gender) {
+        RelativeKind.PARENT to Gender.MALE -> HindiKinTerm.PITA
+        RelativeKind.PARENT to Gender.FEMALE -> HindiKinTerm.MATA
+        RelativeKind.SPOUSE to Gender.MALE -> HindiKinTerm.PATI
+        RelativeKind.SPOUSE to Gender.FEMALE -> HindiKinTerm.PATNI
+        RelativeKind.CHILD to Gender.MALE -> HindiKinTerm.BETA
+        RelativeKind.CHILD to Gender.FEMALE -> HindiKinTerm.BETI
+        RelativeKind.SIBLING to Gender.MALE -> HindiKinTerm.BHAI
+        RelativeKind.SIBLING to Gender.FEMALE -> HindiKinTerm.BEHEN
+        else -> return 0
+    }
+    return term.termRes(language) ?: 0
 }
 
 /**
