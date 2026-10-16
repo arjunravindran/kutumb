@@ -51,6 +51,7 @@ import com.vibethroughcode.ftree.R
 import com.vibethroughcode.ftree.data.RecordedDate
 import com.vibethroughcode.ftree.phonebook.AndroidPhonebook
 import com.vibethroughcode.ftree.phonebook.ContactRelation
+import com.vibethroughcode.ftree.phonebook.ContactMatcher
 import com.vibethroughcode.ftree.phonebook.ContactsImport
 import com.vibethroughcode.ftree.phonebook.ContactsImportResult
 import com.vibethroughcode.ftree.phonebook.ContactsImporter
@@ -106,6 +107,7 @@ fun ContactsImportDialog(
 
     var contacts by remember { mutableStateOf<List<PhoneContact>?>(null) }
     var existing by remember { mutableStateOf<Set<String>>(emptySet()) }
+    var possible by remember { mutableStateOf<Map<Long, String>>(emptyMap()) }
     var emptyTree by remember { mutableStateOf(true) }
     var failed by remember { mutableStateOf(false) }
     LaunchedEffect(granted) {
@@ -117,6 +119,11 @@ fun ContactsImportDialog(
             // Permission taken back while this was open.
             null
         }
+        // Near-matches ("Asha K" for "Asha Kumar") are worked out off the main thread: contacts times people.
+        val near = if (read == null) emptyMap() else withContext(Dispatchers.Default) {
+            val matcher = ContactMatcher(people)
+            buildMap { read.forEach { c -> matcher.possibleMatch(c)?.name?.let { put(c.id, it) } } }
+        }
         // Written on the main thread, so the screen is sure to pick it up.
         withContext(Dispatchers.Main) {
             if (read == null) {
@@ -125,6 +132,7 @@ fun ContactsImportDialog(
             } else {
                 existing = people.map { Phonebook.nameKey(it.name) }.filter { it.isNotEmpty() }.toSet()
                 emptyTree = people.isEmpty() && allowRelations && pickOne == null
+                possible = near
                 contacts = read
             }
         }
@@ -160,6 +168,7 @@ fun ContactsImportDialog(
             else -> ContactsPicker(
                 contacts = list,
                 existingNames = existing,
+                possibleMatches = possible,
                 emptyTree = emptyTree,
                 myName = myName,
                 onMyName = { myName = it.take(100) },
@@ -269,6 +278,8 @@ fun ContactsPicker(
     onCancel: () -> Unit,
     single: Boolean = false,
     onSingle: (PhoneContact) -> Unit = {},
+    /** Contact id to the name of someone in the tree it might be. Only a hint: the contact can still be ticked. */
+    possibleMatches: Map<Long, String> = emptyMap(),
 ) {
     val shown = remember(contacts, query) {
         val q = query.trim()
@@ -331,6 +342,8 @@ fun ContactsPicker(
                                 Text(contact.name, style = MaterialTheme.typography.bodyLarge)
                                 val note = when {
                                     already && !single -> stringResource(R.string.contacts_already)
+                                    !single && contact.id in possibleMatches ->
+                                        stringResource(R.string.contacts_might_be, possibleMatches.getValue(contact.id))
                                     else -> contact.birthday?.let { RecordedDate.parse(it)?.display() }
                                 }
                                 if (note != null) {

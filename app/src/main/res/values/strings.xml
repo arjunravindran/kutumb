@@ -94,6 +94,7 @@
     <string name="edit_notes">Notes</string>
     <string name="edit_notes_hint">Anything worth remembering</string>
     <string name="edit_save">Save</string>
+    <string name="edit_new_autosaves">They are added to your tree as soon as you finish a field. Save takes you to their page.</string>
     <string name="edit_autosaves">Changes are saved as you go.</string>
     <string name="edit_cancel">Cancel</string>
     <string name="edit_back">Back</string>
@@ -372,6 +373,7 @@
     <string name="extended_who_new">A new person</string>
     <string name="extended_who_existing">Someone already in the tree</string>
     <string name="settings_words_more">More languages</string>
+    <string name="settings_words_draft_note">These family words are a first draft and have not yet been checked by someone who speaks the language, so some may be wrong. Where there is no word, relationships read in English.</string>
     <string name="settings_words_more_note">Family words for these are not ready yet, so relationships still read in English. Your choice is kept for when they are.</string>
     <string name="settings_words_mandarin" translatable="false">中文</string>
     <string name="settings_words_spanish" translatable="false">Español</string>
@@ -422,6 +424,7 @@
     <string name="contacts_pick_title">Choose who to add</string>
     <string name="contacts_me_label">Your name</string>
     <string name="contacts_search">Search your contacts</string>
+    <string name="contacts_might_be">Might be %1$s, already in your tree</string>
     <string name="contacts_already">Already in your tree</string>
     <string name="contacts_relation_prompt">How are they related to you?</string>
     <string name="contacts_rel_mother">Mother</string>
